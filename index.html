@@ -14,6 +14,17 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      (() => {
+        try {
+          const savedTheme = localStorage.getItem("koro-theme");
+          document.documentElement.dataset.theme =
+            savedTheme === "dark" ? "dark" : "light";
+        } catch (error) {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
     <link rel="stylesheet" href="styles.css" />
     <script defer src="script.js"></script>
   </head>
@@ -26,15 +37,6 @@
             <span class="brand-submark">advisory</span>
           </a>
 
-          <button
-            class="menu-toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls="site-nav"
-          >
-            Menu
-          </button>
-
           <nav class="site-nav" id="site-nav">
             <a href="#stacked-scroll">Challenges</a>
             <a href="#services">Approach</a>
@@ -43,10 +45,34 @@
             <a href="#resources">Insights</a>
           </nav>
 
-          <div class="nav-actions">
-            <a class="button button-primary header-cta" href="#contact"
-              >Book a consultation</a
+          <div class="header-tools">
+            <button
+              class="theme-toggle"
+              type="button"
+              aria-pressed="false"
+              aria-label="Switch to dark theme"
+              data-theme-toggle
             >
+              <span class="theme-toggle__track" aria-hidden="true">
+                <span class="theme-toggle__thumb"></span>
+              </span>
+              <span class="theme-toggle__label" data-theme-label>Light</span>
+            </button>
+
+            <div class="nav-actions">
+              <a class="button button-primary header-cta" href="#contact"
+                >Book a consultation</a
+              >
+            </div>
+
+            <button
+              class="menu-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="site-nav"
+            >
+              Menu
+            </button>
           </div>
         </div>
       </header>

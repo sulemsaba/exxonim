@@ -1,5 +1,47 @@
 document.documentElement.classList.add("js");
 
+const themeToggle = document.querySelector("[data-theme-toggle]");
+const themeLabel = document.querySelector("[data-theme-label]");
+
+function getTheme() {
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+}
+
+function applyTheme(theme) {
+  const activeTheme = theme === "dark" ? "dark" : "light";
+  const isDark = activeTheme === "dark";
+
+  document.documentElement.dataset.theme = activeTheme;
+
+  if (themeToggle) {
+    themeToggle.setAttribute("aria-pressed", String(isDark));
+    themeToggle.setAttribute(
+      "aria-label",
+      isDark ? "Switch to light theme" : "Switch to dark theme"
+    );
+  }
+
+  if (themeLabel) {
+    themeLabel.textContent = isDark ? "Dark" : "Light";
+  }
+}
+
+applyTheme(getTheme());
+
+if (themeToggle) {
+  themeToggle.addEventListener("click", () => {
+    const nextTheme = getTheme() === "dark" ? "light" : "dark";
+
+    applyTheme(nextTheme);
+
+    try {
+      localStorage.setItem("koro-theme", nextTheme);
+    } catch (error) {
+      // Ignore storage issues and keep the in-memory theme switch.
+    }
+  });
+}
+
 const menuToggle = document.querySelector(".menu-toggle");
 const siteNav = document.querySelector(".site-nav");
 
@@ -76,7 +118,9 @@ function updateStackCards() {
 
     if (nextCard) {
       const nextRect = nextCard.getBoundingClientRect();
-      const stackOffset = index * 40;
+      const cardStyles = getComputedStyle(card);
+      const stackOffset =
+        Number.parseFloat(cardStyles.getPropertyValue("--stack-top")) || 0;
       const stickyTop = headerHeight + 8 + stackOffset;
       const travelDistance = Math.max(viewportHeight - stickyTop, 1);
 
