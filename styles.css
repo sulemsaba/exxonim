@@ -716,7 +716,7 @@ pre {
 
 .stack-card {
   position: sticky;
-  top: calc(var(--header-height) + 8px + (var(--stack-index) * 40px));
+  top: calc(var(--header-height) + 8px + var(--stack-top, 0px));
   display: flex;
   align-items: center;
   min-height: 100vh;
@@ -728,6 +728,7 @@ pre {
 }
 
 .stack-card__inner {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
   gap: 2.2rem;
