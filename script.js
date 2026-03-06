@@ -51,6 +51,9 @@ if (deviceSlides.length > 1) {
 }
 
 const stackCards = Array.from(document.querySelectorAll("[data-stack-card]"));
+const stackPanels = stackCards.map((card) =>
+  card.querySelector(".stack-card__inner")
+);
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -58,9 +61,13 @@ function clamp(value, min, max) {
 
 function updateStackCards() {
   if (window.innerWidth < 861) {
-    stackCards.forEach((card) => {
-      card.style.transform = "translate3d(0, 0, 0) scale(1)";
-      card.style.filter = "brightness(1)";
+    stackPanels.forEach((panel) => {
+      if (!panel) {
+        return;
+      }
+
+      panel.style.transform = "translate3d(0, 0, 0) scale(1)";
+      panel.style.filter = "brightness(1) saturate(1)";
     });
     return;
   }
@@ -70,19 +77,35 @@ function updateStackCards() {
     Number.parseFloat(rootStyles.getPropertyValue("--header-height")) || 92;
   const stickyTop = headerHeight + 16;
 
-  stackCards.forEach((card) => {
-    const rect = card.getBoundingClientRect();
-    const progress = clamp(
-      (stickyTop - rect.top) / (window.innerHeight * 0.72),
-      0,
-      1
-    );
-    const scale = 1 - progress * 0.085;
-    const brightness = 1 - progress * 0.24;
-    const translateY = progress * 28;
+  const viewportHeight = window.innerHeight;
+  const travelDistance = Math.max(viewportHeight - stickyTop, 1);
 
-    card.style.transform = `translate3d(0, ${translateY.toFixed(2)}px, 0) scale(${scale.toFixed(6)})`;
-    card.style.filter = `brightness(${brightness.toFixed(6)})`;
+  stackCards.forEach((card, index) => {
+    const panel = stackPanels[index];
+
+    if (!panel) {
+      return;
+    }
+
+    const nextCard = stackCards[index + 1];
+    let progress = 0;
+
+    if (nextCard) {
+      const nextRect = nextCard.getBoundingClientRect();
+      progress = clamp(
+        (viewportHeight - nextRect.top) / travelDistance,
+        0,
+        1
+      );
+    }
+
+    const scale = 1 - progress * 0.08;
+    const brightness = 1 - progress * 0.18;
+    const saturate = 1 - progress * 0.1;
+    const translateY = progress * 34;
+
+    panel.style.transform = `translate3d(0, ${translateY.toFixed(2)}px, 0) scale(${scale.toFixed(6)})`;
+    panel.style.filter = `brightness(${brightness.toFixed(6)}) saturate(${saturate.toFixed(6)})`;
   });
 }
 
