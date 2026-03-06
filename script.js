@@ -35,7 +35,8 @@ if (themeToggle) {
     applyTheme(nextTheme);
 
     try {
-      localStorage.setItem("koro-theme", nextTheme);
+      localStorage.setItem("exxonim-theme", nextTheme);
+      localStorage.removeItem("koro-theme");
     } catch (error) {
       // Ignore storage issues and keep the in-memory theme switch.
     }

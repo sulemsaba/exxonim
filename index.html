@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Koro Advisory | Business Consulting for Growth and Performance</title>
+    <title>Exxonim | Business Consulting for Growth and Performance</title>
     <meta
       name="description"
-      content="Koro Advisory is a business consulting website for leadership teams improving strategy, operating performance, and transformation delivery."
+      content="Exxonim is a business consulting website for leadership teams improving strategy, operating performance, and transformation delivery."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,7 +17,9 @@
     <script>
       (() => {
         try {
-          const savedTheme = localStorage.getItem("koro-theme");
+          const savedTheme =
+            localStorage.getItem("exxonim-theme") ??
+            localStorage.getItem("koro-theme");
           document.documentElement.dataset.theme =
             savedTheme === "dark" ? "dark" : "light";
         } catch (error) {
@@ -32,9 +34,12 @@
     <div class="site-shell">
       <header class="site-header">
         <div class="container nav-wrap">
-          <a class="brand" href="#top">
-            <span class="brand-mark">koro</span>
-            <span class="brand-submark">advisory</span>
+          <a class="brand" href="#top" aria-label="Exxonim home">
+            <img
+              class="brand-logo"
+              src="exxonim%20logo.webp"
+              alt="Exxonim"
+            />
           </a>
 
           <nav class="site-nav" id="site-nav">
@@ -83,7 +88,7 @@
             <div class="hero-copy" data-reveal>
               <h1>Business Consulting for Teams Under Real Pressure</h1>
               <p class="hero-text">
-                Koro Advisory works with founders, executives, and operating
+                Exxonim works with founders, executives, and operating
                 leaders who need clearer priorities, stronger management
                 systems, and transformation programs that keep moving after the
                 workshop ends.
@@ -613,7 +618,13 @@
 
       <footer class="site-footer dark-grid-section" id="contact">
         <div class="container footer-brand-block">
-          <a class="brand footer-brand__logo" href="#top">koro</a>
+          <a class="brand footer-brand__logo" href="#top" aria-label="Exxonim home">
+            <img
+              class="brand-logo brand-logo--footer"
+              src="exxonim%20logo.webp"
+              alt="Exxonim"
+            />
+          </a>
           <p>Business consulting for organizations navigating growth and change.</p>
           <div class="footer-socials">
             <a href="#x" aria-label="X">X</a>
@@ -659,7 +670,7 @@
         <div class="container footer-divider footer-divider--bottom"></div>
 
         <div class="container footer-bottom">
-          <p>Copyright 2026 Koro. All rights reserved.</p>
+          <p>Copyright 2026 Exxonim. All rights reserved.</p>
           <div>
             <a href="#terms">Terms &amp; Conditions</a>
             <a href="#privacy">Privacy Policy</a>
