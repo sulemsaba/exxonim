@@ -101,6 +101,7 @@ pre {
   display: block;
   width: clamp(12.5rem, 18vw, 18rem);
   height: auto;
+  object-fit: contain;
 }
 
 .site-nav,
@@ -1561,12 +1562,17 @@ pre {
 
 html[data-theme="dark"] body {
   color: #eef2ff;
-  background: #040817;
+  background: #041214;
 }
 
 html[data-theme="dark"] .site-header {
-  background: rgba(4, 8, 23, 0.9);
+  background: rgba(4, 18, 20, 0.92);
   border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .brand-logo {
+  filter: brightness(0) invert(1);
+  opacity: 0.96;
 }
 
 html[data-theme="dark"] .hero-text,
@@ -1642,7 +1648,7 @@ html[data-theme="dark"] .hero-visual::before {
 
 html[data-theme="dark"] .hero-figure {
   opacity: 0.86;
-  filter: drop-shadow(0 28px 80px rgba(30, 51, 150, 0.22));
+  filter: drop-shadow(0 28px 80px rgba(13, 102, 106, 0.2));
 }
 
 html[data-theme="dark"] .hero-motion__trail {
@@ -1668,7 +1674,7 @@ html[data-theme="dark"] .hero-motion__orb {
 html[data-theme="dark"] .device-screen {
   border-color: rgba(255, 255, 255, 0.08);
   background:
-    linear-gradient(180deg, rgba(12, 20, 49, 0.96), rgba(8, 14, 34, 0.92)),
+    linear-gradient(180deg, rgba(7, 27, 29, 0.96), rgba(5, 18, 20, 0.92)),
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
   box-shadow: 0 38px 110px rgba(0, 0, 0, 0.28);
 }
@@ -1684,7 +1690,7 @@ html[data-theme="dark"] .device-base {
 
 html[data-theme="dark"] .device-slide {
   background:
-    linear-gradient(180deg, rgba(11, 18, 43, 0.94), rgba(7, 13, 30, 0.95)),
+    linear-gradient(180deg, rgba(7, 27, 29, 0.94), rgba(5, 18, 20, 0.95)),
     radial-gradient(circle at top right, rgba(44, 139, 145, 0.22), transparent 34%),
     #071819;
 }
@@ -1693,7 +1699,7 @@ html[data-theme="dark"] .device-media {
   border-color: rgba(255, 255, 255, 0.08);
   background:
     radial-gradient(circle at top, rgba(44, 139, 145, 0.2), transparent 55%),
-    rgba(15, 24, 54, 0.88);
+    rgba(8, 29, 31, 0.88);
 }
 
 html[data-theme="dark"] .device-slide__label,
@@ -1711,7 +1717,7 @@ html[data-theme="dark"] .pricing-panel,
 html[data-theme="dark"] .blog-card,
 html[data-theme="dark"] .site-nav.is-open {
   border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(12, 20, 49, 0.86);
+  background: rgba(7, 24, 26, 0.9);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
 }
 
@@ -1755,7 +1761,7 @@ html[data-theme="dark"] .stack-note,
 html[data-theme="dark"] .code-window,
 html[data-theme="dark"] .engine-card__inner {
   border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(11, 18, 43, 0.88);
+  background: rgba(7, 24, 26, 0.9);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
 }
 
@@ -1794,7 +1800,7 @@ html[data-theme="dark"] .slider-thumb {
 
 html[data-theme="dark"] .code-window__top {
   color: rgba(226, 232, 255, 0.82);
-  background: linear-gradient(90deg, rgba(18, 28, 62, 0.96), rgba(11, 18, 43, 0.92));
+  background: linear-gradient(90deg, rgba(10, 35, 38, 0.96), rgba(7, 24, 26, 0.92));
 }
 
 html[data-theme="dark"] .code-window__body {
@@ -1809,7 +1815,7 @@ html[data-theme="dark"] .code-window__body--media {
 
 html[data-theme="dark"] .status-alert {
   border-color: rgba(92, 176, 181, 0.22);
-  background: rgba(18, 28, 62, 0.92);
+  background: rgba(9, 33, 36, 0.92);
 }
 
 html[data-theme="dark"] .status-alert span {
