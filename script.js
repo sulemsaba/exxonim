@@ -94,6 +94,9 @@ if (deviceSlides.length > 1) {
 }
 
 const stackCards = Array.from(document.querySelectorAll("[data-stack-card]"));
+const stackCardInners = stackCards.map((card) =>
+  card.querySelector(".stack-card__inner")
+);
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -101,10 +104,15 @@ function clamp(value, min, max) {
 
 function updateStackCards() {
   if (window.innerWidth < 861) {
-    stackCards.forEach((card) => {
-      card.style.transform = "translate3d(0, 0, 0) scale(1)";
-      card.style.filter = "brightness(1)";
+    stackCardInners.forEach((inner) => {
+      if (!inner) {
+        return;
+      }
+
+      inner.style.transform = "none";
+      inner.style.filter = "none";
     });
+
     return;
   }
 
@@ -112,31 +120,36 @@ function updateStackCards() {
   const headerHeight =
     Number.parseFloat(rootStyles.getPropertyValue("--header-height")) || 92;
   const viewportHeight = window.innerHeight;
+  const travelDistance = Math.max(viewportHeight - headerHeight, 1);
 
   stackCards.forEach((card, index) => {
+    const inner = stackCardInners[index];
     const nextCard = stackCards[index + 1];
-    let progress = 0;
 
-    if (nextCard) {
-      const nextRect = nextCard.getBoundingClientRect();
-      const cardStyles = getComputedStyle(card);
-      const stackOffset =
-        Number.parseFloat(cardStyles.getPropertyValue("--stack-top")) || 0;
-      const stickyTop = headerHeight + 8 + stackOffset;
-      const travelDistance = Math.max(viewportHeight - stickyTop, 1);
-
-      progress = clamp(
-        (viewportHeight - nextRect.top) / travelDistance,
-        0,
-        1
-      );
+    if (!inner) {
+      return;
     }
 
-    const scale = 1 - progress * 0.055;
-    const brightness = 1 - progress * 0.11;
+    if (!nextCard) {
+      inner.style.transform = "none";
+      inner.style.filter = "none";
+      return;
+    }
 
-    card.style.transform = `translate3d(0, 0, 0) scale(${scale.toFixed(6)})`;
-    card.style.filter = `brightness(${brightness.toFixed(6)})`;
+    const nextRect = nextCard.getBoundingClientRect();
+    const progress = clamp(
+      (viewportHeight - nextRect.top) / travelDistance,
+      0,
+      1
+    );
+    const scale = 1 - progress * 0.048;
+    const translateY = progress * 34;
+    const brightness = 1 - progress * 0.08;
+
+    inner.style.transform =
+      `translate3d(0, ${translateY.toFixed(2)}px, 0) ` +
+      `scale(${scale.toFixed(5)})`;
+    inner.style.filter = `brightness(${brightness.toFixed(5)})`;
   });
 }
 
