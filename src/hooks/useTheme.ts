@@ -5,24 +5,27 @@ const STORAGE_KEY = "exxonim-theme";
 const LEGACY_STORAGE_KEY = "koro-theme";
 
 function getInitialTheme(): Theme {
-  if (typeof window === "undefined") {
+  if (typeof document === "undefined") {
     return "light";
   }
 
-  try {
-    const savedTheme =
-      localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
-
-    return savedTheme === "dark" ? "dark" : "light";
-  } catch {
-    return "light";
-  }
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 }
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [theme, setTheme] = useState<Theme>("light");
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    setTheme(getInitialTheme());
+    setIsReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isReady) {
+      return;
+    }
+
     document.documentElement.dataset.theme = theme;
 
     try {
@@ -31,7 +34,7 @@ export function useTheme() {
     } catch {
       // Ignore storage failures and keep the active theme in memory.
     }
-  }, [theme]);
+  }, [isReady, theme]);
 
   return {
     theme,

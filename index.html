@@ -8,6 +8,26 @@
       name="description"
       content="Exxonim is a business consulting website for leadership teams improving strategy, operating performance, and transformation delivery."
     />
+    <script>
+      (() => {
+        try {
+          const savedTheme =
+            localStorage.getItem("exxonim-theme") ??
+            localStorage.getItem("koro-theme");
+          document.documentElement.dataset.theme =
+            savedTheme === "dark" ? "dark" : "light";
+        } catch (error) {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+    <link
+      rel="preload"
+      as="image"
+      href="/exxonim-logo.webp"
+      fetchpriority="high"
+      type="image/webp"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

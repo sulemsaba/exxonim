@@ -29,11 +29,18 @@ export function Header({
             className="brand-logo brand-logo--light"
             src={brand.lightLogoSrc}
             alt=""
+            width="288"
+            height="90"
+            loading="eager"
+            decoding="async"
           />
           <img
             className="brand-logo brand-logo--dark"
             src={brand.darkLogoSrc}
             alt=""
+            width="288"
+            height="90"
+            decoding="async"
           />
         </a>
 
@@ -50,17 +57,13 @@ export function Header({
             className="theme-toggle"
             type="button"
             aria-pressed={isDarkTheme}
-            aria-label={
-              isDarkTheme ? "Switch to light theme" : "Switch to dark theme"
-            }
+            aria-label="Toggle theme"
             onClick={onToggleTheme}
           >
             <span className="theme-toggle__track" aria-hidden="true">
               <span className="theme-toggle__thumb"></span>
             </span>
-            <span className="theme-toggle__label">
-              {isDarkTheme ? "Dark" : "Light"}
-            </span>
+            <span className="theme-toggle__label">Theme</span>
           </button>
 
           <div className="nav-actions">
