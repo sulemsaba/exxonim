@@ -47,6 +47,7 @@ export function Footer({ brand, linkGroups }: FooterProps) {
 
       <div className="container footer-divider"></div>
 
+      <span className="footer-anchor" id="career" aria-hidden="true"></span>
       <div className="container footer-links">
         {linkGroups.map((group) => (
           <div key={group.title}>
@@ -62,6 +63,7 @@ export function Footer({ brand, linkGroups }: FooterProps) {
 
       <div className="container footer-divider footer-divider--bottom"></div>
 
+      <span className="footer-anchor" id="faqs" aria-hidden="true"></span>
       <div className="container footer-bottom">
         <p>Copyright 2026 Exxonim. All rights reserved.</p>
         <div>

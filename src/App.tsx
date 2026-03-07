@@ -5,8 +5,9 @@ import {
   heroMetrics,
   heroSlides,
   insightPosts,
-  navLinks,
+  primaryNavLinks,
   providerLabels,
+  serviceNavGroups,
   stackItems,
 } from "./content";
 import { Footer } from "./components/Footer";
@@ -24,6 +25,7 @@ import { useTheme } from "./hooks/useTheme";
 
 export default function App() {
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isAtTop, setIsAtTop] = useState(true);
   const { theme, toggleTheme } = useTheme();
   const activeSlideIndex = useAutoRotatingIndex(heroSlides.length, 2600);
   const blogRailRef = useRef<HTMLDivElement>(null);
@@ -33,6 +35,19 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.classList.add("js");
+  }, []);
+
+  useEffect(() => {
+    const updateHeaderState = () => {
+      setIsAtTop(window.scrollY < 18);
+    };
+
+    updateHeaderState();
+    window.addEventListener("scroll", updateHeaderState, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", updateHeaderState);
+    };
   }, []);
 
   const handleNavLinkClick = () => {
@@ -61,8 +76,10 @@ export default function App() {
     <div className="site-shell">
       <Header
         brand={brand}
-        navLinks={navLinks}
+        navLinks={primaryNavLinks}
+        serviceGroups={serviceNavGroups}
         theme={theme}
+        isAtTop={isAtTop}
         isNavOpen={isNavOpen}
         onToggleTheme={toggleTheme}
         onToggleNav={() => setIsNavOpen((current) => !current)}

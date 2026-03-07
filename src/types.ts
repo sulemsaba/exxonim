@@ -11,6 +11,13 @@ export interface NavLink {
   href: string;
 }
 
+export interface ServiceNavGroup {
+  title: string;
+  summary: string;
+  href: string;
+  items: string[];
+}
+
 export interface HeroSlide {
   label: string;
   videoSrc: string;

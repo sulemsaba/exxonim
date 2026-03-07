@@ -12,7 +12,7 @@ export function HeroSection({
   activeSlideIndex,
 }: HeroSectionProps) {
   return (
-    <section className="hero-section dark-grid-section">
+    <section className="hero-section dark-grid-section" id="about">
       <div className="container hero-grid">
         <div className="hero-copy" data-reveal>
           <h1>Business Consulting for Teams Under Real Pressure</h1>

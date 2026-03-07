@@ -5,6 +5,7 @@ import type {
   HeroSlide,
   InsightPost,
   NavLink,
+  ServiceNavGroup,
   StackItem,
 } from "./types";
 
@@ -14,12 +15,71 @@ export const brand: BrandAssets = {
   darkLogoSrc: "/logo-dark.png",
 };
 
-export const navLinks: NavLink[] = [
-  { label: "Challenges", href: "#stacked-scroll" },
-  { label: "Approach", href: "#services" },
-  { label: "Sectors", href: "#industries" },
-  { label: "Impact", href: "#results" },
-  { label: "Insights", href: "#resources" },
+export const primaryNavLinks: NavLink[] = [
+  { label: "Home", href: "#top" },
+  { label: "About", href: "#about" },
+  { label: "Blogs", href: "#resources" },
+  { label: "Contact", href: "#contact" },
+  { label: "Career", href: "#career" },
+  { label: "FAQs", href: "#faqs" },
+];
+
+export const serviceNavGroups: ServiceNavGroup[] = [
+  {
+    title: "Business Registration Services",
+    summary: "BRELA-focused setup, protection, and entity formation.",
+    href: "#services",
+    items: [
+      "Company Registration",
+      "Business Name Registration",
+      "NGO / Organization Registration",
+      "Trademark Registration",
+    ],
+  },
+  {
+    title: "Tax & Compliance Services",
+    summary: "TRA submissions, returns, and tax setup for compliant growth.",
+    href: "#results",
+    items: [
+      "TIN Application",
+      "Monthly VAT Returns",
+      "Annual Statutory Returns",
+      "Annual Returns Submission",
+    ],
+  },
+  {
+    title: "Licensing & Permits",
+    summary: "Licenses and regulated approvals including BOT-linked processes.",
+    href: "#services",
+    items: [
+      "Business License Applications",
+      "Residence Permits",
+      "Microfinance Licensing",
+      "Central Bank Licensing",
+    ],
+  },
+  {
+    title: "Government & Institutional Registrations",
+    summary: "Operational registrations for public systems and compliance bodies.",
+    href: "#industries",
+    items: [
+      "CRB / ERB Registration",
+      "OSHA Registration",
+      "NSSF / WCF Registration",
+      "NeST / GPSA Registration",
+    ],
+  },
+  {
+    title: "Business Support & Consulting",
+    summary: "Planning, financial preparation, and advisory support for decisions.",
+    href: "#services",
+    items: [
+      "Business Plan Preparation",
+      "Financial Statement Preparation",
+      "MEMART Preparation",
+      "Revenue Forecasting",
+    ],
+  },
 ];
 
 export const heroSlides: HeroSlide[] = [
