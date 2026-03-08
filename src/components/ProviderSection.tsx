@@ -11,21 +11,20 @@ import utecLogo from "../../assets/clients/utec.webp";
 
 interface ProviderLogo {
   alt: string;
-  height: string;
   src: string;
 }
 
 const providerLogos: ProviderLogo[] = [
-  { alt: "BPO", src: bpoLogo, height: "86px" },
-  { alt: "Djema Consult", src: djemaConsultLogo, height: "92px" },
-  { alt: "Exxonim", src: exxonimLogo, height: "106px" },
-  { alt: "FAMA", src: famaLogo, height: "80px" },
-  { alt: "GET", src: getLogo, height: "82px" },
-  { alt: "JKM", src: jkmLogo, height: "90px" },
-  { alt: "Jotofa", src: jotofaLogo, height: "80px" },
-  { alt: "Levo", src: levoLogo, height: "78px" },
-  { alt: "TRCS", src: trcsLogo, height: "88px" },
-  { alt: "UTEC", src: utecLogo, height: "72px" },
+  { alt: "BPO", src: bpoLogo },
+  { alt: "Djema Consult", src: djemaConsultLogo },
+  { alt: "Exxonim", src: exxonimLogo },
+  { alt: "FAMA", src: famaLogo },
+  { alt: "GET", src: getLogo },
+  { alt: "JKM", src: jkmLogo },
+  { alt: "Jotofa", src: jotofaLogo },
+  { alt: "Levo", src: levoLogo },
+  { alt: "TRCS", src: trcsLogo },
+  { alt: "UTEC", src: utecLogo },
 ];
 
 export function ProviderSection() {
@@ -51,7 +50,6 @@ export function ProviderSection() {
                   className="provider-logo-image"
                   src={logo.src}
                   alt={`${logo.alt} logo`}
-                  style={{ height: logo.height }}
                   loading={index < providerLogos.length ? "eager" : "lazy"}
                   decoding="async"
                 />
