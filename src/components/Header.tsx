@@ -1,42 +1,193 @@
-import type {
-  BrandAssets,
-  NavLink,
-  ServiceNavGroup,
-  Theme,
-} from "../types";
+import { useEffect, useRef } from "react";
+import type { FocusEvent } from "react";
+import type { BrandAssets, Theme } from "../types";
 
 interface HeaderProps {
   brand: BrandAssets;
-  navLinks: NavLink[];
-  serviceGroups: ServiceNavGroup[];
   theme: Theme;
   isAtTop: boolean;
   isNavOpen: boolean;
+  openMenuLabel: string | null;
   onToggleTheme: () => void;
   onToggleNav: () => void;
+  onOpenMenu: (label: string | null) => void;
   onNavLinkClick: () => void;
+}
+
+interface HeaderMenuLink {
+  label: string;
+  href: string;
+}
+
+interface HeaderMenuSection {
+  title?: string;
+  links: HeaderMenuLink[];
+}
+
+interface HeaderMenuItem {
+  label: string;
+  href: string;
+  align?: "left" | "center" | "right";
+  sections?: HeaderMenuSection[];
+}
+
+const headerMenuItems: HeaderMenuItem[] = [
+  { label: "About", href: "#about" },
+  {
+    label: "Services",
+    href: "#services",
+    align: "left",
+    sections: [
+      {
+        title: "Business Setup",
+        links: [
+          { label: "Company Registration", href: "#services" },
+          { label: "Business Name Registration", href: "#services" },
+          { label: "NGO / Organization Registration", href: "#services" },
+          { label: "Trademark Registration", href: "#services" },
+        ],
+      },
+      {
+        title: "Compliance & Licensing",
+        links: [
+          { label: "TIN Application", href: "#results" },
+          { label: "Annual Statutory Returns", href: "#results" },
+          { label: "Business License Applications", href: "#services" },
+          { label: "Residence Permits", href: "#services" },
+          { label: "Microfinance Licensing", href: "#services" },
+        ],
+      },
+      {
+        title: "Institutional Registration",
+        links: [
+          { label: "CRB / ERB Registration", href: "#industries" },
+          { label: "OSHA Registration", href: "#industries" },
+          { label: "NSSF / WCF Registration", href: "#industries" },
+          { label: "NeST / GPSA Registration", href: "#industries" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Advisory",
+    href: "#results",
+    align: "left",
+    sections: [
+      {
+        title: "Advisory Focus",
+        links: [
+          { label: "Growth Strategy", href: "#services" },
+          { label: "Operating Design", href: "#services" },
+          { label: "Transformation Delivery", href: "#services" },
+          { label: "Performance Advisory", href: "#results" },
+        ],
+      },
+      {
+        title: "Business Support",
+        links: [
+          { label: "Business Plan Preparation", href: "#services" },
+          { label: "Financial Statement Preparation", href: "#services" },
+          { label: "MEMART Preparation", href: "#services" },
+          { label: "Revenue Forecasting", href: "#results" },
+        ],
+      },
+    ],
+  },
+  { label: "Industries", href: "#industries" },
+  { label: "Results", href: "#results" },
+  { label: "Insights", href: "#resources" },
+  {
+    label: "Pricing",
+    href: "#pricing",
+    align: "right",
+    sections: [
+      {
+        title: "Engagement Options",
+        links: [
+          { label: "Initial Consultation", href: "#pricing" },
+          { label: "Business Setup Packages", href: "#pricing" },
+          { label: "Compliance Retainers", href: "#pricing" },
+          { label: "Licensing Support", href: "#pricing" },
+          { label: "Advisory Engagements", href: "#pricing" },
+        ],
+      },
+    ],
+  },
+  { label: "Contact", href: "#contact" },
+];
+
+function getFlyoutSizeClass(sectionCount: number) {
+  if (sectionCount >= 3) {
+    return "site-nav-flyout--wide";
+  }
+
+  if (sectionCount === 2) {
+    return "site-nav-flyout--medium";
+  }
+
+  return "site-nav-flyout--compact";
 }
 
 export function Header({
   brand,
-  navLinks,
-  serviceGroups,
   theme,
   isAtTop,
   isNavOpen,
+  openMenuLabel,
   onToggleTheme,
   onToggleNav,
+  onOpenMenu,
   onNavLinkClick,
 }: HeaderProps) {
   const isDarkTheme = theme === "dark";
-  const [homeLink, aboutLink, ...tailLinks] = navLinks;
+  const closeMenuTimerRef = useRef<number | null>(null);
+
+  const cancelScheduledClose = () => {
+    if (closeMenuTimerRef.current !== null) {
+      window.clearTimeout(closeMenuTimerRef.current);
+      closeMenuTimerRef.current = null;
+    }
+  };
+
+  const scheduleMenuClose = () => {
+    cancelScheduledClose();
+    closeMenuTimerRef.current = window.setTimeout(() => {
+      onOpenMenu(null);
+      closeMenuTimerRef.current = null;
+    }, 180);
+  };
+
+  useEffect(() => {
+    if (!isNavOpen) {
+      cancelScheduledClose();
+      onOpenMenu(null);
+    }
+  }, [isNavOpen, onOpenMenu]);
+
+  useEffect(() => () => cancelScheduledClose(), []);
+
+  const handleMenuBlur = (event: FocusEvent<HTMLLIElement>, label: string) => {
+    const nextTarget = event.relatedTarget as Node | null;
+
+    if (!nextTarget || !event.currentTarget.contains(nextTarget)) {
+      if (openMenuLabel === label) {
+        scheduleMenuClose();
+      }
+    }
+  };
+
+  const handleNavLinkClick = () => {
+    cancelScheduledClose();
+    onOpenMenu(null);
+    onNavLinkClick();
+  };
 
   return (
     <header
       className={`site-header${isAtTop ? " site-header--hero" : " site-header--scrolled"}`}
     >
       <div className="container nav-wrap">
-        <a className="brand" href="#top" aria-label={`${brand.name} home`}>
+        <a className="brand brand--marketing" href="#top" aria-label={`${brand.name} home`}>
           <img
             className="brand-logo brand-logo--light"
             src={brand.lightLogoSrc}
@@ -56,81 +207,112 @@ export function Header({
           />
         </a>
 
-        <nav className={`site-nav${isNavOpen ? " is-open" : ""}`} id="site-nav">
-          {homeLink ? (
-            <a
-              key={`${homeLink.label}-${homeLink.href}`}
-              className="site-nav__link"
-              href={homeLink.href}
-              onClick={onNavLinkClick}
-            >
-              {homeLink.label}
-            </a>
-          ) : null}
+        <nav className={`site-nav${isNavOpen ? " is-open" : ""}`} id="site-nav" aria-label="Primary">
+          <ul className="site-nav__list">
+            {headerMenuItems.map((item) => {
+              const hasMenu = Boolean(item.sections?.length);
+              const isMenuOpen = openMenuLabel === item.label;
+              const flyoutSizeClass = hasMenu
+                ? getFlyoutSizeClass(item.sections?.length ?? 0)
+                : "";
+              const flyoutAlignClass = hasMenu
+                ? ` site-nav-flyout--align-${item.align ?? "center"}`
+                : "";
+              const menuId = `site-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`;
 
-          {aboutLink ? (
-            <a
-              key={`${aboutLink.label}-${aboutLink.href}`}
-              className="site-nav__link"
-              href={aboutLink.href}
-              onClick={onNavLinkClick}
-            >
-              {aboutLink.label}
-            </a>
-          ) : null}
+              return (
+                <li
+                  key={item.label}
+                  className={`site-nav-item${hasMenu ? " site-nav-item--has-menu" : ""}${isMenuOpen ? " is-open" : ""}`}
+                  onBlurCapture={hasMenu ? (event) => handleMenuBlur(event, item.label) : undefined}
+                  onFocusCapture={
+                    hasMenu
+                      ? () => {
+                          cancelScheduledClose();
+                          onOpenMenu(item.label);
+                        }
+                      : undefined
+                  }
+                  onMouseEnter={
+                    hasMenu
+                      ? () => {
+                          cancelScheduledClose();
+                          onOpenMenu(item.label);
+                        }
+                      : undefined
+                  }
+                  onMouseLeave={hasMenu ? () => scheduleMenuClose() : undefined}
+                >
+                  {hasMenu ? (
+                    <>
+                      <button
+                        className="site-nav-trigger"
+                        type="button"
+                        aria-expanded={isMenuOpen}
+                        aria-controls={menuId}
+                        onClick={() => {
+                          cancelScheduledClose();
+                          onOpenMenu(isMenuOpen ? null : item.label);
+                        }}
+                      >
+                        <span>{item.label}</span>
+                        <span className="site-nav-trigger__chevron" aria-hidden="true"></span>
+                      </button>
 
-          <details className="nav-dropdown">
-            <summary className="nav-dropdown__summary">
-              <span>Services</span>
-              <span className="nav-dropdown__chevron" aria-hidden="true"></span>
-            </summary>
+                      <div
+                        className={`site-nav-flyout ${flyoutSizeClass}${flyoutAlignClass}${isMenuOpen ? " is-visible" : ""}`}
+                        id={menuId}
+                      >
+                        <div className="site-nav-flyout__inner">
+                          {item.sections?.map((section) => (
+                            <div
+                              key={`${item.label}-${section.title ?? "links"}`}
+                              className="site-nav-panel"
+                            >
+                              {section.title ? (
+                                <p className="site-nav-panel__title">{section.title}</p>
+                              ) : null}
 
-            <div className="nav-dropdown__menu">
-              <div className="nav-dropdown__grid">
-                {serviceGroups.map((group) => (
-                  <a
-                    key={group.title}
-                    className="nav-group"
-                    href={group.href}
-                    onClick={onNavLinkClick}
-                  >
-                    <strong className="nav-group__title">{group.title}</strong>
-                    <p className="nav-group__summary">{group.summary}</p>
-                    <ul className="nav-group__list">
-                      {group.items.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </a>
-                ))}
-              </div>
-            </div>
-          </details>
-
-          {tailLinks.map((link) => (
-            <a
-              key={`${link.label}-${link.href}`}
-              className="site-nav__link"
-              href={link.href}
-              onClick={onNavLinkClick}
-            >
-              {link.label}
-            </a>
-          ))}
+                              <ul className="site-nav-panel__list">
+                                {section.links.map((link) => (
+                                  <li key={`${item.label}-${link.label}`}>
+                                    <a
+                                      className="site-nav-panel__link"
+                                      href={link.href}
+                                      onClick={handleNavLinkClick}
+                                    >
+                                      {link.label}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <a className="site-nav__link" href={item.href} onClick={handleNavLinkClick}>
+                      {item.label}
+                    </a>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
 
           <div className="site-nav__mobile-actions">
             <a
-              className="header-call header-call--mobile"
+              className="header-auth__button header-auth__button--primary"
               href="tel:+255794689099"
-              onClick={onNavLinkClick}
+              onClick={handleNavLinkClick}
             >
-              <span className="header-call__eyebrow">Call Now</span>
-              <strong>+255 794 689 099</strong>
+              Call Now
             </a>
             <a
-              className="button button-primary site-nav__mobile-cta"
+              className="header-auth__button header-auth__button--secondary"
               href="#contact"
-              onClick={onNavLinkClick}
+              onClick={handleNavLinkClick}
             >
               Get Consultation
             </a>
@@ -151,12 +333,19 @@ export function Header({
             <span className="theme-toggle__label">Theme</span>
           </button>
 
-          <div className="nav-actions">
-            <a className="header-call" href="tel:+255794689099">
-              <span className="header-call__eyebrow">Call Now</span>
-              <strong>+255 794 689 099</strong>
+          <div className="header-auth">
+            <a
+              className="header-auth__button header-auth__button--primary"
+              href="tel:+255794689099"
+              onClick={handleNavLinkClick}
+            >
+              Call Now
             </a>
-            <a className="button button-primary header-cta" href="#contact">
+            <a
+              className="header-auth__button header-auth__button--secondary"
+              href="#contact"
+              onClick={handleNavLinkClick}
+            >
               Get Consultation
             </a>
           </div>

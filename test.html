@@ -1,180 +1,280 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exxonim Consulting</title>
+<html lang="en" class="dark"> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Nav & Logo Scroll with Glass Toggle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-bg': '#0f0f0f',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            /* Smooth background transition for theme switching */
+            transition: background-color 0.5s ease, color 0.5s ease;
+            font-family: sans-serif;
+        }
 
-<style>
-body{
-font-family: Arial, sans-serif;
-margin:0;
-scroll-behavior:smooth;
-background:#f5f5f5;
-}
+        /* --- 1. Page Load Animation --- */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-up {
+            animation: fadeUp 0.8s ease-out forwards;
+        }
 
-header{
-background:#0a2540;
-color:white;
-padding:15px 40px;
-position:sticky;
-top:0;
-}
+        /* --- Logo Scroll Logic --- */
+        .logo-scroll {
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            padding: 2rem 0;
+            -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+        }
 
-nav{
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+        .logo-track {
+            display: inline-flex;
+            align-items: center;
+            animation: scroll 40s linear infinite; 
+            width: max-content;
+        }
 
-nav ul{
-display:flex;
-list-style:none;
-gap:20px;
-}
+        .logo-scroll:hover .logo-track {
+            animation-play-state: paused;
+        }
 
-nav a{
-color:white;
-text-decoration:none;
-font-weight:bold;
-}
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
 
-section{
-padding:60px 40px;
-background:white;
-margin-bottom:10px;
-}
+        /* Logo Hover Animation */
+        .logo-link {
+            display: inline-block;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            margin: 0 40px; 
+            border-radius: 8px;
+        }
 
-h2{
-color:#0a2540;
-}
+        .logo-link:hover {
+            transform: scale(1.1) translateY(-4px); 
+            filter: drop-shadow(0 10px 15px rgba(128, 128, 128, 0.2)); 
+        }
 
-.services{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:20px;
-}
+        .logo-img {
+            object-fit: contain; 
+            display: block;
+        }
 
-.card{
-background:#f0f4f8;
-padding:20px;
-border-radius:8px;
-}
+        /* --- Nav Dropdown Animation --- */
+        div[id^="header-nav-"] {
+            visibility: hidden;
+            opacity: 0;
+            transform: translate(-50%, 10px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
 
-footer{
-background:#0a2540;
-color:white;
-text-align:center;
-padding:20px;
-}
-</style>
+        .relative:hover > div[id^="header-nav-"] {
+            visibility: visible;
+            opacity: 1;
+            transform: translate(-50%, 0);
+            pointer-events: auto;
+        }
 
+        /* Adaptive Glassmorphism for Dropdowns */
+        .nav-glass {
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            transition: background-color 0.5s ease, border-color 0.5s ease;
+        }
+
+        /* --- GLASS THEME TOGGLE CSS --- */
+        .glass-toggle-bubble {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        /* Light mode bubble styling */
+        html:not(.dark) .glass-toggle-bubble {
+            background-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 
+                inset 0 1px 2px rgba(255, 255, 255, 0.8), 
+                inset 0 -1px 2px rgba(0, 0, 0, 0.05), 
+                0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Dark mode bubble styling */
+        html.dark .glass-toggle-bubble {
+            background-color: rgba(255, 255, 255, 0.05);
+            box-shadow: 
+                inset 0 1px 2px rgba(255, 255, 255, 0.15), 
+                inset 0 -1px 2px rgba(0, 0, 0, 0.3), 
+                0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+    </style>
 </head>
+<body class="dark:bg-brand-bg bg-[#f2f2f7] dark:text-white text-gray-900 overflow-x-hidden">
 
-<body>
+    <header class="p-6 border-b dark:border-white/10 border-black/10 animate-fade-up transition-colors duration-500">
+        <nav class="hidden items-center lg:flex justify-center relative">
+            
+            <ul class="flex items-center gap-2 lg:gap-4">
+                <li>
+                    <a class="cursor-pointer font-normal text-sm flex items-center gap-0.5 rounded-lg px-2.5 whitespace-nowrap dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-black py-1.5 transition-colors dark:hover:bg-white/10 hover:bg-black/5" href="/overview/">
+                        <span>About</span>
+                    </a>
+                </li>
+                
+                <li class="relative">
+                    <button class="inline-flex items-center px-2.5 py-1.5 text-sm dark:text-gray-400 text-gray-600 transition-colors dark:hover:text-white hover:text-black" type="button">
+                        <span>Features</span>
+                    </button>
+                    <div id="header-nav-features" class="absolute start-1/2 z-50 mt-2 rounded-lg p-4 shadow-lg nav-glass dark:bg-[rgba(40,40,40,0.6)] bg-[rgba(255,255,255,0.7)] dark:border-white/10 border-black/10 border min-w-[200px]">
+                        <ul class="flex flex-col">
+                            <li><a class="cursor-pointer font-normal text-sm flex items-center rounded-lg px-2.5 whitespace-nowrap dark:hover:bg-white/10 hover:bg-black/5 py-2 transition-colors dark:text-gray-300 text-gray-700 dark:hover:text-white hover:text-black" href="#">Agent</a></li>
+                            <li><a class="cursor-pointer font-normal text-sm flex items-center rounded-lg px-2.5 whitespace-nowrap dark:hover:bg-white/10 hover:bg-black/5 py-2 transition-colors dark:text-gray-300 text-gray-700 dark:hover:text-white hover:text-black" href="#">Deep Research</a></li>
+                            <li><a class="cursor-pointer font-normal text-sm flex items-center rounded-lg px-2.5 whitespace-nowrap dark:hover:bg-white/10 hover:bg-black/5 py-2 transition-colors dark:text-gray-300 text-gray-700 dark:hover:text-white hover:text-black" href="#">Voice</a></li>
+                        </ul>
+                    </div>
+                </li>
 
-<header>
-<nav>
-<h1>Exxonim Consulting</h1>
+                <li class="relative">
+                    <button class="inline-flex items-center px-2.5 py-1.5 text-sm dark:text-gray-400 text-gray-600 transition-colors dark:hover:text-white hover:text-black" type="button">
+                        <span>Learn</span>
+                    </button>
+                    <div id="header-nav-learn" class="absolute start-1/2 z-50 mt-2 rounded-lg p-4 shadow-lg nav-glass dark:bg-[rgba(40,40,40,0.6)] bg-[rgba(255,255,255,0.7)] dark:border-white/10 border-black/10 border">
+                        <div class="grid min-w-max auto-cols-fr grid-flow-col items-stretch divide-x dark:divide-white/10 divide-black/10">
+                            <div class="pe-4">
+                                <div class="text-xs my-2.5 px-2.5 dark:text-gray-500 text-gray-400 uppercase tracking-wider">Use Cases</div>
+                                <ul class="flex flex-col">
+                                    <li><a class="text-sm px-2.5 py-2 dark:hover:bg-white/10 hover:bg-black/5 rounded-lg block transition-colors dark:text-gray-300 text-gray-700 dark:hover:text-white hover:text-black" href="#">Students</a></li>
+                                    <li><a class="text-sm px-2.5 py-2 dark:hover:bg-white/10 hover:bg-black/5 rounded-lg block transition-colors dark:text-gray-300 text-gray-700 dark:hover:text-white hover:text-black" href="#">University Educators</a></li>
+                                </ul>
+                            </div>
+                            <div class="px-4">
+                                <div class="text-xs my-2.5 px-2.5 dark:text-gray-500 text-gray-400 uppercase tracking-wider">Inspiration</div>
+                                <ul class="flex flex-col">
+                                    <li><a class="text-sm px-2.5 py-2 dark:hover:bg-white/10 hover:bg-black/5 rounded-lg block transition-colors dark:text-gray-300 text-gray-700 dark:hover:text-white hover:text-black" href="#">Student Writing Guide</a></li>
+                                    <li><a class="text-sm px-2.5 py-2 dark:hover:bg-white/10 hover:bg-black/5 rounded-lg block transition-colors dark:text-gray-300 text-gray-700 dark:hover:text-white hover:text-black" href="#">Recipes & Cooking</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </li>
 
-<ul>
-<li><a href="#home">Home</a></li>
-<li><a href="#services">Services</a></li>
-<li><a href="#about">About</a></li>
-<li><a href="#contact">Contact</a></li>
-</ul>
+                <li>
+                    <a class="cursor-pointer font-normal text-sm flex items-center gap-0.5 rounded-lg px-2.5 whitespace-nowrap dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-black py-1.5 transition-colors dark:hover:bg-white/10 hover:bg-black/5" href="/pricing/">
+                        <span>Pricing</span>
+                    </a>
+                </li>
+            </ul>
 
-</nav>
-</header>
+            <div id="theme-toggle" class="absolute right-0 flex items-center w-20 h-8 rounded-full cursor-pointer select-none transition-colors duration-500 shadow-inner dark:bg-[#1a1a1a] bg-gray-300 border dark:border-white/10 border-black/5" aria-label="Toggle Theme">
+                
+                <div class="absolute w-full flex justify-between px-[14px] text-xs font-semibold pointer-events-none">
+                    <span class="dark:text-gray-400 text-transparent transition-colors duration-500">Dark</span>
+                    <span class="dark:text-transparent text-gray-500 transition-colors duration-500">Light</span>
+                </div>
 
-<section id="home">
-<h2>Professional Business Consulting in Tanzania</h2>
-<p>We provide professional services for company registration, tax compliance, business licensing, and financial consulting.</p>
-</section>
+                <div class="glass-toggle-bubble absolute top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center dark:translate-x-[2.75rem] translate-x-[-0.25rem]">
+                    
+                    <svg class="w-5 h-5 absolute transition-all duration-500 dark:opacity-0 opacity-100 text-gray-700 dark:rotate-90 rotate-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 3.22a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM14.22 15.364a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 18a1 1 0 01-1-1v-1a1 1 0 112 0v1a1 1 0 01-1 1zm-4.22-3.22a1 1 0 01-1.415 0l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 010 1.414zM2 10a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1zm1.78-4.586a1 1 0 010-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0zM10 14a4 4 0 100-8 4 4 0 000 8z" clip-rule="evenodd" />
+                    </svg>
+                    
+                    <svg class="w-4 h-4 absolute transition-all duration-500 dark:opacity-100 opacity-0 text-white dark:rotate-0 -rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                    </svg>
+                </div>
+            </div>
 
-<section id="services">
+        </nav>
+    </header>
 
-<h2>Our Services</h2>
+    <div class="h-24"></div> 
 
-<div class="services">
+    <div class="pt-6 md:pt-12 animate-fade-up">
+        <p class="my-0 md:mb-4 text-center dark:text-white text-gray-900 text-sm md:text-lg leading-normal px-4 opacity-90 font-medium transition-colors duration-500">
+            Our happy customers and foundational model providers:
+        </p>
+        
+        <div class="logo-scroll">
+            <div class="logo-track">
+                
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/anthropic.png" class="logo-img" alt="Anthropic" style="height: 150px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/aws.png" class="logo-img" alt="AWS" style="height: 80px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/cohereai.png" class="logo-img" alt="Cohere AI" style="height: 100px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/gemini.png" class="logo-img" alt="Gemini" style="height: 120px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/MetaAi.png" class="logo-img" alt="Meta AI" style="height: 120px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/microsoftazure.png" class="logo-img" alt="Microsoft Azure" style="height: 150px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/Nvidia.png" class="logo-img" alt="Nvidia" style="height: 80px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/openai.png" class="logo-img" alt="OpenAI" style="height: 100px;">
+                </a>
+                
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/anthropic.png" class="logo-img" alt="Anthropic" style="height: 150px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/aws.png" class="logo-img" alt="AWS" style="height: 80px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/cohereai.png" class="logo-img" alt="Cohere AI" style="height: 100px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/gemini.png" class="logo-img" alt="Gemini" style="height: 120px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/MetaAi.png" class="logo-img" alt="Meta AI" style="height: 120px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/microsoftazure.png" class="logo-img" alt="Microsoft Azure" style="height: 150px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/Nvidia.png" class="logo-img" alt="Nvidia" style="height: 80px;">
+                </a>
+                <a href="#" target="_blank" class="logo-link" title="View website">
+                    <img src="/customer-logo/openai.png" class="logo-img" alt="OpenAI" style="height: 100px;">
+                </a>
+                
+            </div>
+        </div>
+    </div>
 
-<div class="card">
-<h3>Business Registration</h3>
-<ul>
-<li>Company Registration</li>
-<li>Business Name Registration</li>
-<li>NGO Registration</li>
-<li>Microfinance Registration</li>
-</ul>
-</div>
+    <script>
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
 
-<div class="card">
-<h3>Tax & Compliance</h3>
-<ul>
-<li>TIN Application</li>
-<li>Monthly VAT Returns</li>
-<li>Annual Returns</li>
-<li>TRA Tax Filing</li>
-</ul>
-</div>
-
-<div class="card">
-<h3>Licensing & Permits</h3>
-<ul>
-<li>Business License Applications</li>
-<li>Residence Permits</li>
-<li>Central Bank License</li>
-</ul>
-</div>
-
-<div class="card">
-<h3>Government Registrations</h3>
-<ul>
-<li>CRB / ERB Registration</li>
-<li>OSHA Registration</li>
-<li>NSSF / WCF Registration</li>
-<li>NeST / GPSA Registration</li>
-</ul>
-</div>
-
-<div class="card">
-<h3>Business Support</h3>
-<ul>
-<li>Business Plan Preparation</li>
-<li>Financial Statements</li>
-<li>MEMART Preparation</li>
-<li>Professional Business Advice</li>
-</ul>
-</div>
-
-</div>
-
-</section>
-
-<section id="about">
-
-<h2>About Us</h2>
-<p>
-Exxonim Consulting provides professional consulting services to businesses in Tanzania including registration, compliance, taxation, and strategic advisory support.
-</p>
-
-</section>
-
-<section id="contact">
-
-<h2>Contact Us</h2>
-
-<p><strong>Phone:</strong> +255 794 689 099</p>
-
-<p><strong>Website:</strong> www.exxonim.tz</p>
-
-<p>Contact us for professional and accurate business consulting services.</p>
-
-</section>
-
-<footer>
-<p>© 2026 Exxonim Consulting | All Rights Reserved</p>
-</footer>
-
+        themeToggleBtn.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark');
+        });
+    </script>
 </body>
 </html>

@@ -5,9 +5,7 @@ import {
   heroMetrics,
   heroSlides,
   insightPosts,
-  primaryNavLinks,
   providerLabels,
-  serviceNavGroups,
   stackItems,
 } from "./content";
 import { Footer } from "./components/Footer";
@@ -26,6 +24,7 @@ import { useTheme } from "./hooks/useTheme";
 export default function App() {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
+  const [openMenuLabel, setOpenMenuLabel] = useState<string | null>(null);
   const { theme, toggleTheme } = useTheme();
   const activeSlideIndex = useAutoRotatingIndex(heroSlides.length, 2600);
   const blogRailRef = useRef<HTMLDivElement>(null);
@@ -51,6 +50,7 @@ export default function App() {
   }, []);
 
   const handleNavLinkClick = () => {
+    setOpenMenuLabel(null);
     setIsNavOpen(false);
   };
 
@@ -76,13 +76,13 @@ export default function App() {
     <div className="site-shell">
       <Header
         brand={brand}
-        navLinks={primaryNavLinks}
-        serviceGroups={serviceNavGroups}
         theme={theme}
         isAtTop={isAtTop}
         isNavOpen={isNavOpen}
+        openMenuLabel={openMenuLabel}
         onToggleTheme={toggleTheme}
         onToggleNav={() => setIsNavOpen((current) => !current)}
+        onOpenMenu={setOpenMenuLabel}
         onNavLinkClick={handleNavLinkClick}
       />
 
