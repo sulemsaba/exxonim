@@ -21,7 +21,7 @@
   --panel-shadow: 0 24px 60px rgba(9, 68, 73, 0.1);
   --header-height: 80px;
   --nav-pill-hover-bg: rgba(17, 35, 37, 0.08);
-  --nav-flyout-bg: rgba(252, 254, 255, 0.6);
+  --nav-flyout-bg: rgba(252, 254, 255, 0.78);
   --nav-flyout-border: rgba(255, 255, 255, 0.72);
   --nav-flyout-shadow: 0 28px 60px rgba(9, 68, 73, 0.14);
   --nav-flyout-title: rgba(17, 35, 37, 0.44);
@@ -94,7 +94,7 @@ pre {
 
 .site-header--hero {
   --nav-pill-hover-bg: rgba(255, 255, 255, 0.08);
-  --nav-flyout-bg: rgba(17, 22, 24, 0.56);
+  --nav-flyout-bg: rgba(17, 22, 24, 0.72);
   --nav-flyout-border: rgba(255, 255, 255, 0.12);
   --nav-flyout-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
   --nav-flyout-title: rgba(237, 242, 255, 0.54);
@@ -330,8 +330,8 @@ pre {
     opacity 180ms ease,
     transform 180ms ease,
     visibility 180ms ease;
-  backdrop-filter: blur(34px) saturate(175%);
-  -webkit-backdrop-filter: blur(34px) saturate(175%);
+  backdrop-filter: blur(50px) saturate(155%);
+  -webkit-backdrop-filter: blur(50px) saturate(155%);
 }
 
 .site-nav-flyout--align-left {
@@ -350,7 +350,12 @@ pre {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04) 32%, transparent 70%);
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.32),
+      rgba(255, 255, 255, 0.18) 34%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
   pointer-events: none;
 }
 
@@ -2463,7 +2468,7 @@ html[data-theme="dark"] body {
 
 html[data-theme="dark"] .site-header {
   --nav-pill-hover-bg: rgba(255, 255, 255, 0.08);
-  --nav-flyout-bg: rgba(17, 22, 24, 0.58);
+  --nav-flyout-bg: rgba(17, 22, 24, 0.74);
   --nav-flyout-border: rgba(255, 255, 255, 0.12);
   --nav-flyout-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
   --nav-flyout-title: rgba(226, 232, 255, 0.68);
@@ -2471,6 +2476,16 @@ html[data-theme="dark"] .site-header {
   --nav-flyout-divider: rgba(255, 255, 255, 0.08);
   background: rgba(4, 18, 20, 0.92);
   border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .site-nav-flyout::after {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(0, 0, 0, 0.12) 36%,
+      rgba(0, 0, 0, 0.2) 100%
+    );
 }
 
 html[data-theme="dark"] .site-header--hero {
