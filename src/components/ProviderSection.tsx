@@ -31,7 +31,7 @@ export function ProviderSection() {
   const repeatedLogos = [...providerLogos, ...providerLogos];
 
   return (
-    <section className="provider-section dark-grid-section" id="industries">
+    <section className="provider-section" id="industries">
       <div className="container" data-reveal>
         <p className="provider-copy">
           Trusted by Exxonim clients, collaborators, and operational partners:

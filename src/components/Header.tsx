@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FocusEvent } from "react";
 import type { BrandAssets, Theme } from "../types";
 
@@ -7,10 +7,8 @@ interface HeaderProps {
   theme: Theme;
   isAtTop: boolean;
   isNavOpen: boolean;
-  openMenuLabel: string | null;
   onToggleTheme: () => void;
   onToggleNav: () => void;
-  onOpenMenu: (label: string | null) => void;
   onNavLinkClick: () => void;
 }
 
@@ -32,6 +30,7 @@ interface HeaderMenuItem {
 }
 
 const headerMenuItems: HeaderMenuItem[] = [
+  { label: "Home", href: "#top" },
   { label: "About", href: "#about" },
   {
     label: "Services",
@@ -39,7 +38,7 @@ const headerMenuItems: HeaderMenuItem[] = [
     align: "left",
     sections: [
       {
-        title: "Business Setup",
+        title: "Registration & Setup",
         links: [
           { label: "Company Registration", href: "#services" },
           { label: "Business Name Registration", href: "#services" },
@@ -48,71 +47,51 @@ const headerMenuItems: HeaderMenuItem[] = [
         ],
       },
       {
-        title: "Compliance & Licensing",
+        title: "Tax, Licensing & BOT",
         links: [
           { label: "TIN Application", href: "#results" },
           { label: "Annual Statutory Returns", href: "#results" },
           { label: "Business License Applications", href: "#services" },
-          { label: "Residence Permits", href: "#services" },
-          { label: "Microfinance Licensing", href: "#services" },
+          { label: "BOT / Central Bank Licensing", href: "#services" },
         ],
       },
       {
-        title: "Institutional Registration",
+        title: "Institutional & Support",
         links: [
           { label: "CRB / ERB Registration", href: "#industries" },
           { label: "OSHA Registration", href: "#industries" },
           { label: "NSSF / WCF Registration", href: "#industries" },
-          { label: "NeST / GPSA Registration", href: "#industries" },
-        ],
-      },
-    ],
-  },
-  {
-    label: "Advisory",
-    href: "#results",
-    align: "left",
-    sections: [
-      {
-        title: "Advisory Focus",
-        links: [
-          { label: "Growth Strategy", href: "#services" },
-          { label: "Operating Design", href: "#services" },
-          { label: "Transformation Delivery", href: "#services" },
-          { label: "Performance Advisory", href: "#results" },
-        ],
-      },
-      {
-        title: "Business Support",
-        links: [
           { label: "Business Plan Preparation", href: "#services" },
-          { label: "Financial Statement Preparation", href: "#services" },
-          { label: "MEMART Preparation", href: "#services" },
-          { label: "Revenue Forecasting", href: "#results" },
         ],
       },
     ],
   },
-  { label: "Industries", href: "#industries" },
   { label: "Results", href: "#results" },
-  { label: "Insights", href: "#resources" },
   {
-    label: "Pricing",
-    href: "#pricing",
-    align: "right",
+    label: "Resources",
+    href: "#resources",
+    align: "center",
     sections: [
       {
-        title: "Engagement Options",
+        title: "Insights",
         links: [
-          { label: "Initial Consultation", href: "#pricing" },
-          { label: "Business Setup Packages", href: "#pricing" },
-          { label: "Compliance Retainers", href: "#pricing" },
-          { label: "Licensing Support", href: "#pricing" },
-          { label: "Advisory Engagements", href: "#pricing" },
+          { label: "Blog", href: "#resources" },
+          { label: "Case Examples", href: "#results" },
+          { label: "FAQs", href: "#faqs" },
+        ],
+      },
+      {
+        title: "Company",
+        links: [
+          { label: "Sectors", href: "#industries" },
+          { label: "Career", href: "#career" },
+          { label: "Contact", href: "#contact" },
         ],
       },
     ],
   },
+  { label: "Pricing", href: "#pricing" },
+  { label: "Career", href: "#career" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -133,13 +112,12 @@ export function Header({
   theme,
   isAtTop,
   isNavOpen,
-  openMenuLabel,
   onToggleTheme,
   onToggleNav,
-  onOpenMenu,
   onNavLinkClick,
 }: HeaderProps) {
   const isDarkTheme = theme === "dark";
+  const [openMenuLabel, setOpenMenuLabel] = useState<string | null>(null);
   const closeMenuTimerRef = useRef<number | null>(null);
 
   const cancelScheduledClose = () => {
@@ -152,7 +130,7 @@ export function Header({
   const scheduleMenuClose = () => {
     cancelScheduledClose();
     closeMenuTimerRef.current = window.setTimeout(() => {
-      onOpenMenu(null);
+      setOpenMenuLabel(null);
       closeMenuTimerRef.current = null;
     }, 180);
   };
@@ -160,9 +138,9 @@ export function Header({
   useEffect(() => {
     if (!isNavOpen) {
       cancelScheduledClose();
-      onOpenMenu(null);
+      setOpenMenuLabel(null);
     }
-  }, [isNavOpen, onOpenMenu]);
+  }, [isNavOpen]);
 
   useEffect(() => () => cancelScheduledClose(), []);
 
@@ -178,14 +156,12 @@ export function Header({
 
   const handleNavLinkClick = () => {
     cancelScheduledClose();
-    onOpenMenu(null);
+    setOpenMenuLabel(null);
     onNavLinkClick();
   };
 
   return (
-    <header
-      className={`site-header${isAtTop ? " site-header--hero" : " site-header--scrolled"}`}
-    >
+    <header className={`site-header${isAtTop ? " site-header--hero" : " site-header--scrolled"}`}>
       <div className="container nav-wrap">
         <a className="brand brand--marketing" href="#top" aria-label={`${brand.name} home`}>
           <img
@@ -229,7 +205,7 @@ export function Header({
                     hasMenu
                       ? () => {
                           cancelScheduledClose();
-                          onOpenMenu(item.label);
+                          setOpenMenuLabel(item.label);
                         }
                       : undefined
                   }
@@ -237,7 +213,7 @@ export function Header({
                     hasMenu
                       ? () => {
                           cancelScheduledClose();
-                          onOpenMenu(item.label);
+                          setOpenMenuLabel(item.label);
                         }
                       : undefined
                   }
@@ -252,7 +228,7 @@ export function Header({
                         aria-controls={menuId}
                         onClick={() => {
                           cancelScheduledClose();
-                          onOpenMenu(isMenuOpen ? null : item.label);
+                          setOpenMenuLabel(isMenuOpen ? null : item.label);
                         }}
                       >
                         <span>{item.label}</span>
@@ -303,11 +279,12 @@ export function Header({
 
           <div className="site-nav__mobile-actions">
             <a
-              className="header-auth__button header-auth__button--primary"
+              className="header-auth__button header-auth__button--primary header-auth__button--call"
               href="tel:+255794689099"
               onClick={handleNavLinkClick}
             >
-              Call Now
+              <span className="header-auth__eyebrow">Call Now</span>
+              <strong className="header-auth__number">+255 794 689 099</strong>
             </a>
             <a
               className="header-auth__button header-auth__button--secondary"
@@ -355,11 +332,12 @@ export function Header({
 
           <div className="header-auth">
             <a
-              className="header-auth__button header-auth__button--primary"
+              className="header-auth__button header-auth__button--primary header-auth__button--call"
               href="tel:+255794689099"
               onClick={handleNavLinkClick}
             >
-              Call Now
+              <span className="header-auth__eyebrow">Call Now</span>
+              <strong className="header-auth__number">+255 794 689 099</strong>
             </a>
             <a
               className="header-auth__button header-auth__button--secondary"
