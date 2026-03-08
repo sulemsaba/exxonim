@@ -5,7 +5,6 @@ import {
   heroMetrics,
   heroSlides,
   insightPosts,
-  providerLabels,
   stackItems,
 } from "./content";
 import { Footer } from "./components/Footer";
@@ -92,7 +91,7 @@ export default function App() {
           metrics={heroMetrics}
           activeSlideIndex={activeSlideIndex}
         />
-        <ProviderSection labels={providerLabels} />
+        <ProviderSection />
         <StackSection items={stackItems} />
         <EngineSection />
         <ResultsSection />

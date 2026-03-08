@@ -321,16 +321,36 @@ export function Header({
 
         <div className="header-tools">
           <button
-            className="theme-toggle"
+            className={`theme-toggle${isDarkTheme ? " is-dark" : ""}`}
             type="button"
             aria-pressed={isDarkTheme}
-            aria-label="Toggle theme"
+            aria-label={`Switch to ${isDarkTheme ? "light" : "dark"} theme`}
             onClick={onToggleTheme}
           >
-            <span className="theme-toggle__track" aria-hidden="true">
-              <span className="theme-toggle__thumb"></span>
+            <span className="theme-toggle__labels" aria-hidden="true">
+              <span className="theme-toggle__text theme-toggle__text--dark">Dark</span>
+              <span className="theme-toggle__text theme-toggle__text--light">Light</span>
             </span>
-            <span className="theme-toggle__label">Theme</span>
+            <span className="theme-toggle__bubble" aria-hidden="true">
+              <svg
+                className="theme-toggle__icon theme-toggle__icon--sun"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 2a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm4.22 3.22a1 1 0 0 1 1.415 0l.707.707a1 1 0 0 1-1.414 1.414l-.707-.707a1 1 0 0 1 0-1.414ZM18 10a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm-3.78 5.364a1 1 0 0 1 0 1.414l-.707.707a1 1 0 0 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0ZM10 18a1 1 0 0 1-1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1Zm-4.22-3.22a1 1 0 0 1-1.415 0l-.707-.707a1 1 0 0 1 1.414-1.414l.707.707a1 1 0 0 1 0 1.414ZM2 10a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Zm1.78-4.586a1 1 0 0 1 0-1.414l.707-.707A1 1 0 0 1 5.903 4.72l-.707.707a1 1 0 0 1-1.414 0ZM10 14a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <svg
+                className="theme-toggle__icon theme-toggle__icon--moon"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M17.293 13.293A8 8 0 0 1 6.707 2.707a8 8 0 1 0 10.586 10.586Z" />
+              </svg>
+            </span>
           </button>
 
           <div className="header-auth">

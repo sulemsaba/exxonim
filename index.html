@@ -14,10 +14,19 @@
           const savedTheme =
             localStorage.getItem("exxonim-theme") ??
             localStorage.getItem("koro-theme");
+          const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches;
           document.documentElement.dataset.theme =
-            savedTheme === "dark" ? "dark" : "light";
+            savedTheme === "dark" || (savedTheme !== "light" && prefersDark)
+              ? "dark"
+              : "light";
         } catch (error) {
-          document.documentElement.dataset.theme = "light";
+          document.documentElement.dataset.theme = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches
+            ? "dark"
+            : "light";
         }
       })();
     </script>
