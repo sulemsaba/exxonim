@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import type { FocusEvent } from "react";
+import type { FocusEvent, MouseEvent as ReactMouseEvent } from "react";
 import type { BrandAssets, Theme } from "../types";
 
 interface HeaderProps {
   brand: BrandAssets;
   theme: Theme;
-  isAtTop: boolean;
   isNavOpen: boolean;
   onToggleTheme: () => void;
   onToggleNav: () => void;
+  onCloseNav: () => void;
   onNavLinkClick: () => void;
 }
 
@@ -22,12 +22,64 @@ interface HeaderMenuSection {
   links: HeaderMenuLink[];
 }
 
+interface HeaderMenuAction extends HeaderMenuLink {
+  variant?: "primary" | "secondary";
+}
+
 interface HeaderMenuItem {
   label: string;
   href: string;
   align?: "left" | "center" | "right";
   sections?: HeaderMenuSection[];
+  actions?: HeaderMenuAction[];
 }
+
+const serviceMenuSections: HeaderMenuSection[] = [
+  {
+    title: "Registration & Setup",
+    links: [
+      { label: "Company Registration", href: "#company" },
+      { label: "Business Name Registration", href: "#business-name" },
+      { label: "NGO / Organization Registration", href: "#ngo" },
+      { label: "Trademark Registration", href: "#trademark" },
+    ],
+  },
+  {
+    title: "Tax, Licensing & BOT",
+    links: [
+      { label: "TIN Application", href: "#tin" },
+      { label: "Annual Statutory Returns", href: "#returns" },
+      { label: "Business License Applications", href: "#license" },
+      { label: "BOT / Central Bank Licensing", href: "#bot" },
+    ],
+  },
+  {
+    title: "Institutional & Support",
+    links: [
+      { label: "CRB / ERB Registration", href: "#crb" },
+      { label: "OSHA Registration", href: "#osha" },
+      { label: "NSSF / WCF Registration", href: "#nssf" },
+      { label: "Business Plan Preparation", href: "#plan" },
+    ],
+  },
+];
+
+const resourceMenuSections: HeaderMenuSection[] = [
+  {
+    title: "Insights",
+    links: [
+      { label: "Blog", href: "#resources" },
+      { label: "Case Examples", href: "#case-examples" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "Sectors", href: "#industries" },
+      { label: "FAQ", href: "#faq" },
+    ],
+  },
+];
 
 const headerMenuItems: HeaderMenuItem[] = [
   { label: "Home", href: "#top" },
@@ -36,58 +88,34 @@ const headerMenuItems: HeaderMenuItem[] = [
     label: "Services",
     href: "#services",
     align: "left",
-    sections: [
+    sections: serviceMenuSections,
+    actions: [
+      { label: "See More Services", href: "#services", variant: "primary" },
       {
-        title: "Registration & Setup",
-        links: [
-          { label: "Company Registration", href: "#services" },
-          { label: "Business Name Registration", href: "#services" },
-          { label: "NGO / Organization Registration", href: "#services" },
-          { label: "Trademark Registration", href: "#services" },
-        ],
-      },
-      {
-        title: "Tax, Licensing & BOT",
-        links: [
-          { label: "TIN Application", href: "#results" },
-          { label: "Annual Statutory Returns", href: "#results" },
-          { label: "Business License Applications", href: "#services" },
-          { label: "BOT / Central Bank Licensing", href: "#services" },
-        ],
-      },
-      {
-        title: "Institutional & Support",
-        links: [
-          { label: "CRB / ERB Registration", href: "#industries" },
-          { label: "OSHA Registration", href: "#industries" },
-          { label: "NSSF / WCF Registration", href: "#industries" },
-          { label: "Business Plan Preparation", href: "#services" },
-        ],
+        label: "Track Your Consultation",
+        href: "#track-consultation",
+        variant: "secondary",
       },
     ],
   },
-  { label: "Results", href: "#results" },
   {
     label: "Resources",
     href: "#resources",
     align: "center",
-    sections: [
-      {
-        title: "Insights",
-        links: [
-          { label: "Blog", href: "#resources" },
-          { label: "Case Examples", href: "#results" },
-        ],
-      },
-      {
-        title: "Company",
-        links: [
-          { label: "Sectors", href: "#industries" },
-          { label: "Contact", href: "#contact" },
-        ],
-      },
+    sections: resourceMenuSections,
+    actions: [
+      { label: "See More", href: "#resources", variant: "primary" },
+      { label: "Ask a Question", href: "#contact", variant: "secondary" },
     ],
   },
+  { label: "Career", href: "#career" },
+  { label: "Contact", href: "#contact" },
+];
+
+const mobilePrimaryLinks: HeaderMenuLink[] = [
+  { label: "Home", href: "#top" },
+  { label: "About", href: "#about" },
+  { label: "Career", href: "#career" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -106,10 +134,10 @@ function getFlyoutSizeClass(sectionCount: number) {
 export function Header({
   brand,
   theme,
-  isAtTop,
   isNavOpen,
   onToggleTheme,
   onToggleNav,
+  onCloseNav,
   onNavLinkClick,
 }: HeaderProps) {
   const isDarkTheme = theme === "dark";
@@ -132,7 +160,7 @@ export function Header({
   };
 
   useEffect(() => {
-    if (!isNavOpen) {
+    if (isNavOpen) {
       cancelScheduledClose();
       setOpenMenuLabel(null);
     }
@@ -156,10 +184,22 @@ export function Header({
     onNavLinkClick();
   };
 
+  const handleMobileFrameClick = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      onCloseNav();
+    }
+  };
+
+  const mobileMenuItems = headerMenuItems.filter((item) => item.sections?.length);
+
   return (
-    <header className={`site-header${isAtTop ? " site-header--hero" : " site-header--scrolled"}`}>
+    <header className="site-header">
       <div className="container nav-wrap">
-        <a className="brand brand--marketing" href="#top" aria-label={`${brand.name} home`}>
+        <a
+          className="brand brand--marketing"
+          href="#top"
+          aria-label={`${brand.name} home`}
+        >
           <img
             className="brand-logo brand-logo--light"
             src={brand.lightLogoSrc}
@@ -179,7 +219,7 @@ export function Header({
           />
         </a>
 
-        <nav className={`site-nav${isNavOpen ? " is-open" : ""}`} id="site-nav" aria-label="Primary">
+        <nav className="site-nav" aria-label="Primary">
           <ul className="site-nav__list">
             {headerMenuItems.map((item) => {
               const hasMenu = Boolean(item.sections?.length);
@@ -196,7 +236,9 @@ export function Header({
                 <li
                   key={item.label}
                   className={`site-nav-item${hasMenu ? " site-nav-item--has-menu" : ""}${isMenuOpen ? " is-open" : ""}`}
-                  onBlurCapture={hasMenu ? (event) => handleMenuBlur(event, item.label) : undefined}
+                  onBlurCapture={
+                    hasMenu ? (event) => handleMenuBlur(event, item.label) : undefined
+                  }
                   onFocusCapture={
                     hasMenu
                       ? () => {
@@ -261,10 +303,29 @@ export function Header({
                             </div>
                           ))}
                         </div>
+
+                        {item.actions?.length ? (
+                          <div className="site-nav-flyout__footer">
+                            {item.actions.map((action) => (
+                              <a
+                                key={`${item.label}-${action.label}`}
+                                className={`site-nav-flyout__action site-nav-flyout__action--${action.variant ?? "secondary"}`}
+                                href={action.href}
+                                onClick={handleNavLinkClick}
+                              >
+                                {action.label}
+                              </a>
+                            ))}
+                          </div>
+                        ) : null}
                       </div>
                     </>
                   ) : (
-                    <a className="site-nav__link" href={item.href} onClick={handleNavLinkClick}>
+                    <a
+                      className="site-nav__link"
+                      href={item.href}
+                      onClick={handleNavLinkClick}
+                    >
                       {item.label}
                     </a>
                   )}
@@ -272,24 +333,6 @@ export function Header({
               );
             })}
           </ul>
-
-          <div className="site-nav__mobile-actions">
-            <a
-              className="header-auth__button header-auth__button--primary header-auth__button--call"
-              href="tel:+255794689099"
-              onClick={handleNavLinkClick}
-            >
-              <span className="header-auth__eyebrow">Call Now</span>
-              <strong className="header-auth__number">+255 794 689 099</strong>
-            </a>
-            <a
-              className="header-auth__button header-auth__button--secondary"
-              href="#contact"
-              onClick={handleNavLinkClick}
-            >
-              Get Consultation
-            </a>
-          </div>
         </nav>
 
         <div className="header-tools">
@@ -328,36 +371,180 @@ export function Header({
 
           <div className="header-auth">
             <a
-              className="header-auth__button header-auth__button--primary header-auth__button--call"
+              className="header-auth__button header-auth__button--call"
               href="tel:+255794689099"
               onClick={handleNavLinkClick}
             >
-              <span className="header-auth__eyebrow">Call Now</span>
-              <strong className="header-auth__number">+255 794 689 099</strong>
+              <span className="header-auth__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path
+                    className="header-auth__ring"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 5a2 2 0 0 1 2-2h3.28a1 1 0 0 1 .948.684l1.498 4.493a1 1 0 0 1-.502 1.21l-2.257 1.13a11.042 11.042 0 0 0 5.516 5.516l1.13-2.257a1 1 0 0 1 1.21-.502l4.493 1.498a1 1 0 0 1 .684.949V19a2 2 0 0 1-2 2h-1C9.716 21 3 14.284 3 6V5Z"
+                  />
+                </svg>
+              </span>
+              <span className="header-auth__copy">
+                <span className="header-auth__eyebrow">Call Now</span>
+                <strong className="header-auth__number">+255 794 689 099</strong>
+              </span>
             </a>
             <a
-              className="header-auth__button header-auth__button--secondary"
-              href="#contact"
+              className="header-auth__button header-auth__button--track"
+              href="#track-consultation"
               onClick={handleNavLinkClick}
             >
-              Get Consultation
+              Track Your Consultation
             </a>
           </div>
 
-          <button
-            className={`menu-toggle${isNavOpen ? " is-open" : ""}`}
-            type="button"
-            aria-expanded={isNavOpen}
-            aria-controls="site-nav"
-            aria-label={isNavOpen ? "Close menu" : "Open menu"}
-            onClick={onToggleNav}
-          >
-            <span className="menu-toggle__bars" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-            </span>
-          </button>
+            <button
+              className={`menu-toggle${isNavOpen ? " is-open" : ""}`}
+              type="button"
+              aria-expanded={isNavOpen}
+              aria-controls="mobile-nav"
+              aria-label={isNavOpen ? "Close menu" : "Open menu"}
+              onClick={onToggleNav}
+            >
+              <svg
+                className="menu-toggle__icon menu-toggle__icon--menu"
+                aria-hidden="true"
+                width="24"
+                height="24"
+                viewBox="0 0 32 32"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.25"
+              >
+                <path strokeLinecap="round" d="M 7 10 h 18 M 7 16 h 18 M 7 22 h 18" />
+              </svg>
+              <svg
+                className="menu-toggle__icon menu-toggle__icon--close"
+                aria-hidden="true"
+                width="24"
+                height="24"
+                viewBox="0 0 32 32"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.25"
+              >
+                <path strokeLinecap="round" d="M 10 10 L 22 22 M 22 10 L 10 22" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      <div
+        className={`mobile-nav${isNavOpen ? " is-open" : ""}`}
+        id="mobile-nav"
+        aria-hidden={!isNavOpen}
+      >
+        <button
+          className="mobile-nav__overlay"
+          type="button"
+          aria-label="Close navigation"
+          onClick={onCloseNav}
+        ></button>
+        <div className="mobile-nav__frame" onClick={handleMobileFrameClick}>
+          <nav className="mobile-nav__panel" aria-label="Mobile navigation">
+            <div className="mobile-nav__grid">
+              <div className="mobile-nav__top-links">
+                {mobilePrimaryLinks.map((link) => (
+                  <a
+                    key={link.label}
+                    className="mobile-nav__top-link"
+                    href={link.href}
+                    onClick={handleNavLinkClick}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+
+              {mobileMenuItems.map((item) => (
+                <section key={item.label} className="mobile-nav__card">
+                  <p className="mobile-nav__eyebrow">{item.label}</p>
+
+                  <div className="mobile-nav__groups">
+                    {item.sections?.map((section) => (
+                      <div
+                        key={`${item.label}-${section.title ?? "links"}`}
+                        className="mobile-nav__group"
+                      >
+                        {section.title ? (
+                          <p className="mobile-nav__group-title">{section.title}</p>
+                        ) : null}
+
+                        <div className="mobile-nav__list">
+                          {section.links.map((link) => (
+                            <a
+                              key={`${item.label}-${link.label}`}
+                              className="mobile-nav__list-link"
+                              href={link.href}
+                              onClick={handleNavLinkClick}
+                            >
+                              {link.label}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {item.actions?.length ? (
+                    <div className="mobile-nav__card-actions">
+                      {item.actions.map((action) => (
+                        <a
+                          key={`${item.label}-${action.label}`}
+                          className={`mobile-nav__card-action mobile-nav__card-action--${action.variant ?? "secondary"}`}
+                          href={action.href}
+                          onClick={handleNavLinkClick}
+                        >
+                          {action.label}
+                        </a>
+                      ))}
+                    </div>
+                  ) : null}
+                </section>
+              ))}
+
+              <div className="mobile-nav__actions">
+                <a
+                  className="header-auth__button header-auth__button--call"
+                  href="tel:+255794689099"
+                  onClick={handleNavLinkClick}
+                >
+                  <span className="header-auth__icon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path
+                        className="header-auth__ring"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 5a2 2 0 0 1 2-2h3.28a1 1 0 0 1 .948.684l1.498 4.493a1 1 0 0 1-.502 1.21l-2.257 1.13a11.042 11.042 0 0 0 5.516 5.516l1.13-2.257a1 1 0 0 1 1.21-.502l4.493 1.498a1 1 0 0 1 .684.949V19a2 2 0 0 1-2 2h-1C9.716 21 3 14.284 3 6V5Z"
+                      />
+                    </svg>
+                  </span>
+                  <span className="header-auth__copy">
+                    <span className="header-auth__eyebrow">Call Now</span>
+                    <strong className="header-auth__number">+255 794 689 099</strong>
+                  </span>
+                </a>
+                <a
+                  className="header-auth__button header-auth__button--track"
+                  href="#track-consultation"
+                  onClick={handleNavLinkClick}
+                >
+                  Track Your Consultation
+                </a>
+              </div>
+            </div>
+          </nav>
         </div>
       </div>
     </header>

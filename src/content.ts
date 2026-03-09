@@ -83,62 +83,59 @@ export const serviceNavGroups: ServiceNavGroup[] = [
 
 export const heroSlides: HeroSlide[] = [
   {
-    label: "Executive diagnostic",
-    videoSrc:
-      "https://asset.acho.io/new-aden-website/home/BrittleChainCodeBlock1.mov",
-    title: "Leadership focus",
+    label: "Registration desk",
+    videoSrc: "",
+    title: "Company and organization setup",
     description:
-      "We isolate the few decisions, conflicts, and operating constraints that are actually slowing growth.",
+      "Entity formation, business name filing, NGO support, and trademark registration handled with clearer documentation flow.",
   },
   {
-    label: "Operating cadence",
-    videoSrc:
-      "https://asset.acho.io/new-aden-website/home/The%20_Manual%20Orchestration_%20Tax.mov",
-    title: "Operating rhythm",
+    label: "Compliance desk",
+    videoSrc: "",
+    title: "TIN, returns, and statutory filing",
     description:
-      "We redesign reporting, meeting cadence, and decision rights so teams move faster with less friction.",
+      "TRA registration, annual returns, and compliance submissions organized to keep businesses current and submission-ready.",
   },
   {
-    label: "Transformation office",
-    videoSrc:
-      "https://asset.acho.io/new-aden-website/home/ContextBlindspot.mov",
-    title: "Change that holds",
+    label: "Licensing desk",
+    videoSrc: "",
+    title: "Licensing and regulated approvals",
     description:
-      "We turn plans into milestones, owners, governance, and review loops that survive real operating pressure.",
+      "Business licenses, BOT-linked approvals, and institutional registrations coordinated with follow-up that keeps moving.",
   },
 ];
 
 export const heroMetrics: HeroMetric[] = [
   {
-    title: "Growth Strategy",
-    description: "Commercial direction with sharper priorities.",
+    title: "Company and NGO Setup",
+    description: "Formation support from name search to final registration.",
     iconClass: "icon-bars",
   },
   {
-    title: "Operating Design",
-    description: "Clear roles, cadence, and accountability.",
+    title: "Tax and Returns",
+    description: "TIN application and statutory filing support.",
     iconClass: "icon-people",
   },
   {
-    title: "Transformation Delivery",
-    description: "Execution support from idea to rollout.",
+    title: "Licensing Support",
+    description: "Local licenses and regulator-facing applications.",
     iconClass: "icon-bolt",
   },
   {
-    title: "Performance Advisory",
-    description: "Margin, productivity, and team focus.",
+    title: "Business Support",
+    description: "Plans, statements, and readiness for next decisions.",
     iconClass: "icon-eye",
   },
 ];
 
 export const providerLabels: string[] = [
-  "Board Priorities",
-  "Growth Strategy",
-  "Operating Model",
-  "Transformation PMO",
-  "Commercial Performance",
-  "Leadership Alignment",
-  "Execution Cadence",
+  "Startups",
+  "SMEs",
+  "NGOs",
+  "Construction",
+  "Professional services",
+  "Trade and distribution",
+  "Regulated operators",
 ];
 
 export const stackItems: StackItem[] = [
@@ -182,31 +179,31 @@ export const stackItems: StackItem[] = [
 
 export const insightPosts: InsightPost[] = [
   {
-    tag: "Latest",
-    title: "Why Growth Plans Fail in the Middle Layer",
+    tag: "Guide",
+    title: "Documents to prepare before company registration starts",
     description:
-      "Strategy usually breaks where ownership becomes unclear. Here is how to fix that before execution slows.",
-    mediaLabel: "Operating clarity",
+      "A practical shortlist for founders who want the filing process to move without repeated document requests.",
+    mediaLabel: "Registration prep",
   },
   {
-    tag: "Latest",
-    title: "The Meeting Load That Quietly Kills Momentum",
+    tag: "Checklist",
+    title: "How to keep annual statutory returns from becoming a backlog",
     description:
-      "An executive team can spend a week in updates and still miss the decisions that matter.",
-    mediaLabel: "Cadence design",
+      "A simple way to map deadlines, responsible parties, and missing records before penalties stack up.",
+    mediaLabel: "Compliance rhythm",
   },
   {
     tag: "Guide",
-    title: "How to Scale Without Rewriting the Whole Business",
+    title: "When a business license application needs more than the base form",
     description:
-      "Structure should support growth, not slow it down. The key is knowing what to redesign first.",
-    mediaLabel: "Scale with structure",
+      "Supporting documents, sector requirements, and follow-up points that usually determine whether the application stalls.",
+    mediaLabel: "Licensing notes",
   },
   {
     tag: "2026",
-    title: "The Leadership Metrics That Actually Drive Action",
+    title: "What investors and lenders expect from a usable business plan",
     description:
-      "Dashboards become useful when they are tied to choices, not just visibility.",
-    mediaLabel: "Decision quality",
+      "A strong plan is less about volume and more about assumptions, structure, and financial coherence.",
+    mediaLabel: "Planning support",
   },
 ];

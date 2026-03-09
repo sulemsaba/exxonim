@@ -1,96 +1,140 @@
+const checkpoints = [
+  {
+    title: "Intake confirmed",
+    detail: "Requirements captured and service scope agreed.",
+    status: "complete",
+  },
+  {
+    title: "Documents reviewed",
+    detail: "Application pack checked before submission.",
+    status: "complete",
+  },
+  {
+    title: "Authority follow-up",
+    detail: "Submission is active and status is being monitored.",
+    status: "active",
+  },
+  {
+    title: "Final release",
+    detail: "Approval, certificate, or filing confirmation is delivered.",
+    status: "upcoming",
+  },
+] as const;
+
+const caseExamples = [
+  {
+    title: "Fast-moving company setup",
+    detail: "New ventures that need a clean start across registration and tax setup.",
+  },
+  {
+    title: "Regulated approval support",
+    detail: "Operators preparing documentation for sector-specific licensing.",
+  },
+  {
+    title: "Backlog cleanup",
+    detail: "Businesses catching up on statutory returns and employer registrations.",
+  },
+];
+
 export function ResultsSection() {
   return (
-    <section className="roi-section light-section" id="results">
-      <div className="container roi-grid">
-        <div className="roi-copy" data-reveal>
+    <section className="tracking-section dark-grid-section" id="track-consultation">
+      <span className="section-anchor" id="case-examples" aria-hidden="true"></span>
+      <div className="container">
+        <div
+          className="landing-section-heading landing-section-heading--center"
+          data-reveal
+        >
           <p className="section-pill section-pill--light">
-            <span></span>Proven in Execution
+            <span></span>Track your consultation
           </p>
-          <h2 className="section-title">
-            Advice That Shows Up in Margin, Focus, and Delivery
-          </h2>
-          <p className="section-description">
-            Good consulting should not end in a slide deck. We work with
-            leadership teams to improve commercial clarity, operating pace, and
-            accountability so change becomes visible in the business.
+          <h2>A clearer view of what happens after you reach out.</h2>
+          <p>
+            Exxonim keeps engagements structured around intake, review,
+            submission, and follow-up so you are not left guessing where the
+            work stands.
           </p>
-          <a className="button button-primary" href="#contact">
-            Schedule a leadership session
-          </a>
         </div>
 
-        <div className="roi-visual" data-reveal>
-          <div className="status-alert">
-            <span>Priority review</span>
-            <strong>Commercial performance below target</strong>
-            <small>Margin trend dropped under plan</small>
-          </div>
-
-          <div className="roi-panel">
-            <div className="roi-panel__header">
+        <div className="tracking-grid">
+          <article className="tracking-card tracking-card--primary" data-reveal>
+            <div className="tracking-card__top">
               <div>
-                <strong>Margin protection plan</strong>
-                <small>Leadership actions tied to gross margin</small>
+                <span className="tracking-card__eyebrow">Consultation status</span>
+                <strong>Reference EXX-24091</strong>
               </div>
-              <span className="toggle is-on"></span>
+              <span className="tracking-card__badge">In progress</span>
             </div>
-            <div className="slider-block">
-              <div className="slider-label">
-                <span>Target operating margin</span>
-                <strong>24%</strong>
-              </div>
-              <div className="slider-track">
-                <span className="slider-fill"></span>
-                <span className="slider-thumb"></span>
-              </div>
-            </div>
-          </div>
 
-          <div className="roi-code-card">
-            <div className="code-window code-window--dark">
-              <div className="code-window__top">
-                <div className="window-dots">
-                  <span></span>
-                  <span></span>
-                  <span></span>
+            <p className="tracking-card__copy">
+              Document review is complete and the submission package is active.
+              The current task is authority follow-up and final confirmation.
+            </p>
+
+            <div className="tracking-progress">
+              {checkpoints.map((checkpoint) => (
+                <article
+                  key={checkpoint.title}
+                  className={`tracking-progress__item tracking-progress__item--${checkpoint.status}`}
+                >
+                  <span className="tracking-progress__dot" aria-hidden="true"></span>
+                  <div>
+                    <strong>{checkpoint.title}</strong>
+                    <p>{checkpoint.detail}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <div className="tracking-card__actions">
+              <a className="landing-cta landing-cta--primary" href="#contact">
+                Start a new request
+              </a>
+              <a className="landing-cta landing-cta--secondary" href="tel:+255794689099">
+                Call Exxonim
+              </a>
+            </div>
+          </article>
+
+          <div className="tracking-stack">
+            <article className="tracking-card" data-reveal>
+              <span className="tracking-card__eyebrow">How it works</span>
+              <div className="tracking-steps">
+                <div className="tracking-steps__item">
+                  <strong>1. Intake and scoping</strong>
+                  <p>
+                    We clarify the service, requirements, and target outcome
+                    before work starts.
+                  </p>
                 </div>
-                <span>operating-playbook.md</span>
-                <span className="window-tag">plan</span>
+                <div className="tracking-steps__item">
+                  <strong>2. Preparation and submission</strong>
+                  <p>
+                    Documents are checked, gaps are flagged, and the filing pack
+                    is prepared.
+                  </p>
+                </div>
+                <div className="tracking-steps__item">
+                  <strong>3. Follow-up and release</strong>
+                  <p>
+                    Exxonim tracks the outstanding step until approval,
+                    confirmation, or certificate handover.
+                  </p>
+                </div>
               </div>
-              <div className="code-window__body">
-                <pre>{`Priority 01: Restore margin discipline
+            </article>
 
-- tighten pricing governance by account tier
-- reset weekly commercial review cadence
-- clarify approval rights on discounting
-- assign delivery owners for each intervention
-- track impact against the 90-day plan`}</pre>
+            <article className="tracking-card" data-reveal>
+              <span className="tracking-card__eyebrow">Case examples</span>
+              <div className="case-grid">
+                {caseExamples.map((item) => (
+                  <article key={item.title} className="case-grid__item">
+                    <strong>{item.title}</strong>
+                    <p>{item.detail}</p>
+                  </article>
+                ))}
               </div>
-            </div>
-          </div>
-
-          <div className="pricing-panel" id="pricing">
-            <div className="pricing-panel__row">
-              <span>Baseline</span>
-              <strong>12%</strong>
-            </div>
-            <div className="pricing-bar">
-              <span style={{ width: "38%" }}></span>
-            </div>
-            <div className="pricing-panel__row">
-              <span>Intervention</span>
-              <strong>19%</strong>
-            </div>
-            <div className="pricing-bar">
-              <span style={{ width: "63%" }}></span>
-            </div>
-            <div className="pricing-panel__row highlight">
-              <span>Optimized</span>
-              <strong>24%</strong>
-            </div>
-            <div className="pricing-bar highlight">
-              <span style={{ width: "82%" }}></span>
-            </div>
+            </article>
           </div>
         </div>
       </div>

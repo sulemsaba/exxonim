@@ -8,6 +8,7 @@ import jotofaLogo from "../../assets/clients/jotofa.webp";
 import levoLogo from "../../assets/clients/levo.webp";
 import trcsLogo from "../../assets/clients/trcs.webp";
 import utecLogo from "../../assets/clients/utec.webp";
+import { providerLabels } from "../content";
 
 interface ProviderLogo {
   alt: string;
@@ -32,9 +33,35 @@ export function ProviderSection() {
 
   return (
     <section className="provider-section" id="industries">
-      <div className="container" data-reveal>
-        <p className="provider-copy">
-          Trusted by Exxonim clients, collaborators, and operational partners:
+      <div className="container">
+        <div
+          className="landing-section-heading landing-section-heading--center"
+          data-reveal
+        >
+          <p className="section-pill section-pill--light">
+            <span></span>Sectors and partners
+          </p>
+          <h2>
+            Trusted by businesses, institutions, and operating partners that
+            need reliable follow-through.
+          </h2>
+          <p>
+            We support founders, compliance teams, project offices, and
+            operators navigating setup and approvals across Tanzania.
+          </p>
+        </div>
+
+        <div className="partner-band__chips" data-reveal>
+          {providerLabels.map((label) => (
+            <span key={label} className="partner-band__chip">
+              {label}
+            </span>
+          ))}
+        </div>
+
+        <p className="provider-copy" data-reveal>
+          Brands, collaborators, and client-side teams we have worked
+          alongside.
         </p>
 
         <div className="provider-marquee" aria-label="Client and partner logos">
