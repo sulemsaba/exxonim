@@ -90,7 +90,6 @@ const headerMenuItems: HeaderMenuItem[] = [
       },
     ],
   },
-  { label: "Pricing", href: "#pricing" },
   { label: "Career", href: "#career" },
   { label: "Contact", href: "#contact" },
 ];

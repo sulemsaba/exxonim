@@ -1,5 +1,5 @@
 :root {
-  --font-display: "Canvas Black", "Canva Sans", "Arial Black", "Manrope", sans-serif;
+  --font-display: "MADE Canvas", "Arial Black", "Manrope", sans-serif;
   --primary: hsl(185 60% 26%);
   --primary-strong: hsl(185 64% 20%);
   --primary-soft: hsl(185 42% 42%);
@@ -31,14 +31,25 @@
 }
 
 @font-face {
-  font-family: "Canvas Black";
-  src:
-    local("Canvas Black"),
-    local("Canvas-Black"),
-    local("Canva Sans Black"),
-    local("CanvaSans-Black"),
-    local("Canva Sans");
-  font-weight: 700 900;
+  font-family: "MADE Canvas";
+  src: url("../assets/clients/MADE Canvas Light PERSONAL USE.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MADE Canvas";
+  src: url("../assets/clients/MADE Canvas Regular PERSONAL USE.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MADE Canvas";
+  src: url("../assets/clients/MADE Canvas Black PERSONAL USE.otf") format("opentype");
+  font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
@@ -868,7 +879,7 @@ pre {
 .blog-card__copy h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: -0.06em;
 }
 
@@ -2349,7 +2360,7 @@ pre {
   bottom: 1.2rem;
   font-family: var(--font-display);
   font-size: 1.85rem;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.12;
   color: var(--slate-950);
 }
@@ -2909,6 +2920,16 @@ html[data-theme="dark"] .footer-divider {
     width: min(1440px, calc(100% - 0.75rem));
   }
 
+  .site-nav__list {
+    gap: 0.15rem;
+  }
+
+  .site-nav__link,
+  .site-nav-trigger {
+    padding: 0.5rem 0.68rem;
+    font-size: 0.9rem;
+  }
+
   .theme-toggle {
     --theme-toggle-width: 4.8rem;
     --theme-toggle-height: 2rem;
@@ -2959,7 +2980,7 @@ html[data-theme="dark"] .footer-divider {
   }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1120px) {
   .menu-toggle {
     display: inline-flex;
   }
