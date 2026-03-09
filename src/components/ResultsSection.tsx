@@ -1,3 +1,5 @@
+import { routes } from "../routes";
+
 const checkpoints = [
   {
     title: "Intake confirmed",
@@ -87,7 +89,7 @@ export function ResultsSection() {
             </div>
 
             <div className="tracking-card__actions">
-              <a className="landing-cta landing-cta--primary" href="#contact">
+              <a className="landing-cta landing-cta--primary" href={routes.contact}>
                 Start a new request
               </a>
               <a className="landing-cta landing-cta--secondary" href="tel:+255794689099">

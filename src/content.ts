@@ -7,6 +7,7 @@ import type {
   ServiceNavGroup,
   StackItem,
 } from "./types";
+import { routes } from "./routes";
 
 export const brand: BrandAssets = {
   name: "Exxonim",
@@ -15,19 +16,19 @@ export const brand: BrandAssets = {
 };
 
 export const primaryNavLinks: NavLink[] = [
-  { label: "Home", href: "#top" },
-  { label: "About", href: "#about" },
-  { label: "Blogs", href: "#resources" },
-  { label: "Contact", href: "#contact" },
-  { label: "Career", href: "#career" },
-  { label: "FAQs", href: "#faqs" },
+  { label: "Home", href: routes.home },
+  { label: "About", href: routes.about },
+  { label: "Blogs", href: routes.resources },
+  { label: "Contact", href: routes.contact },
+  { label: "Career", href: routes.career },
+  { label: "FAQs", href: `${routes.resources}#faq` },
 ];
 
 export const serviceNavGroups: ServiceNavGroup[] = [
   {
     title: "Business Registration Services",
     summary: "BRELA-focused setup, protection, and entity formation.",
-    href: "#services",
+    href: `${routes.services}#company`,
     items: [
       "Company Registration",
       "Business Name Registration",
@@ -38,7 +39,7 @@ export const serviceNavGroups: ServiceNavGroup[] = [
   {
     title: "Tax & Compliance Services",
     summary: "TRA submissions, returns, and tax setup for compliant growth.",
-    href: "#results",
+    href: `${routes.services}#tin`,
     items: [
       "TIN Application",
       "Monthly VAT Returns",
@@ -49,7 +50,7 @@ export const serviceNavGroups: ServiceNavGroup[] = [
   {
     title: "Licensing & Permits",
     summary: "Licenses and regulated approvals including BOT-linked processes.",
-    href: "#services",
+    href: `${routes.services}#license`,
     items: [
       "Business License Applications",
       "Residence Permits",
@@ -60,7 +61,7 @@ export const serviceNavGroups: ServiceNavGroup[] = [
   {
     title: "Government & Institutional Registrations",
     summary: "Operational registrations for public systems and compliance bodies.",
-    href: "#industries",
+    href: `${routes.services}#crb`,
     items: [
       "CRB / ERB Registration",
       "OSHA Registration",
@@ -71,7 +72,7 @@ export const serviceNavGroups: ServiceNavGroup[] = [
   {
     title: "Business Support & Consulting",
     summary: "Planning, financial preparation, and advisory support for decisions.",
-    href: "#services",
+    href: `${routes.services}#plan`,
     items: [
       "Business Plan Preparation",
       "Financial Statement Preparation",
@@ -145,7 +146,7 @@ export const stackItems: StackItem[] = [
     description:
       "Leadership teams often agree on ambition but not on the sequence, owners, and tradeoffs needed to move. We turn the plan into a short, practical agenda the business can execute against.",
     ctaLabel: "See our advisory model",
-    ctaHref: "#services",
+    ctaHref: routes.services,
     windowTitle: "Board Priority Review",
     windowTag: "Strategy",
     videoSrc:
@@ -157,7 +158,7 @@ export const stackItems: StackItem[] = [
     description:
       "Teams lose momentum when reporting, meetings, and decisions depend on workarounds. We redesign the management system so execution becomes clearer, faster, and easier to sustain.",
     ctaLabel: "Explore operating systems",
-    ctaHref: "#results",
+    ctaHref: routes.tracking,
     windowTitle: "Operating Cadence Review",
     windowTag: "Cadence",
     videoSrc:
@@ -169,7 +170,7 @@ export const stackItems: StackItem[] = [
     description:
       "Growth creates complexity faster than most companies build structure. We put in place the governance, accountability, and delivery discipline required to scale without drift.",
     ctaLabel: "View transformation approach",
-    ctaHref: "#resources",
+    ctaHref: routes.resources,
     windowTitle: "Transformation Steering",
     windowTag: "Delivery",
     videoSrc:

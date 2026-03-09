@@ -232,6 +232,7 @@ export default function App({ initialPathname }: AppProps) {
       <Header
         brand={brand}
         theme={theme}
+        pathname={pathname}
         isNavOpen={isNavOpen}
         onToggleTheme={toggleTheme}
         onToggleNav={() => setIsNavOpen((current) => !current)}

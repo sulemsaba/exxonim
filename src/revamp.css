@@ -31,37 +31,37 @@
 }
 
 .landing-hero {
-  padding: 1.5rem 0 4.5rem;
+  padding: 0.5rem 0 4rem;
 }
 
 .landing-hero__grid {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: 1.5rem;
+  gap: 1.25rem;
   align-items: start;
 }
 
 .landing-hero__copy,
 .landing-hero__visual {
   display: grid;
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 .landing-hero__copy h1 {
   margin: 0;
-  max-width: 11ch;
+  max-width: 13ch;
   font-family: var(--font-display);
-  font-size: clamp(3.1rem, 7vw, 6.5rem);
+  font-size: clamp(2.85rem, 5.25vw, 5.45rem);
   font-weight: 400;
   letter-spacing: -0.07em;
-  line-height: 0.9;
+  line-height: 0.92;
 }
 
 .landing-hero__lead {
-  max-width: 40rem;
+  max-width: 35rem;
   margin: 0;
-  font-size: clamp(1rem, 1.8vw, 1.15rem);
-  line-height: 1.75;
+  font-size: clamp(0.98rem, 1.25vw, 1.08rem);
+  line-height: 1.65;
   color: rgba(17, 35, 37, 0.78);
 }
 
@@ -490,6 +490,88 @@
   scroll-margin-top: calc(var(--header-height) + 1rem);
 }
 
+.page-shell {
+  padding: 1.75rem 0 5.5rem;
+}
+
+.page-hero {
+  display: grid;
+  gap: 2rem;
+}
+
+.page-grid,
+.contact-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.page-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
+.contact-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.page-card {
+  display: grid;
+  gap: 1rem;
+  min-height: 100%;
+  padding: 1.45rem;
+  border: 1px solid var(--cinematic-card-border);
+  border-radius: 1.7rem;
+  background: var(--cinematic-card-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: var(--cinematic-card-shadow);
+}
+
+.page-card__eyebrow {
+  display: inline-flex;
+  margin-bottom: 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(17, 35, 37, 0.46);
+}
+
+.page-card strong,
+.page-list__item strong {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.page-card p,
+.page-list__item p {
+  margin: 0;
+  color: rgba(17, 35, 37, 0.72);
+  line-height: 1.7;
+}
+
+.page-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.page-list__item {
+  display: grid;
+  gap: 0.28rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(9, 68, 73, 0.08);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
 .whatsapp-float {
   position: fixed;
   right: 1.5rem;
@@ -809,6 +891,8 @@ html[data-theme="dark"] .service-catalog__card-top p,
 html[data-theme="dark"] .service-catalog__service p,
 html[data-theme="dark"] .resource-card p,
 html[data-theme="dark"] .faq-card p,
+html[data-theme="dark"] .page-card p,
+html[data-theme="dark"] .page-list__item p,
 html[data-theme="dark"] .metric-card p {
   color: rgba(237, 242, 255, 0.72);
 }
@@ -819,7 +903,8 @@ html[data-theme="dark"] .hero-service-list__item,
 html[data-theme="dark"] .service-catalog__service,
 html[data-theme="dark"] .tracking-progress__item,
 html[data-theme="dark"] .tracking-steps__item,
-html[data-theme="dark"] .case-grid__item {
+html[data-theme="dark"] .case-grid__item,
+html[data-theme="dark"] .page-list__item {
   background: rgba(255, 255, 255, 0.06);
   color: rgba(248, 251, 255, 0.92);
 }
@@ -827,7 +912,8 @@ html[data-theme="dark"] .case-grid__item {
 html[data-theme="dark"] .hero-feature-card__eyebrow,
 html[data-theme="dark"] .hero-side-card__label,
 html[data-theme="dark"] .tracking-card__eyebrow,
-html[data-theme="dark"] .hero-service-list__item span {
+html[data-theme="dark"] .hero-service-list__item span,
+html[data-theme="dark"] .page-card__eyebrow {
   color: rgba(226, 232, 255, 0.54);
 }
 
@@ -934,11 +1020,13 @@ html[data-theme="dark"] .site-nav-panel__link::before {
 
 @media (max-width: 1100px) {
   .landing-hero__grid,
-  .tracking-grid {
+  .tracking-grid,
+  .page-grid {
     grid-template-columns: 1fr;
   }
 
-  .service-catalog__grid {
+  .service-catalog__grid,
+  .contact-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1001,7 +1089,8 @@ html[data-theme="dark"] .site-nav-panel__link::before {
 
   .hero-side-grid,
   .service-catalog__grid,
-  .faq-grid {
+  .faq-grid,
+  .contact-grid {
     grid-template-columns: 1fr;
   }
 

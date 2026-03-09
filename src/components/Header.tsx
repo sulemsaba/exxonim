@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import type { FocusEvent, MouseEvent as ReactMouseEvent } from "react";
-import { routes } from "../routes";
+import { normalizePathname, routes } from "../routes";
 import type { BrandAssets, Theme } from "../types";
 
 interface HeaderProps {
   brand: BrandAssets;
   theme: Theme;
+  pathname: string;
   isNavOpen: boolean;
   onToggleTheme: () => void;
   onToggleNav: () => void;
@@ -120,6 +121,17 @@ const mobilePrimaryLinks: HeaderMenuLink[] = [
   { label: "Contact", href: routes.contact },
 ];
 
+const mobileServiceLinks: HeaderMenuLink[] = [
+  { label: "Company Registration", href: `${routes.services}#company` },
+  { label: "TIN Application", href: `${routes.services}#tin` },
+  { label: "Business Licensing", href: `${routes.services}#license` },
+];
+
+const mobileResourceLinks: HeaderMenuLink[] = [
+  { label: "Blog", href: routes.resources },
+  { label: "FAQ", href: `${routes.resources}#faq` },
+];
+
 function getFlyoutSizeClass(sectionCount: number) {
   if (sectionCount >= 3) {
     return "site-nav-flyout--wide";
@@ -132,9 +144,15 @@ function getFlyoutSizeClass(sectionCount: number) {
   return "site-nav-flyout--compact";
 }
 
+function getHrefPath(href: string) {
+  const [path] = href.split("#");
+  return normalizePathname(path || routes.home);
+}
+
 export function Header({
   brand,
   theme,
+  pathname,
   isNavOpen,
   onToggleTheme,
   onToggleNav,
@@ -167,6 +185,27 @@ export function Header({
     }
   }, [isNavOpen]);
 
+  useEffect(() => {
+    cancelScheduledClose();
+    setOpenMenuLabel(null);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!openMenuLabel) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        cancelScheduledClose();
+        setOpenMenuLabel(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [openMenuLabel]);
+
   useEffect(() => () => cancelScheduledClose(), []);
 
   const handleMenuBlur = (event: FocusEvent<HTMLLIElement>, label: string) => {
@@ -190,8 +229,6 @@ export function Header({
       onCloseNav();
     }
   };
-
-  const mobileMenuItems = headerMenuItems.filter((item) => item.sections?.length);
 
   return (
     <header className="site-header">
@@ -225,6 +262,7 @@ export function Header({
             {headerMenuItems.map((item) => {
               const hasMenu = Boolean(item.sections?.length);
               const isMenuOpen = openMenuLabel === item.label;
+              const isCurrent = getHrefPath(item.href) === pathname;
               const flyoutSizeClass = hasMenu
                 ? getFlyoutSizeClass(item.sections?.length ?? 0)
                 : "";
@@ -236,7 +274,7 @@ export function Header({
               return (
                 <li
                   key={item.label}
-                  className={`site-nav-item${hasMenu ? " site-nav-item--has-menu" : ""}${isMenuOpen ? " is-open" : ""}`}
+                  className={`site-nav-item${hasMenu ? " site-nav-item--has-menu" : ""}${isMenuOpen ? " is-open" : ""}${isCurrent ? " is-current" : ""}`}
                   onBlurCapture={
                     hasMenu ? (event) => handleMenuBlur(event, item.label) : undefined
                   }
@@ -261,9 +299,10 @@ export function Header({
                   {hasMenu ? (
                     <>
                       <button
-                        className="site-nav-trigger"
+                        className={`site-nav-trigger${isCurrent ? " is-current" : ""}`}
                         type="button"
                         aria-expanded={isMenuOpen}
+                        aria-haspopup="true"
                         aria-controls={menuId}
                         onClick={() => {
                           cancelScheduledClose();
@@ -323,8 +362,9 @@ export function Header({
                     </>
                   ) : (
                     <a
-                      className="site-nav__link"
+                      className={`site-nav__link${isCurrent ? " is-current" : ""}`}
                       href={item.href}
+                      aria-current={isCurrent ? "page" : undefined}
                       onClick={handleNavLinkClick}
                     >
                       {item.label}
@@ -394,47 +434,48 @@ export function Header({
             <a
               className="header-auth__button header-auth__button--track"
               href={routes.tracking}
+              aria-current={pathname === normalizePathname(routes.tracking) ? "page" : undefined}
               onClick={handleNavLinkClick}
             >
               Track Your Consultation
             </a>
           </div>
 
-            <button
-              className={`menu-toggle${isNavOpen ? " is-open" : ""}`}
-              type="button"
-              aria-expanded={isNavOpen}
-              aria-controls="mobile-nav"
-              aria-label={isNavOpen ? "Close menu" : "Open menu"}
-              onClick={onToggleNav}
+          <button
+            className={`menu-toggle${isNavOpen ? " is-open" : ""}`}
+            type="button"
+            aria-expanded={isNavOpen}
+            aria-controls="mobile-nav"
+            aria-label={isNavOpen ? "Close menu" : "Open menu"}
+            onClick={onToggleNav}
+          >
+            <svg
+              className="menu-toggle__icon menu-toggle__icon--menu"
+              aria-hidden="true"
+              width="24"
+              height="24"
+              viewBox="0 0 32 32"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.25"
             >
-              <svg
-                className="menu-toggle__icon menu-toggle__icon--menu"
-                aria-hidden="true"
-                width="24"
-                height="24"
-                viewBox="0 0 32 32"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.25"
-              >
-                <path strokeLinecap="round" d="M 7 10 h 18 M 7 16 h 18 M 7 22 h 18" />
-              </svg>
-              <svg
-                className="menu-toggle__icon menu-toggle__icon--close"
-                aria-hidden="true"
-                width="24"
-                height="24"
-                viewBox="0 0 32 32"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.25"
-              >
-                <path strokeLinecap="round" d="M 10 10 L 22 22 M 22 10 L 10 22" />
-              </svg>
-            </button>
-          </div>
+              <path strokeLinecap="round" d="M 7 10 h 18 M 7 16 h 18 M 7 22 h 18" />
+            </svg>
+            <svg
+              className="menu-toggle__icon menu-toggle__icon--close"
+              aria-hidden="true"
+              width="24"
+              height="24"
+              viewBox="0 0 32 32"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.25"
+            >
+              <path strokeLinecap="round" d="M 10 10 L 22 22 M 22 10 L 10 22" />
+            </svg>
+          </button>
         </div>
+      </div>
 
       <div
         className={`mobile-nav${isNavOpen ? " is-open" : ""}`}
@@ -454,8 +495,9 @@ export function Header({
                 {mobilePrimaryLinks.map((link) => (
                   <a
                     key={link.label}
-                    className="mobile-nav__top-link"
+                    className={`mobile-nav__top-link${getHrefPath(link.href) === pathname ? " is-current" : ""}`}
                     href={link.href}
+                    aria-current={getHrefPath(link.href) === pathname ? "page" : undefined}
                     onClick={handleNavLinkClick}
                   >
                     {link.label}
@@ -463,85 +505,70 @@ export function Header({
                 ))}
               </div>
 
-              {mobileMenuItems.map((item) => (
-                <section key={item.label} className="mobile-nav__card">
-                  <p className="mobile-nav__eyebrow">{item.label}</p>
+              <section className="mobile-nav__card">
+                <p className="mobile-nav__eyebrow">Services</p>
+                <div className="mobile-nav__list">
+                  {mobileServiceLinks.map((link) => (
+                    <a
+                      key={link.label}
+                      className="mobile-nav__list-link"
+                      href={link.href}
+                      onClick={handleNavLinkClick}
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+                <div className="mobile-nav__card-actions">
+                  <a
+                    className="mobile-nav__card-action mobile-nav__card-action--primary"
+                    href={routes.services}
+                    onClick={handleNavLinkClick}
+                  >
+                    See More Services
+                  </a>
+                  <a
+                    className="mobile-nav__card-action mobile-nav__card-action--secondary"
+                    href={routes.tracking}
+                    onClick={handleNavLinkClick}
+                  >
+                    Track Your Consultation
+                  </a>
+                </div>
+              </section>
 
-                  <div className="mobile-nav__groups">
-                    {item.sections?.map((section) => (
-                      <div
-                        key={`${item.label}-${section.title ?? "links"}`}
-                        className="mobile-nav__group"
-                      >
-                        {section.title ? (
-                          <p className="mobile-nav__group-title">{section.title}</p>
-                        ) : null}
-
-                        <div className="mobile-nav__list">
-                          {section.links.map((link) => (
-                            <a
-                              key={`${item.label}-${link.label}`}
-                              className="mobile-nav__list-link"
-                              href={link.href}
-                              onClick={handleNavLinkClick}
-                            >
-                              {link.label}
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {item.actions?.length ? (
-                    <div className="mobile-nav__card-actions">
-                      {item.actions.map((action) => (
-                        <a
-                          key={`${item.label}-${action.label}`}
-                          className={`mobile-nav__card-action mobile-nav__card-action--${action.variant ?? "secondary"}`}
-                          href={action.href}
-                          onClick={handleNavLinkClick}
-                        >
-                          {action.label}
-                        </a>
-                      ))}
-                    </div>
-                  ) : null}
-                </section>
-              ))}
+              <section className="mobile-nav__card">
+                <p className="mobile-nav__eyebrow">Resources</p>
+                <div className="mobile-nav__list">
+                  {mobileResourceLinks.map((link) => (
+                    <a
+                      key={link.label}
+                      className="mobile-nav__list-link"
+                      href={link.href}
+                      onClick={handleNavLinkClick}
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              </section>
 
               <div className="mobile-nav__actions">
                 <a
-                  className="header-auth__button header-auth__button--call"
+                  className="mobile-nav__contact"
                   href="tel:+255794689099"
                   onClick={handleNavLinkClick}
                 >
-                  <span className="header-auth__icon" aria-hidden="true">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path
-                        className="header-auth__ring"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3 5a2 2 0 0 1 2-2h3.28a1 1 0 0 1 .948.684l1.498 4.493a1 1 0 0 1-.502 1.21l-2.257 1.13a11.042 11.042 0 0 0 5.516 5.516l1.13-2.257a1 1 0 0 1 1.21-.502l4.493 1.498a1 1 0 0 1 .684.949V19a2 2 0 0 1-2 2h-1C9.716 21 3 14.284 3 6V5Z"
-                      />
-                    </svg>
-                  </span>
-                  <span className="header-auth__copy">
-                    <span className="header-auth__eyebrow">Call Now</span>
-                    <strong className="header-auth__number">+255 794 689 099</strong>
-                  </span>
+                  <span className="mobile-nav__contact-eyebrow">Call Now</span>
+                  <strong className="mobile-nav__contact-number">+255 794 689 099</strong>
                 </a>
                 <a
-                  className="header-auth__button header-auth__button--track"
-                  href={routes.tracking}
+                  className="mobile-nav__cta"
+                  href={routes.contact}
+                  aria-current={pathname === normalizePathname(routes.contact) ? "page" : undefined}
                   onClick={handleNavLinkClick}
                 >
-                  Track Your Consultation
+                  Get Consultation
                 </a>
               </div>
             </div>
