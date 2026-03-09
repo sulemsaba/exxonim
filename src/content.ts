@@ -150,8 +150,8 @@ export const stackItems: StackItem[] = [
       "Leadership teams often agree on ambition but not on the sequence, owners, and tradeoffs needed to move. We turn the plan into a short, practical agenda the business can execute against.",
     ctaLabel: "See our advisory model",
     ctaHref: "#services",
-    windowTitle: "board-priority-map",
-    windowTag: "strategy",
+    windowTitle: "Board Priority Review",
+    windowTag: "Strategy",
     videoSrc:
       "https://asset.acho.io/new-aden-website/home/BrittleChainCodeBlock1.mov",
   },
@@ -162,8 +162,8 @@ export const stackItems: StackItem[] = [
       "Teams lose momentum when reporting, meetings, and decisions depend on workarounds. We redesign the management system so execution becomes clearer, faster, and easier to sustain.",
     ctaLabel: "Explore operating systems",
     ctaHref: "#results",
-    windowTitle: "operating-cadence-review",
-    windowTag: "ops",
+    windowTitle: "Operating Cadence Review",
+    windowTag: "Cadence",
     videoSrc:
       "https://asset.acho.io/new-aden-website/home/The%20_Manual%20Orchestration_%20Tax.mov",
   },
@@ -174,8 +174,8 @@ export const stackItems: StackItem[] = [
       "Growth creates complexity faster than most companies build structure. We put in place the governance, accountability, and delivery discipline required to scale without drift.",
     ctaLabel: "View transformation approach",
     ctaHref: "#resources",
-    windowTitle: "transformation-office",
-    windowTag: "delivery",
+    windowTitle: "Transformation Steering",
+    windowTag: "Delivery",
     videoSrc:
       "https://asset.acho.io/new-aden-website/home/ContextBlindspot.mov",
   },
