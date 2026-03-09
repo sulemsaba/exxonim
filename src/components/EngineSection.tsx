@@ -1,3 +1,5 @@
+import { routes } from "../routes";
+
 const serviceGroups = [
   {
     title: "Registration and setup",
@@ -134,12 +136,12 @@ export function EngineSection() {
         </div>
 
         <div className="service-catalog__footer" data-reveal>
-          <a className="landing-cta landing-cta--primary" href="#contact">
+          <a className="landing-cta landing-cta--primary" href={routes.contact}>
             Request a consultation
           </a>
           <a
             className="landing-cta landing-cta--secondary"
-            href="#track-consultation"
+            href={routes.tracking}
           >
             Track your consultation
           </a>

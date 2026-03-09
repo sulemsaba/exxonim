@@ -1,4 +1,5 @@
 import type { HeroMetric, HeroSlide } from "../types";
+import { routes } from "../routes";
 
 interface HeroSectionProps {
   slides: HeroSlide[];
@@ -27,10 +28,10 @@ export function HeroSection({
             timelines and fewer avoidable delays.
           </p>
           <div className="landing-actions">
-            <a className="landing-cta landing-cta--primary" href="#contact">
+            <a className="landing-cta landing-cta--primary" href={routes.contact}>
               Get Consultation
             </a>
-            <a className="landing-cta landing-cta--secondary" href="#services">
+            <a className="landing-cta landing-cta--secondary" href={routes.services}>
               Explore Services
             </a>
           </div>

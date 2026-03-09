@@ -1,27 +1,27 @@
 import type { BrandAssets } from "../types";
+import { routes } from "../routes";
 
 interface FooterProps {
   brand: BrandAssets;
 }
 
 const footerAnchorIds = [
-  "career",
   "support",
   "terms",
   "privacy",
 ] as const;
 
 const quickLinks = [
-  { label: "About", href: "#about" },
-  { label: "Services", href: "#services" },
-  { label: "Track Your Consultation", href: "#track-consultation" },
-  { label: "Help (FAQ)", href: "#faq" },
-  { label: "Blogs", href: "#blogs" },
-  { label: "Contact", href: "#contact" },
+  { label: "About", href: routes.about },
+  { label: "Services", href: routes.services },
+  { label: "Track Your Consultation", href: routes.tracking },
+  { label: "Help (FAQ)", href: `${routes.resources}#faq` },
+  { label: "Blogs", href: routes.resources },
+  { label: "Contact", href: routes.contact },
 ];
 
 const otherResources = [
-  { label: "Career", href: "#career" },
+  { label: "Career", href: routes.career },
   { label: "Support", href: "#support" },
   { label: "Terms of Use", href: "#terms" },
   { label: "Privacy Policy", href: "#privacy" },
@@ -29,7 +29,7 @@ const otherResources = [
 
 export function Footer({ brand }: FooterProps) {
   return (
-    <footer className="site-footer dark-grid-section" id="contact">
+    <footer className="site-footer dark-grid-section" id="site-footer">
       {footerAnchorIds.map((anchorId) => (
         <span key={anchorId} className="section-anchor" id={anchorId} aria-hidden="true"></span>
       ))}
@@ -38,7 +38,7 @@ export function Footer({ brand }: FooterProps) {
         <div className="footer-brand-panel">
           <a
             className="brand footer-brand__logo"
-            href="#top"
+            href={routes.home}
             aria-label={`${brand.name} home`}
           >
             <img

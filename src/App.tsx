@@ -1,28 +1,45 @@
 import { useEffect, useRef, useState } from "react";
-import { brand, heroMetrics, heroSlides, insightPosts, stackItems } from "./content";
+import {
+  brand,
+  heroMetrics,
+  heroSlides,
+  insightPosts,
+  stackItems,
+} from "./content";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
-import { HeroSection } from "./components/HeroSection";
-import { InsightsSection } from "./components/InsightsSection";
-import { ProviderSection } from "./components/ProviderSection";
-import { ResultsSection } from "./components/ResultsSection";
-import { EngineSection } from "./components/EngineSection";
-import { StackSection } from "./components/StackSection";
 import { useAutoRotatingIndex } from "./hooks/useAutoRotatingIndex";
 import { useRevealOnScroll } from "./hooks/useRevealOnScroll";
 import { useStackCardDepth } from "./hooks/useStackCardDepth";
 import { useTheme } from "./hooks/useTheme";
+import { normalizePathname, routes } from "./routes";
+import { AboutPage } from "./pages/AboutPage";
+import { CareerPage } from "./pages/CareerPage";
+import { ContactPage } from "./pages/ContactPage";
+import { HomePage } from "./pages/HomePage";
+import { ResourcesPage } from "./pages/ResourcesPage";
+import { ServicesPage } from "./pages/ServicesPage";
+import { TrackConsultationPage } from "./pages/TrackConsultationPage";
 
-export default function App() {
+interface AppProps {
+  initialPathname?: string;
+}
+
+export default function App({ initialPathname }: AppProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const activeSlideIndex = useAutoRotatingIndex(heroSlides.length, 2600);
-  const blogRailRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
   const navHistoryEntryRef = useRef(false);
   const closingNavFromHistoryRef = useRef(false);
+  const pathname =
+    typeof window === "undefined"
+      ? normalizePathname(initialPathname)
+      : normalizePathname(window.location.pathname);
 
   useRevealOnScroll();
   useStackCardDepth();
+
   useEffect(() => {
     document.documentElement.classList.add("js");
   }, []);
@@ -102,6 +119,7 @@ export default function App() {
 
   useEffect(() => {
     const root = document.documentElement;
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setIsNavOpen(false);
@@ -120,7 +138,11 @@ export default function App() {
       navHistoryEntryRef.current = true;
     }
 
-    if (!isNavOpen && navHistoryEntryRef.current && !closingNavFromHistoryRef.current) {
+    if (
+      !isNavOpen &&
+      navHistoryEntryRef.current &&
+      !closingNavFromHistoryRef.current
+    ) {
       navHistoryEntryRef.current = false;
 
       if (window.history.state?.mobileNavOpen) {
@@ -145,12 +167,8 @@ export default function App() {
     setIsNavOpen(false);
   };
 
-  const closeNav = () => {
-    setIsNavOpen(false);
-  };
-
-  const scrollBlogRail = (direction: number) => {
-    const rail = blogRailRef.current;
+  const scrollRail = (direction: number) => {
+    const rail = railRef.current;
 
     if (!rail) {
       return;
@@ -167,6 +185,41 @@ export default function App() {
     });
   };
 
+  const sharedResourcePageProps = {
+    posts: insightPosts,
+    railRef,
+    onPrev: () => scrollRail(-1),
+    onNext: () => scrollRail(1),
+  };
+
+  const page =
+    pathname === normalizePathname(routes.about) ? (
+      <AboutPage
+        slides={heroSlides}
+        metrics={heroMetrics}
+        activeSlideIndex={activeSlideIndex}
+        stackItems={stackItems}
+      />
+    ) : pathname === normalizePathname(routes.services) ? (
+      <ServicesPage />
+    ) : pathname === normalizePathname(routes.tracking) ? (
+      <TrackConsultationPage />
+    ) : pathname === normalizePathname(routes.resources) ? (
+      <ResourcesPage {...sharedResourcePageProps} />
+    ) : pathname === normalizePathname(routes.career) ? (
+      <CareerPage />
+    ) : pathname === normalizePathname(routes.contact) ? (
+      <ContactPage />
+    ) : (
+      <HomePage
+        slides={heroSlides}
+        metrics={heroMetrics}
+        activeSlideIndex={activeSlideIndex}
+        stackItems={stackItems}
+        {...sharedResourcePageProps}
+      />
+    );
+
   return (
     <div className="site-shell">
       <div className="cinematic-bg" aria-hidden="true">
@@ -182,26 +235,12 @@ export default function App() {
         isNavOpen={isNavOpen}
         onToggleTheme={toggleTheme}
         onToggleNav={() => setIsNavOpen((current) => !current)}
-        onCloseNav={closeNav}
+        onCloseNav={() => setIsNavOpen(false)}
         onNavLinkClick={handleNavLinkClick}
       />
 
       <main id="top" className="site-main">
-        <HeroSection
-          slides={heroSlides}
-          metrics={heroMetrics}
-          activeSlideIndex={activeSlideIndex}
-        />
-        <ProviderSection />
-        <StackSection items={stackItems} />
-        <EngineSection />
-        <ResultsSection />
-        <InsightsSection
-          posts={insightPosts}
-          railRef={blogRailRef}
-          onPrev={() => scrollBlogRail(-1)}
-          onNext={() => scrollBlogRail(1)}
-        />
+        {page}
       </main>
 
       <Footer brand={brand} />

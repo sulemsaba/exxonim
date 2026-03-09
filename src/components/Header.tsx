@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { FocusEvent, MouseEvent as ReactMouseEvent } from "react";
+import { routes } from "../routes";
 import type { BrandAssets, Theme } from "../types";
 
 interface HeaderProps {
@@ -38,28 +39,28 @@ const serviceMenuSections: HeaderMenuSection[] = [
   {
     title: "Registration & Setup",
     links: [
-      { label: "Company Registration", href: "#company" },
-      { label: "Business Name Registration", href: "#business-name" },
-      { label: "NGO / Organization Registration", href: "#ngo" },
-      { label: "Trademark Registration", href: "#trademark" },
+      { label: "Company Registration", href: `${routes.services}#company` },
+      { label: "Business Name Registration", href: `${routes.services}#business-name` },
+      { label: "NGO / Organization Registration", href: `${routes.services}#ngo` },
+      { label: "Trademark Registration", href: `${routes.services}#trademark` },
     ],
   },
   {
     title: "Tax, Licensing & BOT",
     links: [
-      { label: "TIN Application", href: "#tin" },
-      { label: "Annual Statutory Returns", href: "#returns" },
-      { label: "Business License Applications", href: "#license" },
-      { label: "BOT / Central Bank Licensing", href: "#bot" },
+      { label: "TIN Application", href: `${routes.services}#tin` },
+      { label: "Annual Statutory Returns", href: `${routes.services}#returns` },
+      { label: "Business License Applications", href: `${routes.services}#license` },
+      { label: "BOT / Central Bank Licensing", href: `${routes.services}#bot` },
     ],
   },
   {
     title: "Institutional & Support",
     links: [
-      { label: "CRB / ERB Registration", href: "#crb" },
-      { label: "OSHA Registration", href: "#osha" },
-      { label: "NSSF / WCF Registration", href: "#nssf" },
-      { label: "Business Plan Preparation", href: "#plan" },
+      { label: "CRB / ERB Registration", href: `${routes.services}#crb` },
+      { label: "OSHA Registration", href: `${routes.services}#osha` },
+      { label: "NSSF / WCF Registration", href: `${routes.services}#nssf` },
+      { label: "Business Plan Preparation", href: `${routes.services}#plan` },
     ],
   },
 ];
@@ -68,55 +69,55 @@ const resourceMenuSections: HeaderMenuSection[] = [
   {
     title: "Insights",
     links: [
-      { label: "Blog", href: "#resources" },
-      { label: "Case Examples", href: "#case-examples" },
+      { label: "Blog", href: routes.resources },
+      { label: "Case Examples", href: `${routes.tracking}#case-examples` },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "Sectors", href: "#industries" },
-      { label: "FAQ", href: "#faq" },
+      { label: "Sectors", href: `${routes.about}#industries` },
+      { label: "FAQ", href: `${routes.resources}#faq` },
     ],
   },
 ];
 
 const headerMenuItems: HeaderMenuItem[] = [
-  { label: "Home", href: "#top" },
-  { label: "About", href: "#about" },
+  { label: "Home", href: routes.home },
+  { label: "About", href: routes.about },
   {
     label: "Services",
-    href: "#services",
+    href: routes.services,
     align: "left",
     sections: serviceMenuSections,
     actions: [
-      { label: "See More Services", href: "#services", variant: "primary" },
+      { label: "See More Services", href: routes.services, variant: "primary" },
       {
         label: "Track Your Consultation",
-        href: "#track-consultation",
+        href: routes.tracking,
         variant: "secondary",
       },
     ],
   },
   {
     label: "Resources",
-    href: "#resources",
+    href: routes.resources,
     align: "center",
     sections: resourceMenuSections,
     actions: [
-      { label: "See More", href: "#resources", variant: "primary" },
-      { label: "Ask a Question", href: "#contact", variant: "secondary" },
+      { label: "See More", href: routes.resources, variant: "primary" },
+      { label: "Ask a Question", href: routes.contact, variant: "secondary" },
     ],
   },
-  { label: "Career", href: "#career" },
-  { label: "Contact", href: "#contact" },
+  { label: "Career", href: routes.career },
+  { label: "Contact", href: routes.contact },
 ];
 
 const mobilePrimaryLinks: HeaderMenuLink[] = [
-  { label: "Home", href: "#top" },
-  { label: "About", href: "#about" },
-  { label: "Career", href: "#career" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: routes.home },
+  { label: "About", href: routes.about },
+  { label: "Career", href: routes.career },
+  { label: "Contact", href: routes.contact },
 ];
 
 function getFlyoutSizeClass(sectionCount: number) {
@@ -197,7 +198,7 @@ export function Header({
       <div className="container nav-wrap">
         <a
           className="brand brand--marketing"
-          href="#top"
+          href={routes.home}
           aria-label={`${brand.name} home`}
         >
           <img
@@ -392,7 +393,7 @@ export function Header({
             </a>
             <a
               className="header-auth__button header-auth__button--track"
-              href="#track-consultation"
+              href={routes.tracking}
               onClick={handleNavLinkClick}
             >
               Track Your Consultation
@@ -537,7 +538,7 @@ export function Header({
                 </a>
                 <a
                   className="header-auth__button header-auth__button--track"
-                  href="#track-consultation"
+                  href={routes.tracking}
                   onClick={handleNavLinkClick}
                 >
                   Track Your Consultation
