@@ -172,16 +172,6 @@ export function HeroSection({
         </div>
 
         <div className="hero-visual" data-reveal>
-          <div className="hero-motion" aria-hidden="true">
-            <img
-              className="hero-figure"
-              src="https://asset.acho.io/new-aden-website/home/header-bg-per.png"
-              alt=""
-            />
-            <div className="hero-motion__orb"></div>
-            <div className="hero-motion__trail"></div>
-          </div>
-
           <div className="device-shell">
             <div className="device-frame">
               <span className="device-camera" aria-hidden="true"></span>

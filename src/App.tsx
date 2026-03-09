@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
   brand,
-  footerLinkGroups,
   heroMetrics,
   heroSlides,
   insightPosts,
@@ -47,6 +46,47 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    let targetX = window.innerWidth / 2;
+    let targetY = window.innerHeight / 2;
+    let currentX = targetX;
+    let currentY = targetY;
+    let frameId = 0;
+    const lerpFactor = 0.08;
+
+    const handlePointerMove = (event: MouseEvent) => {
+      targetX = event.clientX;
+      targetY = event.clientY;
+    };
+
+    const updateScroll = () => {
+      root.style.setProperty("--scroll-y", `${window.scrollY}px`);
+    };
+
+    const animateGlow = () => {
+      currentX += (targetX - currentX) * lerpFactor;
+      currentY += (targetY - currentY) * lerpFactor;
+      root.style.setProperty("--mouse-x", `${currentX}px`);
+      root.style.setProperty("--mouse-y", `${currentY}px`);
+      frameId = window.requestAnimationFrame(animateGlow);
+    };
+
+    root.style.setProperty("--mouse-x", `${currentX}px`);
+    root.style.setProperty("--mouse-y", `${currentY}px`);
+    updateScroll();
+    frameId = window.requestAnimationFrame(animateGlow);
+
+    window.addEventListener("mousemove", handlePointerMove, { passive: true });
+    window.addEventListener("scroll", updateScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("mousemove", handlePointerMove);
+      window.removeEventListener("scroll", updateScroll);
+      window.cancelAnimationFrame(frameId);
+    };
+  }, []);
+
   const handleNavLinkClick = () => {
     setIsNavOpen(false);
   };
@@ -71,15 +111,22 @@ export default function App() {
 
   return (
     <div className="site-shell">
-        <Header
-          brand={brand}
-          theme={theme}
-          isAtTop={isAtTop}
-          isNavOpen={isNavOpen}
-          onToggleTheme={toggleTheme}
-          onToggleNav={() => setIsNavOpen((current) => !current)}
-          onNavLinkClick={handleNavLinkClick}
-        />
+      <div className="cinematic-bg" aria-hidden="true">
+        <div className="cinematic-bg__orb cinematic-bg__orb--one"></div>
+        <div className="cinematic-bg__orb cinematic-bg__orb--two"></div>
+        <div className="cinematic-bg__grid"></div>
+        <div className="cinematic-bg__glow"></div>
+      </div>
+
+      <Header
+        brand={brand}
+        theme={theme}
+        isAtTop={isAtTop}
+        isNavOpen={isNavOpen}
+        onToggleTheme={toggleTheme}
+        onToggleNav={() => setIsNavOpen((current) => !current)}
+        onNavLinkClick={handleNavLinkClick}
+      />
 
       <main id="top">
         <HeroSection
@@ -99,7 +146,7 @@ export default function App() {
         />
       </main>
 
-      <Footer brand={brand} linkGroups={footerLinkGroups} />
+      <Footer brand={brand} />
     </div>
   );
 }

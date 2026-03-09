@@ -1,112 +1,448 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pure CSS MacBook Video</title>
+    <title>Exxonim - Innovation Meets Efficiency</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: ['class', '[data-theme="dark"]'],
+            theme: {
+                extend: {
+                    colors: {
+                        exxonim: {
+                            navy: '#094449',
+                            dark: '#041214',
+                            teal: '#2c8b91',
+                            light: '#f6fbfb'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                        sans: ['Manrope', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
+        /* =========================================
+           1. CORE THEME & PARALLAX VARIABLES
+           ========================================= */
+        :root {
+            --mouse-x: 50vw;
+            --mouse-y: 50vh;
+            --scroll-y: 0;
+
+            /* Light Theme Variables */
+            --bg-main: #f6fbfb;
+            --text-main: #112325;
+            --grid-color: rgba(44, 139, 145, 0.15);
+            --glow-bright: rgba(44, 139, 145, 0.2);
+            --glow-deep: rgba(13, 102, 106, 0.1);
+            --blend-mode: normal;
+        }
+
+        html[data-theme="dark"] {
+            /* Dark Theme Variables */
+            --bg-main: #041214;
+            --text-main: #ffffff;
+            --grid-color: rgba(44, 139, 145, 0.25);
+            --glow-bright: rgba(44, 139, 145, 0.45);
+            --glow-deep: rgba(13, 102, 106, 0.3);
+            --blend-mode: screen;
+        }
+
         body {
-            background-color: #f2f2f7;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            font-family: sans-serif;
+            font-family: 'Manrope', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            transition: background-color 0.5s ease, color 0.5s ease;
+            overflow-x: hidden;
         }
 
-        /* The overall container */
-        .macbook-container {
-            width: 100%;
-            max-width: 800px; /* Change this to resize the whole laptop */
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        /* =========================================
+           2. CINEMATIC PARALLAX BACKGROUND
+           ========================================= */
+        .bg-system {
+            position: fixed; inset: 0; z-index: -1;
+            pointer-events: none; overflow: hidden;
+            background: radial-gradient(circle at top center, rgba(44,139,145,0.05) 0%, var(--bg-main) 100%);
+            transition: background 0.5s ease;
         }
 
-        /* The Top Lid (Screen Bezel) */
-        .macbook-lid {
-            width: 80%;
-            background-color: #1a1a1a; /* Black bezels */
-            border-radius: 20px 20px 0 0;
-            padding: 3% 3% 4% 3%;
-            position: relative;
-            box-shadow: inset 0 0 0 2px #333, 0px -2px 10px rgba(0,0,0,0.2);
+        /* 3D Perspective Grid */
+        .grid-layer {
+            position: absolute; bottom: -30%; left: -50%;
+            width: 200%; height: 150%;
+            background-image: 
+                linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform-origin: center top;
+            transform: perspective(1000px) rotateX(60deg) translateY(calc(var(--scroll-y) * -0.5px));
+            -webkit-mask-image: radial-gradient(ellipse at center top, black 40%, transparent 75%);
+            mask-image: radial-gradient(ellipse at center top, black 40%, transparent 75%);
+            transition: background-image 0.5s ease;
         }
 
-        /* The webcam dot */
-        .macbook-lid::before {
-            content: '';
-            position: absolute;
-            top: 2%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 6px;
-            height: 6px;
-            background-color: #444;
-            border-radius: 50%;
+        /* The Interactive Mouse Glow */
+        .interactive-glow {
+            position: absolute; top: 0; left: 0;
+            width: min(60vw, 700px); height: min(60vw, 700px);
+            transform: translate(calc(var(--mouse-x) * 1px - 50%), calc(var(--mouse-y) * 1px - 50%));
+            background: radial-gradient(circle, var(--glow-bright) 0%, var(--glow-deep) 40%, transparent 70%);
+            filter: blur(80px);
+            mix-blend-mode: var(--blend-mode);
+            will-change: transform;
+            transition: background 0.5s ease;
         }
 
-        /* The actual screen where the video plays */
-        .macbook-screen {
-            width: 100%;
-            aspect-ratio: 16 / 10; /* Standard MacBook screen ratio */
-            background-color: #000;
-            border-radius: 4px;
-            overflow: hidden;
+        /* Floating Ambient Orbs */
+        .ambient-orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.6; transition: background 0.5s ease; }
+        .ambient-orb-1 { top: 10%; right: 10%; width: 500px; height: 500px; background: var(--glow-deep); animation: drift-1 25s ease-in-out infinite; }
+        .ambient-orb-2 { bottom: 20%; left: 5%; width: 600px; height: 600px; background: var(--glow-bright); animation: drift-2 30s ease-in-out infinite; }
+        
+        @keyframes drift-1 { 
+            0%, 100% { transform: translate(0, 0) scale(1); } 
+            50% { transform: translate(-80px, 60px) scale(1.1); } 
+        }
+        @keyframes drift-2 { 
+            0%, 100% { transform: translate(0, 0) scale(1); } 
+            50% { transform: translate(60px, -80px) scale(0.95); } 
         }
 
-        .macbook-screen video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        /* =========================================
+           3. KOYEB-STYLE PILL NAVIGATION
+           ========================================= */
+        .pill-container {
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.06); border: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 0.25rem; border-radius: 0.75rem; height: 3rem;
+            display: inline-flex; align-items: center; transition: all 0.3s ease;
+        }
+        html[data-theme="dark"] .pill-container {
+            background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.1);
         }
 
-        /* The Bottom Base (Keyboard deck edge) */
-        .macbook-base {
-            width: 100%;
-            height: 20px;
-            background: linear-gradient(to bottom, #d6d9df 0%, #b8babc 100%);
-            border-radius: 0 0 20px 20px;
-            position: relative;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        .pill-tab {
+            height: 100%; padding: 0 1rem; border-radius: 0.5rem;
+            display: flex; align-items: center; justify-content: center;
+            font-family: monospace; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            cursor: pointer; transition: all 0.2s ease; color: rgba(17, 35, 37, 0.8);
+        }
+        .pill-tab:hover, .group:hover .pill-tab {
+            background-color: #ffffff; color: #041214; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        html[data-theme="dark"] .pill-tab { color: rgba(255, 255, 255, 0.8); }
+        html[data-theme="dark"] .pill-tab:hover, html[data-theme="dark"] .group:hover .pill-tab {
+            background-color: #000000; color: #ffffff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
         }
 
-        /* The thumb groove to open the laptop */
-        .macbook-base::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 15%;
-            height: 6px;
-            background-color: #999;
-            border-radius: 0 0 6px 6px;
+        /* Mega Menu Flyouts */
+        .flyout-glass {
+            backdrop-filter: blur(30px) saturate(155%); -webkit-backdrop-filter: blur(30px) saturate(155%);
+            background: rgba(252, 254, 255, 0.95);
+            border: 1px solid rgba(9, 68, 73, 0.1); box-shadow: 0 28px 60px rgba(9, 68, 73, 0.14);
+            transition: all 0.3s ease;
+        }
+        html[data-theme="dark"] .flyout-glass {
+            background: rgba(17, 22, 24, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
         }
 
-        /* The small grey bottom lip */
-        .macbook-bottom-lip {
-            width: 98%;
-            height: 4px;
-            background-color: #888;
-            border-radius: 0 0 20px 20px;
+        .mega-menu {
+            position: absolute; top: 100%; left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            padding-top: 1rem; /* Invisible bridge to prevent hover drop-off */
+            visibility: hidden; opacity: 0; pointer-events: none;
+            transition: all 0.2s ease-out; z-index: 100;
         }
+        .group:hover .mega-menu {
+            visibility: visible; opacity: 1;
+            transform: translateX(-50%) translateY(0); pointer-events: auto;
+        }
+
+        /* =========================================
+           4. ACCURATE GLASS THEME TOGGLE
+           ========================================= */
+        .tutorial-toggle {
+            position: relative; display: flex; align-items: center;
+            width: 6.5rem; height: 2.5rem; border-radius: 999px;
+            background: rgba(0, 0, 0, 0.06); border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: background 0.3s ease;
+        }
+        html[data-theme="dark"] .tutorial-toggle {
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-bubble {
+            position: absolute; left: 0.25rem; width: 2rem; height: 2rem; border-radius: 50%;
+            background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.15), inset 0 -2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.25, 1);
+            z-index: 10; display: flex; align-items: center; justify-content: center;
+        }
+        html[data-theme="dark"] .toggle-bubble {
+            background: #1a1a1a; box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2);
+            transform: translateX(3.8rem);
+        }
+
+        .toggle-icon { width: 1.25rem; height: 1.25rem; transition: opacity 0.3s ease; }
+        .icon-sun { opacity: 1; color: #333; }
+        html[data-theme="dark"] .icon-sun { opacity: 0; }
+        .icon-moon { opacity: 0; color: #fff; position: absolute; }
+        html[data-theme="dark"] .icon-moon { opacity: 1; }
+
+        .toggle-text {
+            position: absolute; width: 100%; display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em; pointer-events: none; z-index: 5;
+        }
+        .text-light { padding-left: 1.5rem; color: rgba(0,0,0,0.6); opacity: 1; transition: opacity 0.3s; }
+        html[data-theme="dark"] .text-light { opacity: 0; }
+        .text-dark { padding-right: 1.5rem; color: rgba(255,255,255,0.8); opacity: 0; transition: opacity 0.3s; }
+        html[data-theme="dark"] .text-dark { opacity: 1; }
+
+        /* =========================================
+           5. ANIMATIONS
+           ========================================= */
+        @keyframes phone-ring {
+            0%, 100% { transform: rotate(0); }
+            10% { transform: rotate(15deg); }
+            20% { transform: rotate(-10deg); }
+            30% { transform: rotate(15deg); }
+            40% { transform: rotate(-10deg); }
+            50% { transform: rotate(0); }
+        }
+        .animate-ring { animation: phone-ring 2s ease-in-out infinite; }
     </style>
 </head>
-<body>
+<body class="antialiased flex flex-col min-h-screen"> 
 
-    <div class="macbook-container">
-        <div class="macbook-lid">
-            <div class="macbook-screen">
-                <video src="https://www.w3schools.com/html/mov_bbb.mp4" autoplay loop muted playsinline></video>
+    <div class="bg-system">
+        <div class="ambient-orb ambient-orb-1"></div>
+        <div class="ambient-orb ambient-orb-2"></div>
+        <div class="grid-layer"></div>
+        <div class="interactive-glow"></div> </div>
+
+    <header class="fixed top-0 left-0 w-full z-50 p-4 grid grid-cols-[auto_1fr_auto] items-center max-w-[1600px] mx-auto">
+        
+        <a href="#top" class="flex-shrink-0 flex items-center pl-2">
+            <span class="font-black tracking-tight text-3xl text-exxonim-navy dark:text-white">Exxonim</span>
+        </a>
+
+        <div class="hidden xl:flex justify-center">
+            <nav class="pill-container">
+                
+                <a href="#top" class="pill-tab">Home</a>
+                <a href="#about" class="pill-tab">About</a>
+
+                <div class="group h-full relative flex items-center">
+                    <div class="pill-tab gap-1.5">
+                        Services
+                        <svg class="w-3 h-3 opacity-60 transition-transform group-hover:-rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+
+                    <div class="mega-menu w-[850px]">
+                        <div class="flyout-glass rounded-[24px] p-6 font-sans normal-case tracking-normal">
+                            <div class="grid grid-cols-3 gap-8">
+                                <div class="flex flex-col gap-3">
+                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Registration & Setup</h4>
+                                    <ul class="flex flex-col gap-1">
+                                        <li><a href="#company" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Company Registration</a></li>
+                                        <li><a href="#business-name" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Business Name Registration</a></li>
+                                        <li><a href="#ngo" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">NGO / Organization Registration</a></li>
+                                        <li><a href="#trademark" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Trademark Registration</a></li>
+                                    </ul>
+                                </div>
+                                <div class="flex flex-col gap-3 border-l border-black/5 dark:border-white/10 pl-8">
+                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Tax, Licensing & BOT</h4>
+                                    <ul class="flex flex-col gap-1">
+                                        <li><a href="#tin" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">TIN Application</a></li>
+                                        <li><a href="#returns" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Annual Statutory Returns</a></li>
+                                        <li><a href="#license" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Business License Applications</a></li>
+                                        <li><a href="#bot" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">BOT / Central Bank Licensing</a></li>
+                                    </ul>
+                                </div>
+                                <div class="flex flex-col gap-3 border-l border-black/5 dark:border-white/10 pl-8">
+                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Institutional & Support</h4>
+                                    <ul class="flex flex-col gap-1">
+                                        <li><a href="#crb" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">CRB / ERB Registration</a></li>
+                                        <li><a href="#osha" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">OSHA Registration</a></li>
+                                        <li><a href="#nssf" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">NSSF / WCF Registration</a></li>
+                                        <li><a href="#plan" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Business Plan Preparation</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="#resources" class="pill-tab">Resources</a>
+                <a href="#career" class="pill-tab">Career</a>
+                <a href="#contact" class="pill-tab">Contact</a>
+
+            </nav>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 lg:gap-4 pr-2">
+            
+            <button class="tutorial-toggle hidden md:flex" id="themeToggleBtn" aria-label="Toggle theme">
+                <span class="toggle-text text-light">Light</span>
+                <span class="toggle-text text-dark">Dark</span>
+                <span class="toggle-bubble">
+                    <svg class="toggle-icon icon-sun" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 2a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm4.22 3.22a1 1 0 0 1 1.415 0l.707.707a1 1 0 0 1-1.414 1.414l-.707-.707a1 1 0 0 1 0-1.414ZM18 10a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm-3.78 5.364a1 1 0 0 1 0 1.414l-.707.707a1 1 0 0 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0ZM10 18a1 1 0 0 1-1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1Zm-4.22-3.22a1 1 0 0 1-1.415 0l-.707-.707a1 1 0 0 1 1.414-1.414l.707.707a1 1 0 0 1 0 1.414ZM2 10a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Zm1.78-4.586a1 1 0 0 1 0-1.414l.707-.707A1 1 0 0 1 5.903 4.72l-.707.707a1 1 0 0 1-1.414 0ZM10 14a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" clip-rule="evenodd" />
+                    </svg>
+                    <svg class="toggle-icon icon-moon" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M17.293 13.293A8 8 0 0 1 6.707 2.707a8 8 0 1 0 10.586 10.586Z" />
+                    </svg>
+                </span>
+            </button>
+
+            <a href="tel:+255794689099" class="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/60 dark:bg-black/30 border border-black/5 dark:border-white/10 hover:bg-white dark:hover:bg-white/10 transition-colors shadow-sm backdrop-blur-md">
+                <div class="bg-green-500 text-white p-1.5 rounded-full shadow-sm">
+                    <svg class="w-3.5 h-3.5 animate-ring" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                </div>
+                <div class="flex flex-col text-left">
+                    <span class="font-bold text-[0.55rem] uppercase tracking-wider text-gray-500 dark:text-gray-400 leading-none mb-0.5">Call Now</span>
+                    <span class="text-[0.8rem] font-bold text-gray-900 dark:text-white leading-none">+255 794 689 099</span>
+                </div>
+            </a>
+            
+            <a href="#contact" class="hidden md:inline-flex items-center justify-center font-mono text-xs tracking-wide font-bold uppercase bg-[#041214] text-white shadow-md rounded-xl border-b border-black/20 hover:bg-exxonim-navy transition-colors h-10 px-5 dark:bg-white dark:text-[#041214] dark:hover:bg-gray-200">
+                Get Consultation
+            </a>
+
+            <button id="mobileMenuBtn" class="xl:hidden p-2 rounded-lg text-gray-800 dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke-width="2" stroke="currentColor"><path d="M 6 10 h 20 M 6 16 h 20 M 6 22 h 20"></path></svg>
+            </button>
+
+        </div>
+    </header>
+
+    <main class="flex-grow pt-[200px] px-8 max-w-7xl mx-auto text-center">
+        <h1 class="text-5xl md:text-7xl font-extrabold mb-6 text-gray-900 dark:text-white tracking-tight">The Perfect Merge.</h1>
+        <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Move your mouse to interact with the glow. Scroll down to see the 3D grid shift dynamically. Toggle the theme to watch the colors adapt smoothly between Light and Dark mode.</p>
+    </main>
+
+    <footer class="mt-32 pt-16 pb-8 border-t border-black/5 dark:border-white/5 bg-white/50 dark:bg-[#061c1f]/50 backdrop-blur-md relative z-10">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+                
+                <div class="flex flex-col gap-4">
+                    <span class="font-extrabold tracking-tight text-3xl text-exxonim-navy dark:text-white">Exxonim</span>
+                    <p class="text-gray-600 dark:text-gray-400 font-medium max-w-xs text-sm">
+                        Where Innovation Meets Efficiency
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-6 uppercase tracking-wider text-sm">Quick Links</h4>
+                    <ul class="flex flex-col gap-3 text-gray-600 dark:text-gray-400 text-sm font-medium">
+                        <li><a href="#about" class="hover:text-exxonim-teal transition-colors">About</a></li>
+                        <li><a href="#services" class="hover:text-exxonim-teal transition-colors">Services</a></li>
+                        <li><a href="#faq" class="hover:text-exxonim-teal transition-colors">Help (FAQ)</a></li>
+                        <li><a href="#blogs" class="hover:text-exxonim-teal transition-colors">Blogs</a></li>
+                        <li><a href="#contact" class="hover:text-exxonim-teal transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-6 uppercase tracking-wider text-sm">Other Resources</h4>
+                    <ul class="flex flex-col gap-3 text-gray-600 dark:text-gray-400 text-sm font-medium">
+                        <li><a href="#career" class="hover:text-exxonim-teal transition-colors">Career</a></li>
+                        <li><a href="#support" class="hover:text-exxonim-teal transition-colors">Support</a></li>
+                        <li><a href="#terms" class="hover:text-exxonim-teal transition-colors">Terms of Use</a></li>
+                        <li><a href="#privacy" class="hover:text-exxonim-teal transition-colors">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-6 uppercase tracking-wider text-sm">Contact Us</h4>
+                    <ul class="flex flex-col gap-4 text-gray-600 dark:text-gray-400 text-sm font-medium">
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 mt-0.5 text-exxonim-teal flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span class="leading-relaxed">Mbezi Beach B, Africana, Bagamoyo Road, Block no H, House number 9, Dar es Salaam</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 mt-0.5 text-exxonim-teal flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <div class="flex flex-col gap-1">
+                                <a href="mailto:info@exxonim.tz" class="hover:text-exxonim-teal transition-colors">info@exxonim.tz</a>
+                                <a href="mailto:md@exxonim.tz" class="hover:text-exxonim-teal transition-colors">md@exxonim.tz</a>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 mt-0.5 text-exxonim-teal flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                            <div class="flex flex-col gap-1">
+                                <a href="tel:+255794689099" class="hover:text-exxonim-teal transition-colors">+255 794 689 099</a>
+                                <a href="tel:+255685525224" class="hover:text-exxonim-teal transition-colors">+255 685 525 224</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-16 pt-8 border-t border-black/10 dark:border-white/10 text-center md:text-left">
+                <p class="text-sm text-gray-500 dark:text-gray-400">© 2026 Exxonim. All rights reserved.</p>
             </div>
         </div>
-        
-        <div class="macbook-base"></div>
-        <div class="macbook-bottom-lip"></div>
-    </div>
+    </footer>
 
+    <a href="https://wa.me/255794689099" target="_blank" aria-label="Chat on WhatsApp" class="fixed bottom-6 right-6 z-[100] group flex items-center justify-center w-14 h-14 bg-[#25D366] rounded-full shadow-lg hover:scale-110 transition-transform duration-300">
+        <span class="absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-60 animate-ping group-hover:hidden"></span>
+        <svg class="w-8 h-8 text-white relative z-10" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.01 2.014a9.96 9.96 0 00-8.52 15.11L2 22l4.985-1.465a9.961 9.961 0 105.025-18.52zm0 18.067a8.093 8.093 0 01-4.14-1.134l-.297-.176-3.082.906.924-2.977-.193-.306A8.098 8.098 0 1112.01 20.08zm4.437-6.042c-.244-.122-1.439-.711-1.662-.793-.223-.081-.385-.122-.547.122-.162.244-.628.793-.77.955-.142.162-.284.183-.528.061-1.18-.56-2.072-1.1-2.884-2.522-.083-.146-.01-.223.111-.345.11-.11.244-.284.366-.427.122-.142.162-.244.244-.407.081-.162.041-.305-.02-.427-.061-.122-.547-1.32-.75-1.808-.198-.475-.399-.411-.547-.419-.142-.008-.305-.008-.468-.008-.162 0-.427.061-.65.305-.223.244-.852.833-.852 2.032s.873 2.358.995 2.522c.122.162 1.714 2.628 4.153 3.67.58.24 1.033.383 1.385.49.582.185 1.112.158 1.531.096.47-.07 1.439-.588 1.642-1.157.203-.569.203-1.056.142-1.157-.061-.101-.223-.162-.468-.284z"/>
+        </svg>
+    </a>
+
+    <script>
+        const root = document.documentElement;
+
+        // Theme Toggle Logic
+        const btn = document.getElementById('themeToggleBtn');
+        if (btn) {
+            btn.addEventListener('click', () => {
+                const currentTheme = root.getAttribute('data-theme');
+                root.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+            });
+        }
+
+        // Mobile Menu Logic
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu'); // Note: I didn't add the mobile menu div back in this snippet, add it below header if needed!
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Cinematic Parallax Engine (Mouse Tracking)
+        let targetX = window.innerWidth / 2;
+        let targetY = window.innerHeight / 2;
+        let currentX = targetX;
+        let currentY = targetY;
+        const lerpFactor = 0.08;
+
+        window.addEventListener('mousemove', (e) => {
+            targetX = e.clientX;
+            targetY = e.clientY;
+        });
+
+        function animateGlow() {
+            currentX += (targetX - currentX) * lerpFactor;
+            currentY += (targetY - currentY) * lerpFactor;
+            root.style.setProperty('--mouse-x', currentX);
+            root.style.setProperty('--mouse-y', currentY);
+            requestAnimationFrame(animateGlow);
+        }
+        animateGlow();
+
+        // Parallax Scroll Engine
+        window.addEventListener('scroll', () => {
+            root.style.setProperty('--scroll-y', window.scrollY);
+        });
+    </script>
 </body>
 </html>

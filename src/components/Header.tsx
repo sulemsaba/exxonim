@@ -77,20 +77,17 @@ const headerMenuItems: HeaderMenuItem[] = [
         links: [
           { label: "Blog", href: "#resources" },
           { label: "Case Examples", href: "#results" },
-          { label: "FAQs", href: "#faqs" },
         ],
       },
       {
         title: "Company",
         links: [
           { label: "Sectors", href: "#industries" },
-          { label: "Career", href: "#career" },
           { label: "Contact", href: "#contact" },
         ],
       },
     ],
   },
-  { label: "Career", href: "#career" },
   { label: "Contact", href: "#contact" },
 ];
 

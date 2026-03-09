@@ -1,6 +1,5 @@
 import type {
   BrandAssets,
-  FooterLinkGroup,
   HeroMetric,
   HeroSlide,
   InsightPost,
@@ -209,41 +208,5 @@ export const insightPosts: InsightPost[] = [
     description:
       "Dashboards become useful when they are tied to choices, not just visibility.",
     mediaLabel: "Decision quality",
-  },
-];
-
-export const footerLinkGroups: FooterLinkGroup[] = [
-  {
-    title: "Navigation",
-    links: [
-      { label: "Home", href: "#top" },
-      { label: "Challenges", href: "#stacked-scroll" },
-      { label: "Approach", href: "#services" },
-      { label: "Sectors", href: "#industries" },
-      { label: "Impact", href: "#results" },
-      { label: "Pricing", href: "#pricing" },
-      { label: "Contact", href: "#contact" },
-    ],
-  },
-  {
-    title: "Advisory",
-    links: [
-      { label: "Growth Strategy", href: "#services" },
-      { label: "Operating Design", href: "#services" },
-      { label: "Transformation Delivery", href: "#services" },
-      { label: "Performance Advisory", href: "#results" },
-      { label: "Executive Workshops", href: "#results" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { label: "Blog", href: "#resources" },
-      { label: "Case Examples", href: "#results" },
-      { label: "Sectors", href: "#industries" },
-      { label: "Contact", href: "#contact" },
-      { label: "Privacy Policy", href: "#privacy" },
-      { label: "Terms & Conditions", href: "#terms" },
-    ],
   },
 ];
