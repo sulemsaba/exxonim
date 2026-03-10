@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exxonim - Innovation Meets Efficiency</title>
+    <title>Exxonim - Visualizing Data Flow</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -19,8 +19,9 @@
                         }
                     },
                     fontFamily: {
-                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                        display: ['"MADE Canvas"', '"Arial Black"', 'Georgia', 'serif'],
                         sans: ['Manrope', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
                     }
                 }
             }
@@ -28,252 +29,144 @@
     </script>
     <style>
         /* =========================================
-           1. CORE THEME & PARALLAX VARIABLES
+           1. CUSTOM FONTS & BASE STYLES
            ========================================= */
-        :root {
-            --mouse-x: 50vw;
-            --mouse-y: 50vh;
-            --scroll-y: 0;
-
-            /* Light Theme Variables */
-            --bg-main: #f6fbfb;
-            --text-main: #112325;
-            --grid-color: rgba(44, 139, 145, 0.15);
-            --glow-bright: rgba(44, 139, 145, 0.2);
-            --glow-deep: rgba(13, 102, 106, 0.1);
-            --blend-mode: normal;
-        }
-
-        html[data-theme="dark"] {
-            /* Dark Theme Variables */
-            --bg-main: #041214;
-            --text-main: #ffffff;
-            --grid-color: rgba(44, 139, 145, 0.25);
-            --glow-bright: rgba(44, 139, 145, 0.45);
-            --glow-deep: rgba(13, 102, 106, 0.3);
-            --blend-mode: screen;
+        @font-face {
+            font-family: "MADE Canvas";
+            src: url("../assets/clients/MADE Canvas Black PERSONAL USE.otf") format("opentype");
+            font-weight: 900;
+            font-style: normal;
+            font-display: swap;
         }
 
         body {
             font-family: 'Manrope', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            transition: background-color 0.5s ease, color 0.5s ease;
+            background-color: #041214;
+            color: #ffffff;
             overflow-x: hidden;
+            margin: 0;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        html[data-theme="light"] body {
+            background-color: #f6fbfb;
+            color: #041214;
         }
 
         /* =========================================
-           2. CINEMATIC PARALLAX BACKGROUND
+           2. CANVAS BACKGROUND
            ========================================= */
-        .bg-system {
-            position: fixed; inset: 0; z-index: -1;
-            pointer-events: none; overflow: hidden;
-            background: radial-gradient(circle at top center, rgba(44,139,145,0.05) 0%, var(--bg-main) 100%);
-            transition: background 0.5s ease;
-        }
-
-        /* 3D Perspective Grid */
-        .grid-layer {
-            position: absolute; bottom: -30%; left: -50%;
-            width: 200%; height: 150%;
-            background-image: 
-                linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
-                linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
-            background-size: 50px 50px;
-            transform-origin: center top;
-            transform: perspective(1000px) rotateX(60deg) translateY(calc(var(--scroll-y) * -0.5px));
-            -webkit-mask-image: radial-gradient(ellipse at center top, black 40%, transparent 75%);
-            mask-image: radial-gradient(ellipse at center top, black 40%, transparent 75%);
-            transition: background-image 0.5s ease;
-        }
-
-        /* The Interactive Mouse Glow */
-        .interactive-glow {
-            position: absolute; top: 0; left: 0;
-            width: min(60vw, 700px); height: min(60vw, 700px);
-            transform: translate(calc(var(--mouse-x) * 1px - 50%), calc(var(--mouse-y) * 1px - 50%));
-            background: radial-gradient(circle, var(--glow-bright) 0%, var(--glow-deep) 40%, transparent 70%);
-            filter: blur(80px);
-            mix-blend-mode: var(--blend-mode);
-            will-change: transform;
-            transition: background 0.5s ease;
-        }
-
-        /* Floating Ambient Orbs */
-        .ambient-orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.6; transition: background 0.5s ease; }
-        .ambient-orb-1 { top: 10%; right: 10%; width: 500px; height: 500px; background: var(--glow-deep); animation: drift-1 25s ease-in-out infinite; }
-        .ambient-orb-2 { bottom: 20%; left: 5%; width: 600px; height: 600px; background: var(--glow-bright); animation: drift-2 30s ease-in-out infinite; }
-        
-        @keyframes drift-1 { 
-            0%, 100% { transform: translate(0, 0) scale(1); } 
-            50% { transform: translate(-80px, 60px) scale(1.1); } 
-        }
-        @keyframes drift-2 { 
-            0%, 100% { transform: translate(0, 0) scale(1); } 
-            50% { transform: translate(60px, -80px) scale(0.95); } 
+        #fretboard-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            transition: opacity 0.5s ease;
         }
 
         /* =========================================
            3. KOYEB-STYLE PILL NAVIGATION
            ========================================= */
         .pill-container {
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            background: rgba(0, 0, 0, 0.06); border: 1px solid rgba(0, 0, 0, 0.05);
-            padding: 0.2rem; border-radius: 0.7rem; height: 2.75rem;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.25rem; border-radius: 0.75rem; height: 3rem;
             display: inline-flex; align-items: center; transition: all 0.3s ease;
         }
-        html[data-theme="dark"] .pill-container {
-            background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.1);
+        html[data-theme="light"] .pill-container {
+            background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.05);
         }
 
         .pill-tab {
-            height: 100%; padding: 0 0.9rem; border-radius: 0.45rem;
+            height: 100%; padding: 0 1.25rem; border-radius: 0.5rem;
             display: flex; align-items: center; justify-content: center;
-            font-family: monospace; font-size: 0.72rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.045em;
-            cursor: pointer; transition: all 0.2s ease; color: rgba(17, 35, 37, 0.8);
+            font-family: monospace; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            cursor: pointer; transition: all 0.2s ease; color: rgba(255, 255, 255, 0.8);
         }
+        html[data-theme="light"] .pill-tab { color: rgba(17, 35, 37, 0.7); }
+        
         .pill-tab:hover, .group:hover .pill-tab {
-            background-color: #ffffff; color: #041214; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        html[data-theme="dark"] .pill-tab { color: rgba(255, 255, 255, 0.8); }
-        html[data-theme="dark"] .pill-tab:hover, html[data-theme="dark"] .group:hover .pill-tab {
             background-color: #000000; color: #ffffff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
         }
+        html[data-theme="light"] .pill-tab:hover, html[data-theme="light"] .group:hover .pill-tab {
+            background-color: #ffffff; color: #041214; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
 
-        /* Mega Menu Flyouts */
         .flyout-glass {
             backdrop-filter: blur(30px) saturate(155%); -webkit-backdrop-filter: blur(30px) saturate(155%);
-            background: rgba(252, 254, 255, 0.95);
-            border: 1px solid rgba(9, 68, 73, 0.1); box-shadow: 0 28px 60px rgba(9, 68, 73, 0.14);
-            transition: all 0.3s ease;
+            background: rgba(17, 22, 24, 0.95); border: 1px solid rgba(255, 255, 255, 0.12); 
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5); transition: all 0.3s ease;
         }
-        html[data-theme="dark"] .flyout-glass {
-            background: rgba(17, 22, 24, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+        html[data-theme="light"] .flyout-glass {
+            background: rgba(252, 254, 255, 0.95); border-color: rgba(9, 68, 73, 0.1); box-shadow: 0 28px 60px rgba(9, 68, 73, 0.14);
         }
 
-        .mega-menu {
-            position: absolute; top: 100%; left: 50%;
-            transform: translateX(-50%) translateY(8px);
-            padding-top: 0.85rem; /* Invisible bridge to prevent hover drop-off */
-            visibility: hidden; opacity: 0; pointer-events: none;
+        .mega-menu-wrapper {
+            position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            padding-top: 1.2rem; visibility: hidden; opacity: 0; pointer-events: none;
             transition: all 0.2s ease-out; z-index: 100;
         }
-        .group:hover .mega-menu {
-            visibility: visible; opacity: 1;
-            transform: translateX(-50%) translateY(0); pointer-events: auto;
-        }
+        .group:hover .mega-menu-wrapper { visibility: visible; opacity: 1; pointer-events: auto; }
 
         /* =========================================
-           4. ACCURATE GLASS THEME TOGGLE
+           4. HERO SPECIFIC STYLES
            ========================================= */
-        .tutorial-toggle {
-            position: relative; display: flex; align-items: center;
-            width: 6.5rem; height: 2.5rem; border-radius: 999px;
-            background: rgba(0, 0, 0, 0.06); border: 1px solid rgba(0, 0, 0, 0.05);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: background 0.3s ease;
+        .institutional-glass {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         }
-        .tutorial-toggle--mobile { width: 5.5rem; height: 2.25rem; }
-        html[data-theme="dark"] .tutorial-toggle {
-            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        html[data-theme="light"] .institutional-glass {
+            background: rgba(255, 255, 255, 0.6); border-color: rgba(9, 68, 73, 0.1);
+            box-shadow: 0 30px 60px rgba(9, 68, 73, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
 
-        .toggle-bubble {
-            position: absolute; left: 0.25rem; width: 2rem; height: 2rem; border-radius: 50%;
-            background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.15), inset 0 -2px 4px rgba(0,0,0,0.05);
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.25, 1);
-            z-index: 10; display: flex; align-items: center; justify-content: center;
-        }
-        .tutorial-toggle--mobile .toggle-bubble { width: 1.75rem; height: 1.75rem; }
-        html[data-theme="dark"] .toggle-bubble {
-            background: #1a1a1a; box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2);
-            transform: translateX(3.8rem);
-        }
-        html[data-theme="dark"] .tutorial-toggle--mobile .toggle-bubble { transform: translateX(3rem); }
+        .canvas-heading { letter-spacing: -0.02em; line-height: 1.05; }
+        
+        .text-glow { text-shadow: 0 10px 40px rgba(114, 194, 199, 0.5); }
+        html[data-theme="light"] .text-glow { text-shadow: 0 10px 40px rgba(44, 139, 145, 0.2); }
 
-        .toggle-icon { width: 1.25rem; height: 1.25rem; transition: opacity 0.3s ease; }
-        .icon-sun { opacity: 1; color: #333; }
-        html[data-theme="dark"] .icon-sun { opacity: 0; }
-        .icon-moon { opacity: 0; color: #fff; position: absolute; }
-        html[data-theme="dark"] .icon-moon { opacity: 1; }
+        /* Shimmer Animation for CTA */
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
 
-        .toggle-text {
-            position: absolute; width: 100%; display: flex; align-items: center; justify-content: center;
-            font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em; pointer-events: none; z-index: 5;
+        /* Staggered Entrance Animation */
+        .animate-fade-up {
+            opacity: 0; transform: translateY(20px);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .tutorial-toggle--mobile .toggle-text { font-size: 0.72rem; }
-        .text-light { padding-left: 1.5rem; color: rgba(0,0,0,0.6); opacity: 1; transition: opacity 0.3s; }
-        .tutorial-toggle--mobile .text-light { padding-left: 1.15rem; }
-        html[data-theme="dark"] .text-light { opacity: 0; }
-        .text-dark { padding-right: 1.5rem; color: rgba(255,255,255,0.8); opacity: 0; transition: opacity 0.3s; }
-        .tutorial-toggle--mobile .text-dark { padding-right: 1.15rem; }
-        html[data-theme="dark"] .text-dark { opacity: 1; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
-        /* =========================================
-           5. ANIMATIONS
-           ========================================= */
+        /* Ringing Phone Animation */
         @keyframes phone-ring {
             0%, 100% { transform: rotate(0); }
-            10% { transform: rotate(15deg); }
-            20% { transform: rotate(-10deg); }
-            30% { transform: rotate(15deg); }
-            40% { transform: rotate(-10deg); }
+            10%, 30% { transform: rotate(15deg); }
+            20%, 40% { transform: rotate(-10deg); }
             50% { transform: rotate(0); }
         }
         .animate-ring { animation: phone-ring 2s ease-in-out infinite; }
-
-        @media (max-width: 1279px) {
-            .mega-menu {
-                display: none;
-            }
-        }
-
-        @media (max-width: 767px) {
-            .grid-layer {
-                bottom: -18%;
-                left: -85%;
-                width: 270%;
-                height: 145%;
-            }
-
-            .interactive-glow {
-                width: min(92vw, 420px);
-                height: min(92vw, 420px);
-                filter: blur(64px);
-            }
-
-            .ambient-orb-1 {
-                width: 260px;
-                height: 260px;
-            }
-
-            .ambient-orb-2 {
-                width: 320px;
-                height: 320px;
-            }
-        }
     </style>
 </head>
 <body class="antialiased flex flex-col min-h-screen"> 
 
-    <div class="bg-system">
-        <div class="ambient-orb ambient-orb-1"></div>
-        <div class="ambient-orb ambient-orb-2"></div>
-        <div class="grid-layer"></div>
-        <div class="interactive-glow"></div> </div>
+    <canvas id="fretboard-canvas"></canvas>
 
-    <header class="fixed top-0 left-0 w-full z-50 p-4 xl:px-4 xl:py-[15px]">
-        <div class="mx-auto grid max-w-[1600px] grid-cols-[auto,1fr,auto] items-center gap-3">
-        
+    <header class="fixed top-0 left-0 w-full z-50 p-4 grid grid-cols-[auto_1fr_auto] items-center max-w-[1600px] mx-auto pointer-events-auto">
         <a href="#top" class="flex-shrink-0 flex items-center pl-2">
-            <img src="./public/exxonim-logo.webp" alt="Exxonim" class="block h-9 w-auto object-contain dark:hidden">
-            <img src="./public/logo-dark.png" alt="Exxonim" class="hidden h-9 w-auto object-contain dark:block">
+            <span class="font-black font-display tracking-tight text-3xl text-white dark:text-white html-[data-theme='light']:text-[#094449]">Exxonim</span>
         </a>
 
-        <div class="hidden min-w-0 justify-center px-3 xl:flex">
+        <div class="hidden xl:flex justify-center">
             <nav class="pill-container">
-                
                 <a href="#top" class="pill-tab">Home</a>
                 <a href="#about" class="pill-tab">About</a>
 
@@ -282,270 +175,203 @@
                         Services
                         <svg class="w-3 h-3 opacity-60 transition-transform group-hover:-rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
-
-                    <div class="mega-menu w-[780px]">
-                        <div class="flyout-glass rounded-[22px] p-5 font-sans normal-case tracking-normal">
-                            <div class="grid grid-cols-3 gap-6">
-                                <div class="flex flex-col gap-2.5">
-                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Registration & Setup</h4>
+                    <div class="mega-menu-wrapper w-[850px] -translate-x-[40%]">
+                        <div class="flyout-glass rounded-[24px] p-6 font-sans normal-case tracking-normal">
+                            <div class="grid grid-cols-3 gap-8 text-left">
+                                <div class="flex flex-col gap-3">
+                                    <h4 class="text-[0.65rem] font-bold text-gray-500 uppercase tracking-widest">Registration & Setup</h4>
                                     <ul class="flex flex-col gap-1">
-                                        <li><a href="#company" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Company Registration</a></li>
-                                        <li><a href="#business-name" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Business Name Registration</a></li>
-                                        <li><a href="#ngo" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">NGO / Organization Registration</a></li>
-                                        <li><a href="#trademark" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Trademark Registration</a></li>
+                                        <li><a href="#company" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Company Registration</a></li>
+                                        <li><a href="#business-name" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Business Name Registration</a></li>
+                                        <li><a href="#ngo" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">NGO / Organization</a></li>
+                                        <li><a href="#trademark" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Trademark Registration</a></li>
                                     </ul>
                                 </div>
-                                <div class="flex flex-col gap-2.5 border-l border-black/5 dark:border-white/10 pl-6">
-                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Tax, Licensing & BOT</h4>
+                                <div class="flex flex-col gap-3 border-l border-black/10 dark:border-white/10 pl-8">
+                                    <h4 class="text-[0.65rem] font-bold text-gray-500 uppercase tracking-widest">Tax, Licensing & BOT</h4>
                                     <ul class="flex flex-col gap-1">
-                                        <li><a href="#tin" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">TIN Application</a></li>
-                                        <li><a href="#returns" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Annual Statutory Returns</a></li>
-                                        <li><a href="#license" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Business License Applications</a></li>
-                                        <li><a href="#bot" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">BOT / Central Bank Licensing</a></li>
+                                        <li><a href="#tin" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">TIN Application</a></li>
+                                        <li><a href="#returns" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Annual Statutory Returns</a></li>
+                                        <li><a href="#license" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Business License Applications</a></li>
+                                        <li><a href="#bot" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">BOT / Central Bank Licensing</a></li>
                                     </ul>
                                 </div>
-                                <div class="flex flex-col gap-2.5 border-l border-black/5 dark:border-white/10 pl-6">
-                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Institutional & Support</h4>
+                                <div class="flex flex-col gap-3 border-l border-black/10 dark:border-white/10 pl-8">
+                                    <h4 class="text-[0.65rem] font-bold text-gray-500 uppercase tracking-widest">Institutional & Support</h4>
                                     <ul class="flex flex-col gap-1">
-                                        <li><a href="#crb" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">CRB / ERB Registration</a></li>
-                                        <li><a href="#osha" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">OSHA Registration</a></li>
-                                        <li><a href="#nssf" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">NSSF / WCF Registration</a></li>
-                                        <li><a href="#plan" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Business Plan Preparation</a></li>
+                                        <li><a href="#crb" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">CRB / ERB Registration</a></li>
+                                        <li><a href="#osha" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">OSHA Registration</a></li>
+                                        <li><a href="#nssf" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">NSSF / WCF Registration</a></li>
+                                        <li><a href="#plan" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Business Plan Preparation</a></li>
                                     </ul>
                                 </div>
-                            </div>
-
-                            <div class="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-black/5 pt-4 dark:border-white/10">
-                                <a href="#services" class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white bg-[#041214] hover:bg-exxonim-navy transition-colors dark:bg-white dark:text-[#041214] dark:hover:bg-gray-200">
-                                    See More Services
-                                </a>
-                                <a href="#track-consultation" class="inline-flex items-center justify-center rounded-xl border border-black/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-gray-900 hover:bg-black/5 transition-colors dark:border-white/10 dark:text-white dark:hover:bg-white/10">
-                                    Track Your Consultation
-                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="group h-full relative flex items-center">
+                <div class="group h-full relative flex items-center cursor-pointer">
                     <div class="pill-tab gap-1.5">
                         Resources
                         <svg class="w-3 h-3 opacity-60 transition-transform group-hover:-rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
-
-                    <div class="mega-menu w-[520px]">
-                        <div class="flyout-glass rounded-[22px] p-5 font-sans normal-case tracking-normal">
-                            <div class="grid grid-cols-2 gap-6">
-                                <div class="flex flex-col gap-2.5">
-                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Insights</h4>
+                    <div class="mega-menu-wrapper w-[450px]">
+                        <div class="flyout-glass rounded-[24px] p-6 font-sans normal-case tracking-normal">
+                            <div class="grid grid-cols-2 gap-8 text-left">
+                                <div class="flex flex-col gap-3">
+                                    <h4 class="text-[0.65rem] font-bold text-gray-500 uppercase tracking-widest">Insights</h4>
                                     <ul class="flex flex-col gap-1">
-                                        <li><a href="#resources" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Blog</a></li>
-                                        <li><a href="#case-examples" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Case Examples</a></li>
+                                        <li><a href="#blog" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Blog</a></li>
+                                        <li><a href="#case-examples" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Case Examples</a></li>
                                     </ul>
                                 </div>
-
-                                <div class="flex flex-col gap-2.5 border-l border-black/5 dark:border-white/10 pl-6">
-                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Company</h4>
+                                <div class="flex flex-col gap-3 border-l border-black/10 dark:border-white/10 pl-8">
+                                    <h4 class="text-[0.65rem] font-bold text-gray-500 uppercase tracking-widest">Company</h4>
                                     <ul class="flex flex-col gap-1">
-                                        <li><a href="#industries" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Sectors</a></li>
-                                        <li><a href="#faq" class="block py-1.5 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">FAQ</a></li>
+                                        <li><a href="#sectors" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Sectors</a></li>
+                                        <li><a href="#career" class="block py-2 px-3 -mx-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-semibold text-gray-800 dark:text-gray-200">Career</a></li>
                                     </ul>
                                 </div>
-                            </div>
-
-                            <div class="mt-5 pt-4 border-t border-black/5 dark:border-white/10 flex items-center justify-between gap-3">
-                                <a href="#resources" class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white bg-[#041214] hover:bg-exxonim-navy transition-colors dark:bg-white dark:text-[#041214] dark:hover:bg-gray-200">
-                                    See More
-                                </a>
-                                <a href="#contact" class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-gray-900 border border-black/10 hover:bg-black/5 transition-colors dark:text-white dark:border-white/10 dark:hover:bg-white/10">
-                                    Ask a Question
-                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
-                <a href="#career" class="pill-tab">Career</a>
-                <a href="#contact" class="pill-tab">Contact</a>
 
+                <a href="#contact" class="pill-tab">Contact</a>
             </nav>
         </div>
 
-        <div class="flex shrink-0 items-center justify-end gap-2 pr-2 sm:gap-3 lg:gap-4">
-             
-            <button class="tutorial-toggle hidden md:flex" id="themeToggleBtn" data-theme-toggle aria-label="Toggle theme">
-                <span class="toggle-text text-light">Light</span>
-                <span class="toggle-text text-dark">Dark</span>
-                <span class="toggle-bubble">
-                    <svg class="toggle-icon icon-sun" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 2a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm4.22 3.22a1 1 0 0 1 1.415 0l.707.707a1 1 0 0 1-1.414 1.414l-.707-.707a1 1 0 0 1 0-1.414ZM18 10a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm-3.78 5.364a1 1 0 0 1 0 1.414l-.707.707a1 1 0 0 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0ZM10 18a1 1 0 0 1-1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1Zm-4.22-3.22a1 1 0 0 1-1.415 0l-.707-.707a1 1 0 0 1 1.414-1.414l.707.707a1 1 0 0 1 0 1.414ZM2 10a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Zm1.78-4.586a1 1 0 0 1 0-1.414l.707-.707A1 1 0 0 1 5.903 4.72l-.707.707a1 1 0 0 1-1.414 0ZM10 14a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" clip-rule="evenodd" />
-                    </svg>
-                    <svg class="toggle-icon icon-moon" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M17.293 13.293A8 8 0 0 1 6.707 2.707a8 8 0 1 0 10.586 10.586Z" />
-                    </svg>
-                </span>
+        <div class="flex items-center justify-end gap-3 lg:gap-4 pr-2">
+            <button id="themeToggleBtn" class="hidden md:flex items-center justify-center p-2.5 rounded-xl bg-black/5 dark:bg-white/10 text-gray-800 dark:text-white hover:bg-black/10 dark:hover:bg-white/20 transition-colors">
+                <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
             </button>
 
-            <button class="tutorial-toggle tutorial-toggle--mobile md:hidden" data-theme-toggle aria-label="Toggle theme">
-                <span class="toggle-text text-light">Light</span>
-                <span class="toggle-text text-dark">Dark</span>
-                <span class="toggle-bubble">
-                    <svg class="toggle-icon icon-sun" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 2a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm4.22 3.22a1 1 0 0 1 1.415 0l.707.707a1 1 0 0 1-1.414 1.414l-.707-.707a1 1 0 0 1 0-1.414ZM18 10a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm-3.78 5.364a1 1 0 0 1 0 1.414l-.707.707a1 1 0 0 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0ZM10 18a1 1 0 0 1-1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1Zm-4.22-3.22a1 1 0 0 1-1.415 0l-.707-.707a1 1 0 0 1 1.414-1.414l.707.707a1 1 0 0 1 0 1.414ZM2 10a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Zm1.78-4.586a1 1 0 0 1 0-1.414l.707-.707A1 1 0 0 1 5.903 4.72l-.707.707a1 1 0 0 1-1.414 0ZM10 14a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" clip-rule="evenodd" />
-                    </svg>
-                    <svg class="toggle-icon icon-moon" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M17.293 13.293A8 8 0 0 1 6.707 2.707a8 8 0 1 0 10.586 10.586Z" />
-                    </svg>
-                </span>
-            </button>
-
-            <a href="tel:+255794689099" class="hidden xl:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/60 dark:bg-black/30 border border-black/5 dark:border-white/10 hover:bg-white dark:hover:bg-white/10 transition-colors shadow-sm backdrop-blur-md">
-                <div class="bg-green-500 text-white p-1.5 rounded-full shadow-sm">
+            <a href="tel:+255794689099" class="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-black/5 dark:bg-black/30 border border-black/5 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/10 transition-colors shadow-sm backdrop-blur-md">
+                <div class="bg-exxonim-teal text-white p-1.5 rounded-full shadow-sm">
                     <svg class="w-3.5 h-3.5 animate-ring" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                 </div>
                 <div class="flex flex-col text-left">
-                    <span class="font-bold text-[0.55rem] uppercase tracking-wider text-gray-500 dark:text-gray-400 leading-none mb-0.5">Call Now</span>
+                    <span class="font-bold text-[0.55rem] uppercase tracking-widest text-gray-500 dark:text-gray-400 leading-none mb-0.5">Call Now</span>
                     <span class="text-[0.8rem] font-bold text-gray-900 dark:text-white leading-none">+255 794 689 099</span>
                 </div>
             </a>
             
-            <a href="#track-consultation" class="hidden md:inline-flex items-center justify-center whitespace-nowrap font-mono text-[0.68rem] tracking-wide font-bold uppercase rounded-xl border border-black/10 bg-white/60 px-4 h-10 text-gray-900 shadow-sm backdrop-blur-md hover:bg-white transition-colors dark:border-white/10 dark:bg-black/30 dark:text-white dark:hover:bg-white/10 lg:text-xs">
-                Track Your Consultation
-            </a>
-
-            <button id="mobileMenuBtn" aria-controls="mobileMenu" aria-expanded="false" class="xl:hidden inline-flex h-11 w-11 items-center justify-center rounded-xl border border-black/10 bg-white/55 text-gray-900 shadow-sm backdrop-blur-sm transition-colors hover:bg-white/75 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15">
-                <span class="sr-only">Toggle navigation</span>
-                <svg data-menu-icon width="24" height="24" viewBox="0 0 32 32" fill="none" stroke-width="2.25" stroke="currentColor"><path stroke-linecap="round" d="M 7 10 h 18 M 7 16 h 18 M 7 22 h 18"></path></svg>
-                <svg data-close-icon class="hidden" width="24" height="24" viewBox="0 0 32 32" fill="none" stroke-width="2.25" stroke="currentColor"><path stroke-linecap="round" d="M 10 10 L 22 22 M 22 10 L 10 22"></path></svg>
+            <button id="mobileMenuBtn" class="xl:hidden p-2 rounded-lg text-gray-800 dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke-width="2" stroke="currentColor"><path d="M 6 10 h 20 M 6 16 h 20 M 6 22 h 20"></path></svg>
             </button>
-
         </div>
+
+        <div id="mobileMenu" class="absolute top-[80px] left-0 w-full flyout-glass p-6 flex flex-col gap-4 hidden xl:hidden">
+            <a href="#top" class="text-lg font-bold text-gray-900 dark:text-white">Home</a>
+            <a href="#about" class="text-lg font-bold text-gray-900 dark:text-white">About</a>
+            <a href="#services" class="text-lg font-bold text-gray-900 dark:text-white">Services</a>
+            <a href="#resources" class="text-lg font-bold text-gray-900 dark:text-white">Resources</a>
+            <a href="#career" class="text-lg font-bold text-gray-900 dark:text-white">Career</a>
+            <hr class="border-black/10 dark:border-white/10 my-2">
+            <a href="#contact" class="flex items-center justify-center gap-2 font-mono text-sm font-bold uppercase bg-[#041214] text-white rounded-xl h-12 px-6 dark:bg-white dark:text-[#041214]">Get Consultation</a>
         </div>
     </header>
 
-    <div id="mobileMenu" class="fixed inset-0 z-[60] hidden xl:hidden" aria-hidden="true">
-        <button id="mobileMenuOverlay" type="button" class="absolute inset-0 bg-[#041214]/24 backdrop-blur-[2px] dark:bg-black/45" aria-label="Close navigation"></button>
-        <div class="pointer-events-none relative flex min-h-full items-start justify-end px-4 pb-4 pt-[5.25rem] sm:px-5 sm:pt-[5.5rem]">
-        <div id="mobileMenuPanel" class="flyout-glass pointer-events-auto relative w-full max-w-[24rem] max-h-[calc(100dvh-6.25rem)] overflow-y-auto rounded-[24px] p-4 font-sans normal-case tracking-normal shadow-2xl sm:max-w-[25rem] sm:p-5 md:max-w-[27rem] md:max-h-[calc(100dvh-6.75rem)]">
-            <div class="grid gap-5">
-                <div class="grid grid-cols-4 gap-2">
-                    <a href="#top" class="flex items-center justify-center rounded-xl px-2 py-3 text-[0.78rem] font-bold text-gray-900 hover:bg-black/5 dark:text-white dark:hover:bg-white/10">Home</a>
-                    <a href="#about" class="flex items-center justify-center rounded-xl px-2 py-3 text-[0.78rem] font-bold text-gray-900 hover:bg-black/5 dark:text-white dark:hover:bg-white/10">About</a>
-                    <a href="#career" class="flex items-center justify-center rounded-xl px-2 py-3 text-[0.78rem] font-bold text-gray-900 hover:bg-black/5 dark:text-white dark:hover:bg-white/10">Career</a>
-                    <a href="#contact" class="flex items-center justify-center rounded-xl px-2 py-3 text-[0.78rem] font-bold text-gray-900 hover:bg-black/5 dark:text-white dark:hover:bg-white/10">Contact</a>
-                </div>
-
-                <div class="rounded-2xl border border-black/5 bg-white/40 p-4 dark:border-white/10 dark:bg-white/5">
-                    <p class="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Services</p>
-                    <div class="mt-3 grid gap-2">
-                        <a href="#services" class="block rounded-xl px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-black/5 dark:text-gray-200 dark:hover:bg-white/10">Company Registration</a>
-                        <a href="#services" class="block rounded-xl px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-black/5 dark:text-gray-200 dark:hover:bg-white/10">TIN Application</a>
-                        <a href="#services" class="block rounded-xl px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-black/5 dark:text-gray-200 dark:hover:bg-white/10">Business Licensing</a>
-                    </div>
-                    <div class="mt-4 grid gap-2 sm:grid-cols-2">
-                        <a href="#services" class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-white bg-[#041214] hover:bg-exxonim-navy transition-colors dark:bg-white dark:text-[#041214] dark:hover:bg-gray-200">
-                            See More Services
-                        </a>
-                        <a href="#track-consultation" class="inline-flex items-center justify-center rounded-xl border border-black/10 px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-gray-900 hover:bg-black/5 transition-colors dark:border-white/10 dark:text-white dark:hover:bg-white/10">
-                            Track Your Consultation
-                        </a>
-                    </div>
-                </div>
-
-                <div class="rounded-2xl border border-black/5 bg-white/40 p-4 dark:border-white/10 dark:bg-white/5">
-                    <p class="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Resources</p>
-                    <div class="mt-3 grid gap-2">
-                        <a href="#resources" class="block rounded-xl px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-black/5 dark:text-gray-200 dark:hover:bg-white/10">Blog</a>
-                        <a href="#faq" class="block rounded-xl px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-black/5 dark:text-gray-200 dark:hover:bg-white/10">FAQ</a>
-                    </div>
-                </div>
-
-                <div class="grid gap-3">
-                    <a href="tel:+255794689099" class="inline-flex flex-col items-center justify-center rounded-xl border border-black/10 px-4 py-3 text-sm font-bold text-gray-900 hover:bg-black/5 dark:border-white/10 dark:text-white dark:hover:bg-white/10">
-                        <span class="text-[0.68rem] uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400">Call Now</span>
-                        <span class="mt-1 text-base font-extrabold text-gray-900 dark:text-white">+255 794 689 099</span>
-                    </a>
-                    <a href="#contact" class="inline-flex items-center justify-center rounded-xl bg-[#041214] px-4 py-3 text-sm font-bold text-white hover:bg-exxonim-navy transition-colors dark:bg-white dark:text-[#041214] dark:hover:bg-gray-200">
-                        Get Consultation
-                    </a>
-                </div>
+    <main class="relative z-10 flex-grow flex flex-col items-center justify-center px-6 pt-32 pb-24 min-h-[90vh] max-w-5xl mx-auto text-center pointer-events-none">
+        
+        <div class="pointer-events-auto flex flex-col items-center mt-12 w-full">
+            
+            <div class="animate-fade-up institutional-glass inline-flex items-center gap-3 px-5 py-2 rounded-full mb-8 cursor-default">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2c8b91] dark:bg-[#72c2c7] opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-[#2c8b91] dark:bg-[#72c2c7]"></span>
+                </span>
+                <span class="font-mono text-[0.65rem] md:text-xs font-bold tracking-[0.2em] uppercase text-exxonim-navy dark:text-[#86cfd3]">
+                    Interactive Grid Engine
+                </span>
             </div>
-        </div>
-        </div>
-    </div>
 
-    <main class="mx-auto flex-grow max-w-7xl px-5 pt-[132px] text-center sm:px-6 md:px-8 md:pt-[180px]">
-        <h1 class="mb-5 text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:mb-6 md:text-7xl">The Perfect Merge.</h1>
-        <p class="mx-auto max-w-2xl text-base text-gray-600 dark:text-gray-400 sm:text-lg md:text-xl">Move your mouse to interact with the glow. Scroll down to see the 3D grid shift dynamically. Toggle the theme to watch the colors adapt smoothly between Light and Dark mode.</p>
+            <h1 class="animate-fade-up delay-100 canvas-heading font-display font-black text-6xl md:text-[5.5rem] lg:text-[6.5rem] mb-6 text-gray-900 dark:text-white drop-shadow-sm">
+                Visualizing <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#2c8b91] to-exxonim-navy dark:from-[#86cfd3] dark:to-[#2c8b91] text-glow font-light italic">
+                    Data Flow.
+                </span>
+            </h1>
+
+            <p class="animate-fade-up delay-200 font-sans text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
+                We transform complex operational and digital processes into structured, actionable insight. Move your cursor to engage the mathematical diffusion engine, simulating state-driven propagation across intelligent infrastructure.
+            </p>
+
+            <div class="animate-fade-up delay-300 w-full sm:w-auto">
+                <a href="#consult" class="w-full sm:w-auto group relative inline-flex items-center justify-center gap-3 font-mono text-[0.85rem] tracking-widest font-bold uppercase bg-[#041214] text-white shadow-[0_8px_30px_rgba(4,18,20,0.2)] dark:shadow-[0_8px_30px_rgba(255,255,255,0.15)] rounded-xl hover:shadow-[0_8px_30px_rgba(44,139,145,0.4)] hover:-translate-y-1 transition-all duration-300 h-16 px-10 overflow-hidden dark:bg-white dark:text-[#041214]">
+                    <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 dark:via-black/5 to-transparent group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                    Initiate Consultation
+                    <svg xmlns="http://www.w3.org/2000/svg" width="6" height="12" fill="currentColor" class="relative transition-transform group-hover:translate-x-2"><path d="m0 0 6 6-6 6V0z"></path></svg>
+                </a>
+            </div>
+
+        </div>
     </main>
 
-    <footer class="relative z-10 mt-20 border-t border-black/5 bg-white/50 pt-10 pb-6 backdrop-blur-md dark:border-white/5 dark:bg-[#061c1f]/50 md:mt-32 md:pt-16 md:pb-8">
+    <footer class="pt-16 pb-8 border-t border-black/5 dark:border-white/10 bg-white/50 dark:bg-[#061c1f]/40 backdrop-blur-md relative z-10 pointer-events-auto">
         <div class="max-w-[1440px] mx-auto px-6 lg:px-8">
-            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
                 
                 <div class="flex flex-col gap-4">
-                    <div class="flex items-center">
-                        <img src="./public/exxonim-logo.webp" alt="Exxonim" class="block h-10 w-auto object-contain dark:hidden">
-                        <img src="./public/logo-dark.png" alt="Exxonim" class="hidden h-10 w-auto object-contain dark:block">
-                    </div>
+                    <span class="font-extrabold font-display tracking-tight text-3xl text-exxonim-navy dark:text-white">Exxonim</span>
                     <p class="text-gray-600 dark:text-gray-400 font-medium max-w-xs text-sm">
                         Where Innovation Meets Efficiency
                     </p>
                 </div>
 
                 <div>
-                    <h4 class="mb-4 text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white md:mb-6">Quick Links</h4>
-                    <ul class="flex flex-col gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 md:gap-3">
-                        <li><a href="#about" class="hover:text-exxonim-teal transition-colors">About</a></li>
-                        <li><a href="#services" class="hover:text-exxonim-teal transition-colors">Services</a></li>
-                        <li><a href="#track-consultation" class="hover:text-exxonim-teal transition-colors">Track Your Consultation</a></li>
-                        <li><a href="#faq" class="hover:text-exxonim-teal transition-colors">Help (FAQ)</a></li>
-                        <li><a href="#blogs" class="hover:text-exxonim-teal transition-colors">Blogs</a></li>
-                        <li><a href="#contact" class="hover:text-exxonim-teal transition-colors">Contact</a></li>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-6 uppercase tracking-wider text-sm">Quick Links</h4>
+                    <ul class="flex flex-col gap-3 text-gray-600 dark:text-gray-400 text-sm font-medium">
+                        <li><a href="#about" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">About</a></li>
+                        <li><a href="#services" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">Services</a></li>
+                        <li><a href="#faq" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">Help (FAQ)</a></li>
+                        <li><a href="#blogs" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">Blogs</a></li>
+                        <li><a href="#contact" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">Contact</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <h4 class="mb-4 text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white md:mb-6">Other Resources</h4>
-                    <ul class="flex flex-col gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 md:gap-3">
-                        <li><a href="#career" class="hover:text-exxonim-teal transition-colors">Career</a></li>
-                        <li><a href="#support" class="hover:text-exxonim-teal transition-colors">Support</a></li>
-                        <li><a href="#terms" class="hover:text-exxonim-teal transition-colors">Terms of Use</a></li>
-                        <li><a href="#privacy" class="hover:text-exxonim-teal transition-colors">Privacy Policy</a></li>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-6 uppercase tracking-wider text-sm">Other Resources</h4>
+                    <ul class="flex flex-col gap-3 text-gray-600 dark:text-gray-400 text-sm font-medium">
+                        <li><a href="#career" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">Career</a></li>
+                        <li><a href="#support" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">Support</a></li>
+                        <li><a href="#terms" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">Terms of Use</a></li>
+                        <li><a href="#privacy" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">Privacy Policy</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <h4 class="mb-4 text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white md:mb-6">Contact Us</h4>
-                    <ul class="flex flex-col gap-3 text-sm font-medium text-gray-600 dark:text-gray-400 md:gap-4">
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-6 uppercase tracking-wider text-sm">Contact Us</h4>
+                    <ul class="flex flex-col gap-4 text-gray-600 dark:text-gray-400 text-sm font-medium">
                         <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 mt-0.5 text-exxonim-teal flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <svg class="w-5 h-5 mt-0.5 text-exxonim-teal dark:text-[#2c8b91] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             <span class="leading-relaxed">Mbezi Beach B, Africana, Bagamoyo Road, Block no H, House number 9, Dar es Salaam</span>
                         </li>
                         <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 mt-0.5 text-exxonim-teal flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <svg class="w-5 h-5 mt-0.5 text-exxonim-teal dark:text-[#2c8b91] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                             <div class="flex flex-col gap-1">
-                                <a href="mailto:info@exxonim.tz" class="hover:text-exxonim-teal transition-colors">info@exxonim.tz</a>
-                                <a href="mailto:md@exxonim.tz" class="hover:text-exxonim-teal transition-colors">md@exxonim.tz</a>
+                                <a href="mailto:info@exxonim.tz" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">info@exxonim.tz</a>
+                                <a href="mailto:md@exxonim.tz" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">md@exxonim.tz</a>
                             </div>
                         </li>
                         <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 mt-0.5 text-exxonim-teal flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                            <svg class="w-5 h-5 mt-0.5 text-exxonim-teal dark:text-[#2c8b91] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                             <div class="flex flex-col gap-1">
-                                <a href="tel:+255794689099" class="hover:text-exxonim-teal transition-colors">+255 794 689 099</a>
-                                <a href="tel:+255685525224" class="hover:text-exxonim-teal transition-colors">+255 685 525 224</a>
+                                <a href="tel:+255794689099" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">+255 794 689 099</a>
+                                <a href="tel:+255685525224" class="hover:text-exxonim-teal dark:hover:text-[#86cfd3] transition-colors">+255 685 525 224</a>
                             </div>
                         </li>
                     </ul>
                 </div>
             </div>
-
-            <div class="mt-10 border-t border-black/10 pt-6 text-center dark:border-white/10 md:mt-16 md:pt-8 md:text-left">
-                <p class="text-sm text-gray-500 dark:text-gray-400">© 2026 Exxonim. All rights reserved.</p>
+            <div class="mt-16 pt-8 border-t border-black/10 dark:border-white/10 text-center md:text-left">
+                <p class="text-sm text-gray-500">© 2026 Exxonim. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <a href="https://wa.me/255794689099" target="_blank" aria-label="Chat on WhatsApp" class="fixed bottom-6 right-6 z-30 group flex items-center justify-center w-14 h-14 bg-[#25D366] rounded-full shadow-lg hover:scale-110 transition-transform duration-300">
+    <a href="https://wa.me/255794689099" target="_blank" aria-label="Chat on WhatsApp" class="fixed bottom-6 right-6 z-[100] group flex items-center justify-center w-14 h-14 bg-[#25D366] rounded-full shadow-lg hover:scale-110 transition-transform duration-300 pointer-events-auto">
         <span class="absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-60 animate-ping group-hover:hidden"></span>
         <svg class="w-8 h-8 text-white relative z-10" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12.01 2.014a9.96 9.96 0 00-8.52 15.11L2 22l4.985-1.465a9.961 9.961 0 105.025-18.52zm0 18.067a8.093 8.093 0 01-4.14-1.134l-.297-.176-3.082.906.924-2.977-.193-.306A8.098 8.098 0 1112.01 20.08zm4.437-6.042c-.244-.122-1.439-.711-1.662-.793-.223-.081-.385-.122-.547.122-.162.244-.628.793-.77.955-.142.162-.284.183-.528.061-1.18-.56-2.072-1.1-2.884-2.522-.083-.146-.01-.223.111-.345.11-.11.244-.284.366-.427.122-.142.162-.244.244-.407.081-.162.041-.305-.02-.427-.061-.122-.547-1.32-.75-1.808-.198-.475-.399-.411-.547-.419-.142-.008-.305-.008-.468-.008-.162 0-.427.061-.65.305-.223.244-.852.833-.852 2.032s.873 2.358.995 2.522c.122.162 1.714 2.628 4.153 3.67.58.24 1.033.383 1.385.49.582.185 1.112.158 1.531.096.47-.07 1.439-.588 1.642-1.157.203-.569.203-1.056.142-1.157-.061-.101-.223-.162-.468-.284z"/>
@@ -553,151 +379,124 @@
     </a>
 
     <script>
+        // Theme Logic
         const root = document.documentElement;
-
-        // Theme Toggle Logic
-        const themeToggleButtons = document.querySelectorAll('[data-theme-toggle]');
-        if (themeToggleButtons.length) {
-            themeToggleButtons.forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    const currentTheme = root.getAttribute('data-theme');
-                    root.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
-                });
+        let isDark = root.getAttribute('data-theme') === 'dark';
+        const themeBtn = document.getElementById('themeToggleBtn');
+        
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                isDark = !isDark;
+                root.setAttribute('data-theme', isDark ? 'dark' : 'light');
             });
         }
 
-        // Mobile Menu Logic
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
-        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
-        const mobileMenuPanel = document.getElementById('mobileMenuPanel');
-        if (mobileMenuBtn && mobileMenu && mobileMenuPanel) {
-            const menuIcon = mobileMenuBtn.querySelector('[data-menu-icon]');
-            const closeIcon = mobileMenuBtn.querySelector('[data-close-icon]');
-            let menuHistoryEntryActive = false;
-
-            const syncMobileMenuState = (isOpen) => {
-                mobileMenu.classList.toggle('hidden', !isOpen);
-                mobileMenu.setAttribute('aria-hidden', String(!isOpen));
-                document.body.style.overflow = isOpen ? 'hidden' : '';
-                mobileMenuBtn.setAttribute('aria-expanded', String(isOpen));
-                mobileMenuBtn.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
-                mobileMenuBtn.classList.toggle('bg-[#041214]', isOpen);
-                mobileMenuBtn.classList.toggle('text-white', isOpen);
-                mobileMenuBtn.classList.toggle('border-white/10', isOpen);
-                mobileMenuBtn.classList.toggle('shadow-lg', isOpen);
-                if (menuIcon) {
-                    menuIcon.classList.toggle('hidden', isOpen);
-                }
-                if (closeIcon) {
-                    closeIcon.classList.toggle('hidden', !isOpen);
-                }
-            };
-
-            const openMobileMenu = () => {
-                syncMobileMenuState(true);
-                if (!menuHistoryEntryActive) {
-                    window.history.pushState({ mobileMenuOpen: true }, '', window.location.href);
-                    menuHistoryEntryActive = true;
-                }
-            };
-
-            const closeMobileMenu = (navigateHistory = true) => {
-                const isOpen = !mobileMenu.classList.contains('hidden');
-                if (!isOpen && !menuHistoryEntryActive) {
-                    return;
-                }
-                syncMobileMenuState(false);
-                if (navigateHistory && menuHistoryEntryActive && window.history.state && window.history.state.mobileMenuOpen) {
-                    menuHistoryEntryActive = false;
-                    window.history.back();
-                    return;
-                }
-                menuHistoryEntryActive = false;
-            };
-
-            const handleViewportChange = () => {
-                if (window.innerWidth >= 1280) {
-                    closeMobileMenu(false);
-                    return;
-                }
-                const verticalOffset = window.innerWidth >= 768 ? 120 : 104;
-                mobileMenuPanel.style.maxHeight = `${Math.max(window.innerHeight - verticalOffset, 280)}px`;
-            };
-
+        if (mobileMenuBtn && mobileMenu) {
             mobileMenuBtn.addEventListener('click', () => {
-                if (mobileMenu.classList.contains('hidden')) {
-                    openMobileMenu();
-                    handleViewportChange();
-                    return;
-                }
-                closeMobileMenu();
+                mobileMenu.classList.toggle('hidden');
             });
+        }
 
-            if (mobileMenuOverlay) {
-                mobileMenuOverlay.addEventListener('click', () => {
-                    closeMobileMenu();
-                });
+        // Setup Canvas
+        const canvas = document.getElementById('fretboard-canvas');
+        const ctx = canvas.getContext('2d', { alpha: false }); 
+        
+        const tileSize = 32; 
+        const gap = 8;       
+        const cell = tileSize + gap;
+        const cornerRadius = 6; 
+        
+        let cols, rows;
+        let grid = [];
+
+        function init() {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = window.innerHeight * dpr;
+            canvas.style.width = `${window.innerWidth}px`;
+            canvas.style.height = `${window.innerHeight}px`;
+            ctx.scale(dpr, dpr);
+
+            cols = Math.ceil(window.innerWidth / cell) + 1;
+            rows = Math.ceil(window.innerHeight / cell) + 1;
+            grid = new Array(cols).fill(0).map(() => new Array(rows).fill(0));
+        }
+
+        window.addEventListener('resize', init);
+        init();
+
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            this.beginPath();
+            this.moveTo(x + r, y);
+            this.arcTo(x + w, y, x + w, y + h, r);
+            this.arcTo(x + w, y + h, x, y + h, r);
+            this.arcTo(x, y + h, x, y, r);
+            this.arcTo(x, y, x + w, y, r);
+            this.closePath();
+            return this;
+        }
+
+        // Restrained Fretboard Colors
+        function getColorForStage(value) {
+            if (isDark) {
+                if (value < 0.05) return '#051416'; 
+                if (value < 0.30) return '#081f22'; 
+                if (value < 0.60) return '#0d3237'; 
+                return '#134d53';                   
+            } else {
+                if (value < 0.05) return '#ebf4f5'; 
+                if (value < 0.30) return '#dceeee'; 
+                if (value < 0.60) return '#b4dfe2'; 
+                return '#72c2c7';                   
             }
-
-            mobileMenu.querySelectorAll('a').forEach((link) => {
-                link.addEventListener('click', () => {
-                    closeMobileMenu(false);
-                });
-            });
-
-            window.addEventListener('resize', handleViewportChange);
-            window.addEventListener('orientationchange', () => {
-                window.requestAnimationFrame(handleViewportChange);
-            });
-
-            window.addEventListener('popstate', (event) => {
-                if (event.state && event.state.mobileMenuOpen) {
-                    syncMobileMenuState(false);
-                    menuHistoryEntryActive = false;
-                    window.history.back();
-                    return;
-                }
-                if (menuHistoryEntryActive || !mobileMenu.classList.contains('hidden')) {
-                    syncMobileMenuState(false);
-                    menuHistoryEntryActive = false;
-                }
-            });
-
-            document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape' && !mobileMenu.classList.contains('hidden')) {
-                    closeMobileMenu();
-                }
-            });
-
-            handleViewportChange();
         }
 
-        // Cinematic Parallax Engine (Mouse Tracking)
-        let targetX = window.innerWidth / 2;
-        let targetY = window.innerHeight / 2;
-        let currentX = targetX;
-        let currentY = targetY;
-        const lerpFactor = 0.08;
+        let mouseX = -1000;
+        let mouseY = -1000;
 
-        window.addEventListener('mousemove', (e) => {
-            targetX = e.clientX;
-            targetY = e.clientY;
-        });
+        window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+        window.addEventListener('touchmove', (e) => { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; });
+        window.addEventListener('touchstart', (e) => { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; });
 
-        function animateGlow() {
-            currentX += (targetX - currentX) * lerpFactor;
-            currentY += (targetY - currentY) * lerpFactor;
-            root.style.setProperty('--mouse-x', currentX);
-            root.style.setProperty('--mouse-y', currentY);
-            requestAnimationFrame(animateGlow);
+        document.addEventListener('mouseleave', () => { mouseX = -1000; mouseY = -1000; });
+        document.addEventListener('touchend', () => { mouseX = -1000; mouseY = -1000; });
+
+        function renderLoop() {
+            ctx.fillStyle = isDark ? '#041214' : '#f6fbfb'; 
+            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+            for (let y = 0; y < rows; y++) {
+                let offsetX = (y % 2 === 0) ? 0 : cell / 2;
+                
+                for (let x = 0; x < cols; x++) {
+                    let tileX = x * cell + gap/2 + offsetX;
+                    let tileY = y * cell + gap/2;
+
+                    // Localized activation (guitar fret style)
+                    let dx = mouseX - (tileX + tileSize/2);
+                    let dy = mouseY - (tileY + tileSize/2);
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+
+                    if (dist < cell * 1.2) {
+                        grid[x][y] = 1.0; 
+                    }
+
+                    // Fast, smooth local decay (no spread)
+                    grid[x][y] *= 0.90;
+
+                    ctx.fillStyle = getColorForStage(grid[x][y]);
+                    ctx.roundRect(tileX, tileY, tileSize, tileSize, cornerRadius);
+                    ctx.fill();
+                }
+            }
+            requestAnimationFrame(renderLoop);
         }
-        animateGlow();
 
-        // Parallax Scroll Engine
-        window.addEventListener('scroll', () => {
-            root.style.setProperty('--scroll-y', window.scrollY);
-        });
+        renderLoop();
     </script>
 </body>
 </html>

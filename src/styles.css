@@ -1095,12 +1095,7 @@ pre {
 .stack-subtitle,
 .section-subtitle,
 .section-description,
-.stack-note,
-.footer-brand-panel p,
-.footer-list a,
-.footer-list span,
-.footer-bottom p,
-.footer-call {
+.stack-note {
   line-height: 1.6;
 }
 
@@ -1829,144 +1824,6 @@ pre {
   transition: transform 180ms ease, background 180ms ease;
 }
 
-.site-footer {
-  padding: 4.2rem 0 1.5rem;
-}
-
-.footer-main {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) repeat(3, minmax(10rem, 1fr));
-  gap: 2rem 2.4rem;
-  padding-bottom: 1.9rem;
-}
-
-.footer-brand-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1rem;
-  max-width: 29rem;
-}
-
-.footer-column {
-  display: flex;
-  flex-direction: column;
-  gap: 0.95rem;
-}
-
-.footer-brand__logo {
-  display: block;
-  width: fit-content;
-  margin: 0;
-}
-
-.brand-logo--footer {
-  width: min(8.5rem, 100%);
-}
-
-.footer-brand-panel p {
-  margin: 0;
-  color: rgba(17, 35, 37, 0.76);
-  line-height: 1.55;
-}
-
-.footer-eyebrow {
-  margin: 0;
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(17, 35, 37, 0.52);
-}
-
-.footer-divider {
-  height: 1px;
-  background: rgba(9, 68, 73, 0.14);
-}
-
-.footer-list {
-  display: grid;
-  gap: 0.8rem;
-}
-
-.footer-list a,
-.footer-list span {
-  display: block;
-  line-height: 1.45;
-}
-
-.footer-list a {
-  color: rgba(17, 35, 37, 0.78);
-}
-
-.footer-list a:hover,
-.footer-call:hover {
-  opacity: 1;
-}
-
-.footer-list--contact {
-  gap: 0.55rem;
-}
-
-.footer-contact-label {
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(17, 35, 37, 0.46);
-  margin-top: 0.45rem;
-}
-
-.footer-list--contact .footer-contact-label:first-child {
-  margin-top: 0;
-}
-
-.footer-call {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.2rem;
-  padding: 0.9rem 1.1rem;
-  border: 1px solid var(--cinematic-card-border);
-  border-radius: 20px;
-  background: var(--cinematic-card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--cinematic-card-shadow);
-  color: var(--slate-950);
-  white-space: nowrap;
-  transition: border-color 300ms ease, transform 300ms ease, background 300ms ease;
-}
-
-.footer-call span {
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(17, 35, 37, 0.56);
-}
-
-.footer-call strong {
-  font-size: 1rem;
-  line-height: 1.1;
-}
-
-.footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 1rem;
-  gap: 1rem;
-}
-
-.footer-bottom p,
-.footer-call {
-  margin: 0;
-}
-
-.footer-bottom p {
-  color: rgba(17, 35, 37, 0.7);
-}
-
 html[data-theme="dark"] body {
   color: #eef2ff;
   background: #041214;
@@ -2008,11 +1865,7 @@ html[data-theme="dark"] .status-alert small,
 html[data-theme="dark"] .roi-panel__header small,
 html[data-theme="dark"] .slider-label,
 html[data-theme="dark"] .blog-card__copy p,
-html[data-theme="dark"] .footer-brand-panel p,
-html[data-theme="dark"] .footer-bottom p,
-html[data-theme="dark"] .footer-list a,
-html[data-theme="dark"] .footer-list span,
-html[data-theme="dark"] .footer-call {
+html[data-theme="dark"] .metric-card p {
   color: rgba(226, 232, 255, 0.72);
 }
 
@@ -2377,24 +2230,6 @@ html[data-theme="dark"] .blog-card__media::before {
   background: radial-gradient(circle, rgba(255, 255, 255, 0.76) 0 1px, transparent 2px);
 }
 
-html[data-theme="dark"] .footer-divider {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-html[data-theme="dark"] .footer-call {
-  border-color: var(--cinematic-card-border);
-  background: var(--cinematic-card-bg);
-}
-
-html[data-theme="dark"] .footer-call span {
-  color: rgba(226, 232, 255, 0.52);
-}
-
-html[data-theme="dark"] .footer-eyebrow,
-html[data-theme="dark"] .footer-contact-label {
-  color: rgba(226, 232, 255, 0.46);
-}
-
 .js [data-reveal] {
   opacity: 0;
   transform: translateY(26px);
@@ -2426,10 +2261,6 @@ html[data-theme="dark"] .footer-contact-label {
   .stack-card__content,
   .roi-grid {
     grid-template-columns: 1fr;
-  }
-
-  .footer-main {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .hero-visual {
@@ -2514,14 +2345,6 @@ html[data-theme="dark"] .footer-contact-label {
     width: 100%;
   }
 
-  .footer-main {
-    grid-template-columns: 1fr;
-  }
-
-  .footer-bottom {
-    flex-direction: column;
-    align-items: flex-start;
-  }
 }
 
 @media (max-width: 640px) {
@@ -2625,91 +2448,6 @@ html[data-theme="dark"] .footer-contact-label {
   height: 0;
 }
 
-.site-footer {
-  position: relative;
-  z-index: 10;
-  margin-top: 5rem;
-  padding: 4rem 0 1.75rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-
-.footer-main {
-  gap: 2rem 2.5rem;
-  padding-bottom: 2rem;
-}
-
-.footer-brand-panel p {
-  max-width: 16rem;
-  font-size: 0.95rem;
-}
-
-.footer-list {
-  gap: 0.75rem;
-}
-
-.footer-list a {
-  transition: color 180ms ease;
-}
-
-.footer-list a:hover {
-  color: var(--navy-650);
-}
-
-.footer-list--contact {
-  gap: 1rem;
-}
-
-.footer-contact-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.footer-contact-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-  flex-shrink: 0;
-  margin-top: 0.1rem;
-  color: var(--navy-650);
-}
-
-.footer-contact-copy {
-  display: block;
-  line-height: 1.55;
-}
-
-.footer-contact-copy--stacked {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.footer-divider {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-.footer-bottom {
-  padding-top: 1.25rem;
-}
-
-html[data-theme="dark"] .site-footer {
-  border-top-color: rgba(255, 255, 255, 0.05);
-  background: rgba(6, 28, 31, 0.5);
-}
-
-html[data-theme="dark"] .footer-divider {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-html[data-theme="dark"] .footer-contact-icon {
-  color: #72c2c7;
-}
-
-html[data-theme="dark"] .footer-list a:hover {
-  color: #72c2c7;
-}
 .site-main {
   padding-top: calc(var(--header-height) + 8px);
 }
