@@ -252,13 +252,11 @@ html[data-theme="dark"] .nav-shell__logo--dark{
 .nav-shell__cta-primary,
 .nav-shell__cta-secondary,
 .tutorial-toggle,
-.toggle-bubble,
-.toggle-icon,
-.toggle-text,
+.tutorial-toggle__orb,
+.tutorial-toggle__icon,
 .nav-shell__call-button,
 .nav-shell__call-label,
 .nav-shell__call-number,
-.nav-shell__track-button,
 .nav-shell__toggle,
 .nav-shell__mobile,
 .nav-shell__mobile-backdrop,
@@ -271,8 +269,7 @@ html[data-theme="dark"] .nav-shell__logo--dark{
 .nav-shell__mobile-card-secondary,
 .nav-shell__mobile-bottom-link,
 .nav-shell__mobile-bottom-label,
-.nav-shell__mobile-bottom-number,
-.nav-shell__mobile-bottom-primary{
+.nav-shell__mobile-bottom-number{
   transition:
     background-color .3s ease,
     border-color .3s ease,
@@ -515,184 +512,161 @@ button.nav-shell__tab.nav-shell__trigger{
   position:relative;
   display:flex;
   align-items:center;
-  width:104px;
-  height:40px;
-  border-radius:999px;
-  background:rgba(0,0,0,.06);
-  border:1px solid rgba(0,0,0,.05);
-  box-shadow:inset 0 2px 4px rgba(0,0,0,.05);
+  justify-content:center;
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  background:rgba(255,255,255,.58);
+  border:1px solid rgba(0,0,0,.08);
+  box-shadow:0 10px 24px rgba(9,68,73,.08), inset 0 1px 0 rgba(255,255,255,.55);
   cursor:pointer;
   font-family:var(--nav-sans);
+  color:#0c6069;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
 }
 
 .tutorial-toggle--mobile{
-  width:88px;
-  height:36px;
+  width:44px;
+  height:44px;
+  border-radius:12px;
 }
 
 html[data-theme="dark"] .tutorial-toggle,
 .tutorial-toggle[data-theme="dark"]{
-  background:rgba(255,255,255,.08);
-  border-color:rgba(255,255,255,.1);
-  box-shadow:inset 0 2px 4px rgba(0,0,0,.2);
+  background:linear-gradient(180deg, rgba(5,25,28,.96), rgba(1,14,17,.98));
+  border-color:rgba(87,184,196,.18);
+  box-shadow:0 12px 30px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.04);
+  color:#e9feff;
 }
 
-.toggle-bubble{
-  position:absolute;
-  left:4px;
+.tutorial-toggle:hover,
+.tutorial-toggle:focus-visible{
+  transform:translateY(-1px);
+  border-color:rgba(9,68,73,.18);
+  outline:none;
+}
+
+html[data-theme="dark"] .tutorial-toggle:hover,
+html[data-theme="dark"] .tutorial-toggle:focus-visible,
+.tutorial-toggle[data-theme="dark"]:hover,
+.tutorial-toggle[data-theme="dark"]:focus-visible{
+  border-color:rgba(111,232,245,.28);
+}
+
+.tutorial-toggle__orb{
   display:flex;
   align-items:center;
   justify-content:center;
-  width:32px;
-  height:32px;
-  border-radius:999px;
-  background:#fff;
-  box-shadow:0 2px 8px rgba(0,0,0,.15), inset 0 -2px 4px rgba(0,0,0,.05);
-  z-index:1;
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  background:rgba(9,68,73,.08);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.48);
 }
 
-.tutorial-toggle--mobile .toggle-bubble{
-  width:28px;
-  height:28px;
+.tutorial-toggle--mobile .tutorial-toggle__orb{
+  width:30px;
+  height:30px;
+  border-radius:10px;
 }
 
-html[data-theme="dark"] .toggle-bubble,
-.tutorial-toggle[data-theme="dark"] .toggle-bubble{
-  background:#1a1a1a;
-  box-shadow:0 2px 8px rgba(0,0,0,.4), inset 0 1px 1px rgba(255,255,255,.2);
-  transform:translateX(60.8px);
+html[data-theme="dark"] .tutorial-toggle__orb,
+.tutorial-toggle[data-theme="dark"] .tutorial-toggle__orb{
+  background:rgba(71,185,197,.1);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
 }
 
-html[data-theme="dark"] .tutorial-toggle--mobile .toggle-bubble,
-.tutorial-toggle--mobile[data-theme="dark"] .toggle-bubble{
-  transform:translateX(48px);
-}
-
-.tutorial-toggle[data-theme="light"] .toggle-bubble{
-  transform:translateX(0);
-}
-
-.toggle-icon{
-  width:20px;
-  height:20px;
-}
-
-.icon-sun{
-  opacity:1;
-  color:#333;
-}
-
-html[data-theme="dark"] .icon-sun,
-.tutorial-toggle[data-theme="dark"] .icon-sun{
-  opacity:0;
-}
-
-.icon-moon{
+.tutorial-toggle__icon{
   position:absolute;
-  opacity:0;
-  color:#fff;
+  width:18px;
+  height:18px;
+  transition:opacity .24s ease, transform .24s var(--nav-ease);
 }
 
-html[data-theme="dark"] .icon-moon,
-.tutorial-toggle[data-theme="dark"] .icon-moon{
+.tutorial-toggle__icon--sun{
   opacity:1;
+  transform:scale(1) rotate(0deg);
 }
 
-.tutorial-toggle[data-theme="light"] .icon-sun{
-  opacity:1;
-}
-
-.tutorial-toggle[data-theme="light"] .icon-moon{
+.tutorial-toggle__icon--moon{
   opacity:0;
+  transform:scale(.72) rotate(-18deg);
 }
 
-.toggle-text{
-  position:absolute;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:100%;
-  font-family:var(--nav-sans);
-  font-size:12.8px;
-  font-weight:700;
-  letter-spacing:.02em;
-  pointer-events:none;
-}
-
-.tutorial-toggle--mobile .toggle-text{
-  font-size:11.52px;
-  font-weight:700;
-}
-
-.text-light{
-  padding-left:24px;
-  color:rgba(0,0,0,.6);
-  opacity:1;
-}
-
-.tutorial-toggle--mobile .text-light{
-  padding-left:18.4px;
-}
-
-html[data-theme="dark"] .text-light,
-.tutorial-toggle[data-theme="dark"] .text-light{
+html[data-theme="dark"] .tutorial-toggle__icon--sun,
+.tutorial-toggle[data-theme="dark"] .tutorial-toggle__icon--sun{
   opacity:0;
+  transform:scale(.72) rotate(18deg);
 }
 
-.text-dark{
-  padding-right:24px;
-  color:rgba(255,255,255,.8);
-  opacity:0;
-}
-
-.tutorial-toggle--mobile .text-dark{
-  padding-right:18.4px;
-}
-
-html[data-theme="dark"] .text-dark,
-.tutorial-toggle[data-theme="dark"] .text-dark{
+html[data-theme="dark"] .tutorial-toggle__icon--moon,
+.tutorial-toggle[data-theme="dark"] .tutorial-toggle__icon--moon{
   opacity:1;
-}
-
-.tutorial-toggle[data-theme="light"] .text-light{
-  opacity:1;
-}
-
-.tutorial-toggle[data-theme="light"] .text-dark{
-  opacity:0;
+  transform:scale(1) rotate(0deg);
 }
 
 .nav-shell__call-button{
   display:none;
   align-items:center;
   flex:0 0 auto;
-  gap:10px;
-  padding:6px 12px;
-  border-radius:12px;
+  gap:12px;
+  height:44px;
+  padding:4px 18px 4px 8px;
+  border-radius:16px;
+  position:relative;
+  overflow:hidden;
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
-  background:var(--nav-utility-bg);
-  border:1px solid var(--nav-utility-border);
-  box-shadow:0 1px 2px rgba(0,0,0,.05);
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(0,0,0,.08);
+  box-shadow:0 14px 30px rgba(9,68,73,.12), inset 0 1px 0 rgba(255,255,255,.58);
   text-decoration:none;
   white-space:nowrap;
 }
 
+.nav-shell__call-button::after{
+  content:"";
+  position:absolute;
+  top:-40%;
+  bottom:-40%;
+  left:-58%;
+  width:42%;
+  background:linear-gradient(90deg, transparent, rgba(111,232,245,.18), transparent);
+  transform:skewX(-22deg);
+  animation:call-shimmer 4.5s linear infinite;
+}
+
 .nav-shell__call-button:hover,
 .nav-shell__call-button:focus-visible{
-  background:var(--nav-utility-bg-hover);
+  transform:translateY(-1px);
+  border-color:rgba(12,96,105,.16);
+  box-shadow:0 18px 36px rgba(9,68,73,.16), inset 0 1px 0 rgba(255,255,255,.64);
   outline:none;
 }
 
 .nav-shell__call-icon{
+  position:relative;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:6px;
+  width:36px;
+  height:36px;
   border-radius:999px;
-  background:#22c55e;
+  background:linear-gradient(180deg, #1eb2bd, #0e8d97);
   color:#fff;
-  box-shadow:0 1px 2px rgba(0,0,0,.05);
+  box-shadow:0 10px 18px rgba(18,166,179,.28);
+  z-index:1;
+}
+
+.nav-shell__call-icon::after{
+  content:"";
+  position:absolute;
+  inset:-5px;
+  border-radius:inherit;
+  border:1px solid rgba(69,203,215,.44);
+  opacity:0;
+  animation:call-ping 1.85s ease-out infinite;
 }
 
 .nav-shell__call-icon svg{
@@ -706,6 +680,8 @@ html[data-theme="dark"] .text-dark,
   min-width:max-content;
   text-align:left;
   white-space:nowrap;
+  position:relative;
+  z-index:1;
 }
 
 .nav-shell__call-label{
@@ -716,47 +692,43 @@ html[data-theme="dark"] .text-dark,
   line-height:1;
   letter-spacing:.05em;
   text-transform:uppercase;
-  color:var(--nav-muted-text);
+  color:rgba(17,35,37,.56);
 }
 
 .nav-shell__call-number{
   display:block;
   font-family:var(--nav-sans);
   font-size:12.8px;
-  font-weight:700;
+  font-weight:800;
   line-height:1.05;
   letter-spacing:.01em;
   white-space:nowrap;
-  color:var(--nav-secondary-text);
+  color:#112325;
 }
 
-.nav-shell__track-button{
-  display:none;
-  align-items:center;
-  justify-content:center;
-  flex:0 0 auto;
-  height:40px;
-  padding:0 16px;
-  border-radius:12px;
-  border:1px solid var(--nav-utility-border);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  background:var(--nav-utility-bg);
-  box-shadow:0 1px 2px rgba(0,0,0,.05);
-  font-family:var(--nav-mono);
-  font-size:12px;
-  font-weight:700;
-  letter-spacing:.025em;
-  text-transform:uppercase;
-  text-decoration:none;
-  white-space:nowrap;
-  color:var(--nav-utility-text);
+html[data-theme="dark"] .nav-shell__call-button,
+.nav-shell[data-theme="dark"] .nav-shell__call-button{
+  background:rgba(255,255,255,.72);
+  border-color:rgba(0,0,0,.08);
+  box-shadow:0 14px 30px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.58);
 }
 
-.nav-shell__track-button:hover,
-.nav-shell__track-button:focus-visible{
-  background:var(--nav-utility-bg-hover);
-  outline:none;
+html[data-theme="dark"] .nav-shell__call-button:hover,
+html[data-theme="dark"] .nav-shell__call-button:focus-visible,
+.nav-shell[data-theme="dark"] .nav-shell__call-button:hover,
+.nav-shell[data-theme="dark"] .nav-shell__call-button:focus-visible{
+  border-color:rgba(12,96,105,.16);
+  box-shadow:0 18px 36px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.64);
+}
+
+html[data-theme="dark"] .nav-shell__call-label,
+.nav-shell[data-theme="dark"] .nav-shell__call-label{
+  color:rgba(17,35,37,.56);
+}
+
+html[data-theme="dark"] .nav-shell__call-number,
+.nav-shell[data-theme="dark"] .nav-shell__call-number{
+  color:#112325;
 }
 
 .nav-shell__toggle{
@@ -951,8 +923,7 @@ html[data-theme="dark"] .nav-shell__toggle:focus-visible{
 
 .nav-shell__mobile-card-primary,
 .nav-shell__mobile-card-secondary,
-.nav-shell__mobile-bottom-link,
-.nav-shell__mobile-bottom-primary{
+.nav-shell__mobile-bottom-link{
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -1031,22 +1002,6 @@ html[data-theme="dark"] .nav-shell__toggle:focus-visible{
   color:var(--nav-secondary-text);
 }
 
-.nav-shell__mobile-bottom-primary{
-  padding:12px 16px;
-  border-radius:12px;
-  background:var(--nav-primary-cta-bg);
-  color:var(--nav-primary-cta-text);
-  font-family:var(--nav-sans);
-  font-size:14px;
-  font-weight:700;
-}
-
-.nav-shell__mobile-bottom-primary:hover,
-.nav-shell__mobile-bottom-primary:focus-visible{
-  background:var(--nav-primary-cta-hover);
-  outline:none;
-}
-
 .nav-shell__sr-only{
   position:absolute;
   width:1px;
@@ -1068,8 +1023,20 @@ html[data-theme="dark"] .nav-shell__toggle:focus-visible{
   50%{transform:rotate(0)}
 }
 
+@keyframes call-ping{
+  0%{transform:scale(.92);opacity:0}
+  30%{opacity:.7}
+  100%{transform:scale(1.42);opacity:0}
+}
+
+@keyframes call-shimmer{
+  0%{transform:translateX(0) skewX(-22deg)}
+  100%{transform:translateX(420%) skewX(-22deg)}
+}
+
 .animate-ring{
   animation:phone-ring 2s ease-in-out infinite;
+  transform-origin:center;
 }
 
 @media (min-width:640px){
@@ -1082,7 +1049,6 @@ html[data-theme="dark"] .nav-shell__toggle:focus-visible{
 @media (min-width:768px){
   .tutorial-toggle.nav-shell__theme-desktop{display:flex}
   .tutorial-toggle.nav-shell__theme-mobile{display:none}
-  .nav-shell__track-button{display:inline-flex;font-size:12px}
   .nav-shell__mobile-panel{max-width:27rem;max-height:calc(100dvh - 6.75rem)}
 }
 
@@ -1121,17 +1087,15 @@ function renderThemeToggle(className: string, theme: Theme, onToggleTheme: () =>
       onClick={onToggleTheme}
       aria-label={`Toggle theme. Current theme is ${theme}.`}
     >
-      <span className="toggle-text text-light">Light</span>
-      <span className="toggle-text text-dark">Dark</span>
-      <span className="toggle-bubble">
-        <svg className="toggle-icon icon-sun" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <span className="tutorial-toggle__orb" aria-hidden="true">
+        <svg className="tutorial-toggle__icon tutorial-toggle__icon--sun" viewBox="0 0 20 20" fill="currentColor">
           <path
             fillRule="evenodd"
             d="M10 2a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm4.22 3.22a1 1 0 0 1 1.415 0l.707.707a1 1 0 0 1-1.414 1.414l-.707-.707a1 1 0 0 1 0-1.414ZM18 10a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm-3.78 5.364a1 1 0 0 1 0 1.414l-.707.707a1 1 0 0 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0ZM10 18a1 1 0 0 1-1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1Zm-4.22-3.22a1 1 0 0 1-1.415 0l-.707-.707a1 1 0 0 1 1.414-1.414l.707.707a1 1 0 0 1 0 1.414ZM2 10a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Zm1.78-4.586a1 1 0 0 1 0-1.414l.707-.707A1 1 0 0 1 5.903 4.72l-.707.707a1 1 0 0 1-1.414 0ZM10 14a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"
             clipRule="evenodd"
           />
         </svg>
-        <svg className="toggle-icon icon-moon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <svg className="tutorial-toggle__icon tutorial-toggle__icon--moon" viewBox="0 0 20 20" fill="currentColor">
           <path d="M17.293 13.293A8 8 0 0 1 6.707 2.707a8 8 0 1 0 10.586 10.586Z" />
         </svg>
       </span>
@@ -1413,10 +1377,6 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
               </div>
             </a>
 
-            <a className="nav-shell__track-button" href={routes.tracking} onClick={closeAllMenus}>
-              Track Your Consultation
-            </a>
-
             <button
               className={`nav-shell__toggle${mobileMenuOpen ? " is-open" : ""}`}
               type="button"
@@ -1541,14 +1501,6 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
                 >
                   <span className="nav-shell__mobile-bottom-label">Call Now</span>
                   <span className="nav-shell__mobile-bottom-number">+255 794 689 099</span>
-                </a>
-
-                <a
-                  className="nav-shell__mobile-bottom-primary"
-                  href={routes.contact}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Get Consultation
                 </a>
               </div>
             </div>
