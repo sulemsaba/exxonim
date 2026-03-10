@@ -1,16 +1,13 @@
 import type { RefObject } from "react";
 import { EngineSection } from "../components/EngineSection";
-import { HeroSection } from "../components/HeroSection";
 import { InsightsSection } from "../components/InsightsSection";
 import { ProviderSection } from "../components/ProviderSection";
+import { ReferenceHero } from "../components/ReferenceHero";
 import { ResultsSection } from "../components/ResultsSection";
 import { StackSection } from "../components/StackSection";
-import type { HeroMetric, HeroSlide, InsightPost, StackItem } from "../types";
+import type { InsightPost, StackItem } from "../types";
 
 interface HomePageProps {
-  slides: HeroSlide[];
-  metrics: HeroMetric[];
-  activeSlideIndex: number;
   stackItems: StackItem[];
   posts: InsightPost[];
   railRef: RefObject<HTMLDivElement>;
@@ -19,9 +16,6 @@ interface HomePageProps {
 }
 
 export function HomePage({
-  slides,
-  metrics,
-  activeSlideIndex,
   stackItems,
   posts,
   railRef,
@@ -30,11 +24,7 @@ export function HomePage({
 }: HomePageProps) {
   return (
     <>
-      <HeroSection
-        slides={slides}
-        metrics={metrics}
-        activeSlideIndex={activeSlideIndex}
-      />
+      <ReferenceHero />
       <ProviderSection />
       <StackSection items={stackItems} />
       <EngineSection />

@@ -21,19 +21,9 @@ function getStoredTheme(): Theme | null {
   }
 }
 
-function getSystemTheme(): Theme {
-  if (typeof window === "undefined") {
-    return "light";
-  }
-
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
-
 function getInitialTheme(): Theme {
   if (typeof document === "undefined") {
-    return "light";
+    return "dark";
   }
 
   const storedTheme = getStoredTheme();
@@ -42,71 +32,28 @@ function getInitialTheme(): Theme {
     return storedTheme;
   }
 
-  return document.documentElement.dataset.theme === "dark"
-    ? "dark"
-    : getSystemTheme();
+  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
 }
 
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
-  const [hasManualPreference, setHasManualPreference] = useState(
-    () => getStoredTheme() !== null,
-  );
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    const handleChange = (event: MediaQueryListEvent) => {
-      if (!hasManualPreference) {
-        setTheme(event.matches ? "dark" : "light");
-      }
-    };
-
-    if (!hasManualPreference) {
-      setTheme(mediaQuery.matches ? "dark" : "light");
-    }
-
-    if (typeof mediaQuery.addEventListener === "function") {
-      mediaQuery.addEventListener("change", handleChange);
-
-      return () => {
-        mediaQuery.removeEventListener("change", handleChange);
-      };
-    }
-
-    mediaQuery.addListener(handleChange);
-
-    return () => {
-      mediaQuery.removeListener(handleChange);
-    };
-  }, [hasManualPreference]);
-
-  useEffect(() => {
     try {
-      if (hasManualPreference) {
-        localStorage.setItem(STORAGE_KEY, theme);
-      } else {
-        localStorage.removeItem(STORAGE_KEY);
-      }
-
+      localStorage.setItem(STORAGE_KEY, theme);
       localStorage.removeItem(LEGACY_STORAGE_KEY);
     } catch {
       // Ignore storage failures and keep the active theme in memory.
     }
-  }, [hasManualPreference, theme]);
+  }, [theme]);
 
   return {
     theme,
     toggleTheme: () => {
-      setHasManualPreference(true);
       setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
     },
   };

@@ -35,8 +35,12 @@ export function useStackCardDepth() {
       }
 
       const rootStyles = getComputedStyle(document.documentElement);
-      const headerHeight =
-        Number.parseFloat(rootStyles.getPropertyValue("--header-height")) || 92;
+      const headerHeightValue = Number.parseFloat(
+        rootStyles.getPropertyValue("--header-height")
+      );
+      const headerHeight = Number.isNaN(headerHeightValue)
+        ? 92
+        : headerHeightValue;
       const viewportHeight = window.innerHeight;
       const travelDistance = Math.max(viewportHeight - headerHeight, 1);
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   brand,
   heroMetrics,
@@ -7,7 +7,7 @@ import {
   stackItems,
 } from "./content";
 import { Footer } from "./components/Footer";
-import { Header } from "./components/Header";
+import { Navigation } from "./components/Navigation";
 import { useAutoRotatingIndex } from "./hooks/useAutoRotatingIndex";
 import { useRevealOnScroll } from "./hooks/useRevealOnScroll";
 import { useStackCardDepth } from "./hooks/useStackCardDepth";
@@ -26,12 +26,9 @@ interface AppProps {
 }
 
 export default function App({ initialPathname }: AppProps) {
-  const [isNavOpen, setIsNavOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const activeSlideIndex = useAutoRotatingIndex(heroSlides.length, 2600);
   const railRef = useRef<HTMLDivElement>(null);
-  const navHistoryEntryRef = useRef(false);
-  const closingNavFromHistoryRef = useRef(false);
   const pathname =
     typeof window === "undefined"
       ? normalizePathname(initialPathname)
@@ -85,88 +82,6 @@ export default function App({ initialPathname }: AppProps) {
     };
   }, []);
 
-  useEffect(() => {
-    const handleViewportChange = () => {
-      if (window.innerWidth >= 1280) {
-        setIsNavOpen(false);
-      }
-    };
-
-    const handleOrientationChange = () => {
-      window.requestAnimationFrame(handleViewportChange);
-    };
-
-    const handlePopState = () => {
-      if (!navHistoryEntryRef.current) {
-        return;
-      }
-
-      closingNavFromHistoryRef.current = true;
-      navHistoryEntryRef.current = false;
-      setIsNavOpen(false);
-    };
-
-    window.addEventListener("resize", handleViewportChange);
-    window.addEventListener("orientationchange", handleOrientationChange);
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("resize", handleViewportChange);
-      window.removeEventListener("orientationchange", handleOrientationChange);
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, []);
-
-  useEffect(() => {
-    const root = document.documentElement;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsNavOpen(false);
-      }
-    };
-
-    document.body.style.overflow = isNavOpen ? "hidden" : "";
-    root.classList.toggle("nav-open", isNavOpen);
-
-    if (isNavOpen && !navHistoryEntryRef.current) {
-      window.history.pushState(
-        { ...(window.history.state ?? {}), mobileNavOpen: true },
-        "",
-        window.location.href,
-      );
-      navHistoryEntryRef.current = true;
-    }
-
-    if (
-      !isNavOpen &&
-      navHistoryEntryRef.current &&
-      !closingNavFromHistoryRef.current
-    ) {
-      navHistoryEntryRef.current = false;
-
-      if (window.history.state?.mobileNavOpen) {
-        window.history.back();
-      }
-    }
-
-    if (!isNavOpen) {
-      closingNavFromHistoryRef.current = false;
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      root.classList.remove("nav-open");
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isNavOpen]);
-
-  const handleNavLinkClick = () => {
-    setIsNavOpen(false);
-  };
-
   const scrollRail = (direction: number) => {
     const rail = railRef.current;
 
@@ -212,9 +127,6 @@ export default function App({ initialPathname }: AppProps) {
       <ContactPage />
     ) : (
       <HomePage
-        slides={heroSlides}
-        metrics={heroMetrics}
-        activeSlideIndex={activeSlideIndex}
         stackItems={stackItems}
         {...sharedResourcePageProps}
       />
@@ -229,15 +141,10 @@ export default function App({ initialPathname }: AppProps) {
         <div className="cinematic-bg__glow"></div>
       </div>
 
-      <Header
-        brand={brand}
-        theme={theme}
+      <Navigation
         pathname={pathname}
-        isNavOpen={isNavOpen}
+        theme={theme}
         onToggleTheme={toggleTheme}
-        onToggleNav={() => setIsNavOpen((current) => !current)}
-        onCloseNav={() => setIsNavOpen(false)}
-        onNavLinkClick={handleNavLinkClick}
       />
 
       <main id="top" className="site-main">
