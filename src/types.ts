@@ -18,19 +18,6 @@ export interface ServiceNavGroup {
   items: string[];
 }
 
-export interface HeroSlide {
-  label: string;
-  videoSrc: string;
-  title: string;
-  description: string;
-}
-
-export interface HeroMetric {
-  title: string;
-  description: string;
-  iconClass: string;
-}
-
 export interface StackItem {
   title: string;
   subtitle: string;

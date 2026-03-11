@@ -9,44 +9,21 @@ const focusAreas = [
   "NSSF / WCF",
 ] as const;
 
-const serviceGroups = [
+const operationalNotes = [
   {
-    title: "Registration & Setup",
-    items: [
-      "Company Registration",
-      "Business Name Registration",
-      "NGO / Organization Registration",
-    ],
+    label: "Best fit",
+    value: "Founders, NGOs, SMEs, and regulated operators",
   },
   {
-    title: "Tax & Licensing",
-    items: [
-      "TIN Application",
-      "Annual Statutory Returns",
-      "Business License Applications",
-    ],
-  },
-  {
-    title: "Institutional Support",
-    items: [
-      "CRB / ERB Registration",
-      "OSHA Registration",
-      "Business Plan Preparation",
-    ],
+    label: "Workflow",
+    value: "One desk from intake to regulator follow-through",
   },
 ] as const;
 
-const quickSignals = [
-  {
-    label: "Typical support",
-    title: "One desk from filing to follow-up",
-    copy: "We prepare, submit, and keep the process moving until there is an actual outcome.",
-  },
-  {
-    label: "Best fit",
-    title: "Founders, NGOs, SMEs, and regulated operators",
-    copy: "Use Exxonim when the work is operationally important and delays create real cost.",
-  },
+const workflowTags = [
+  "Company setup",
+  "Tax registration",
+  "Licensing prep",
 ] as const;
 
 export function ReferenceHero() {
@@ -55,25 +32,26 @@ export function ReferenceHero() {
       <div className="container reference-hero__grid">
         <div className="reference-hero__copy" data-reveal>
           <p className="reference-hero__eyebrow">
+            <span className="reference-hero__eyebrow-dot" aria-hidden="true"></span>
             Registration, licensing, and consultation support
           </p>
 
           <h1 id="reference-hero-title" className="reference-hero__title">
-            Build the business. We keep setup, compliance, and follow-through moving.
+            Setup. Filing. Follow-through. One workflow that keeps moving.
           </h1>
 
           <p className="reference-hero__lead">
-            Exxonim handles company registration, tax filing, business licensing,
-            and institutional submissions through one practical workflow for founders,
-            NGOs, and regulated operators.
+            Exxonim helps businesses, NGOs, and institutions handle company
+            registration, tax setup, licensing, and regulator-facing submissions
+            without turning critical operations into admin drag.
           </p>
 
           <div className="reference-hero__actions">
-            <a className="reference-hero__button reference-hero__button--primary" href={routes.services}>
-              See More Services
+            <a className="reference-hero__button reference-hero__button--primary" href={routes.contact}>
+              Request Consultation
             </a>
-            <a className="reference-hero__button reference-hero__button--secondary" href={routes.tracking}>
-              Track Your Consultation
+            <a className="reference-hero__button reference-hero__button--secondary" href={routes.services}>
+              Explore Services
             </a>
           </div>
 
@@ -84,48 +62,42 @@ export function ReferenceHero() {
               </span>
             ))}
           </div>
-        </div>
 
-        <div className="reference-hero__visual" data-reveal>
-          <article className="reference-hero__panel">
-            <div className="reference-hero__panel-top">
-              <div>
-                <span className="reference-hero__panel-label">Active workflow</span>
-                <h2 className="reference-hero__panel-title">
-                  One desk for setup, filing, and regulator follow-through.
-                </h2>
-              </div>
-              <span className="reference-hero__panel-badge">Open</span>
-            </div>
-
-            <p className="reference-hero__panel-copy">
-              Start with the filing that matters now. Exxonim keeps the documentation,
-              regulator-facing steps, and follow-up clear enough to keep moving.
-            </p>
-
-            <div className="reference-hero__service-grid">
-              {serviceGroups.map((group) => (
-                <article key={group.title} className="reference-hero__service-card">
-                  <span className="reference-hero__service-label">{group.title}</span>
-                  <ul className="reference-hero__service-list">
-                    {group.items.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </article>
-              ))}
-            </div>
-          </article>
-
-          <div className="reference-hero__signal-grid">
-            {quickSignals.map((signal) => (
-              <article key={signal.label} className="reference-hero__signal">
-                <span className="reference-hero__signal-label">{signal.label}</span>
-                <strong>{signal.title}</strong>
-                <p>{signal.copy}</p>
+          <div className="reference-hero__notes" aria-label="How Exxonim supports clients">
+            {operationalNotes.map((note) => (
+              <article key={note.label} className="reference-hero__note">
+                <span>{note.label}</span>
+                <strong>{note.value}</strong>
               </article>
             ))}
           </div>
+        </div>
+
+        <div className="reference-hero__visual" data-reveal aria-hidden="true">
+          <span className="reference-hero__status">Active now</span>
+          <div className="reference-hero__mesh"></div>
+          <div className="reference-hero__glow reference-hero__glow--top"></div>
+          <div className="reference-hero__glow reference-hero__glow--bottom"></div>
+          <div className="reference-hero__shape reference-hero__shape--one"></div>
+          <div className="reference-hero__shape reference-hero__shape--two"></div>
+          <div className="reference-hero__shape reference-hero__shape--three"></div>
+
+          <article className="reference-hero__overlay">
+            <div className="reference-hero__overlay-media">
+              <span className="reference-hero__overlay-play"></span>
+            </div>
+
+            <div className="reference-hero__overlay-copy">
+              <span className="reference-hero__overlay-label">Operational desk</span>
+              <strong>Registration, tax setup, and licensing prep in one queue.</strong>
+
+              <div className="reference-hero__overlay-tags">
+                {workflowTags.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </section>

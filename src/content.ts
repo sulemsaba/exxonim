@@ -1,7 +1,5 @@
 import type {
   BrandAssets,
-  HeroMetric,
-  HeroSlide,
   InsightPost,
   NavLink,
   ServiceNavGroup,
@@ -79,53 +77,6 @@ export const serviceNavGroups: ServiceNavGroup[] = [
       "MEMART Preparation",
       "Revenue Forecasting",
     ],
-  },
-];
-
-export const heroSlides: HeroSlide[] = [
-  {
-    label: "Registration desk",
-    videoSrc: "",
-    title: "Company and organization setup",
-    description:
-      "Entity formation, business name filing, NGO support, and trademark registration handled with clearer documentation flow.",
-  },
-  {
-    label: "Compliance desk",
-    videoSrc: "",
-    title: "TIN, returns, and statutory filing",
-    description:
-      "TRA registration, annual returns, and compliance submissions organized to keep businesses current and submission-ready.",
-  },
-  {
-    label: "Licensing desk",
-    videoSrc: "",
-    title: "Licensing and regulated approvals",
-    description:
-      "Business licenses, BOT-linked approvals, and institutional registrations coordinated with follow-up that keeps moving.",
-  },
-];
-
-export const heroMetrics: HeroMetric[] = [
-  {
-    title: "Company and NGO Setup",
-    description: "Formation support from name search to final registration.",
-    iconClass: "icon-bars",
-  },
-  {
-    title: "Tax and Returns",
-    description: "TIN application and statutory filing support.",
-    iconClass: "icon-people",
-  },
-  {
-    title: "Licensing Support",
-    description: "Local licenses and regulator-facing applications.",
-    iconClass: "icon-bolt",
-  },
-  {
-    title: "Business Support",
-    description: "Plans, statements, and readiness for next decisions.",
-    iconClass: "icon-eye",
   },
 ];
 

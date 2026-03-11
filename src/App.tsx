@@ -1,14 +1,11 @@
 import { useEffect, useRef } from "react";
 import {
   brand,
-  heroMetrics,
-  heroSlides,
   insightPosts,
   stackItems,
 } from "./content";
 import { Footer } from "./components/Footer";
 import { Navigation } from "./components/Navigation";
-import { useAutoRotatingIndex } from "./hooks/useAutoRotatingIndex";
 import { useRevealOnScroll } from "./hooks/useRevealOnScroll";
 import { useStackCardDepth } from "./hooks/useStackCardDepth";
 import { useTheme } from "./hooks/useTheme";
@@ -27,7 +24,6 @@ interface AppProps {
 
 export default function App({ initialPathname }: AppProps) {
   const { theme, toggleTheme } = useTheme();
-  const activeSlideIndex = useAutoRotatingIndex(heroSlides.length, 2600);
   const railRef = useRef<HTMLDivElement>(null);
   const pathname =
     typeof window === "undefined"
@@ -109,12 +105,7 @@ export default function App({ initialPathname }: AppProps) {
 
   const page =
     pathname === normalizePathname(routes.about) ? (
-      <AboutPage
-        slides={heroSlides}
-        metrics={heroMetrics}
-        activeSlideIndex={activeSlideIndex}
-        stackItems={stackItems}
-      />
+      <AboutPage stackItems={stackItems} />
     ) : pathname === normalizePathname(routes.services) ? (
       <ServicesPage />
     ) : pathname === normalizePathname(routes.tracking) ? (
