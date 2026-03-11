@@ -3347,6 +3347,8 @@ html[data-theme="dark"] .blog-card__media::before {
 
 html[data-theme="dark"] .landing-section-heading p:last-child,
 html[data-theme="dark"] .reference-hero__lead,
+html[data-theme="dark"] .reference-hero__panel-copy,
+html[data-theme="dark"] .reference-hero__signal p,
 html[data-theme="dark"] .landing-hero__lead,
 html[data-theme="dark"] .hero-feature-card__copy,
 html[data-theme="dark"] .hero-side-card p,
@@ -3366,6 +3368,8 @@ html[data-theme="dark"] .metric-card p {
 
 html[data-theme="dark"] .landing-chip,
 html[data-theme="dark"] .reference-hero__chip,
+html[data-theme="dark"] .reference-hero__service-card,
+html[data-theme="dark"] .reference-hero__signal,
 html[data-theme="dark"] .partner-band__chip,
 html[data-theme="dark"] .hero-service-list__item,
 html[data-theme="dark"] .service-catalog__service,
@@ -3378,6 +3382,9 @@ html[data-theme="dark"] .page-list__item {
 }
 
 html[data-theme="dark"] .reference-hero__eyebrow,
+html[data-theme="dark"] .reference-hero__panel-label,
+html[data-theme="dark"] .reference-hero__service-label,
+html[data-theme="dark"] .reference-hero__signal-label,
 html[data-theme="dark"] .hero-feature-card__eyebrow,
 html[data-theme="dark"] .hero-side-card__label,
 html[data-theme="dark"] .tracking-card__eyebrow,
@@ -3387,6 +3394,7 @@ html[data-theme="dark"] .page-card__eyebrow {
 }
 
 html[data-theme="dark"] .hero-feature-card__status,
+html[data-theme="dark"] .reference-hero__panel-badge,
 html[data-theme="dark"] .tracking-card__badge,
 html[data-theme="dark"] .service-catalog__index,
 html[data-theme="dark"] .resource-card__tag {
@@ -3403,6 +3411,18 @@ html[data-theme="dark"] .reference-hero__button--secondary {
   color: rgba(255, 255, 255, 0.94);
   border-color: rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .reference-hero__panel {
+  border-color: rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(8, 29, 31, 0.96), rgba(7, 24, 26, 0.94)),
+    radial-gradient(circle at top right, rgba(44, 139, 145, 0.2), transparent 46%);
+}
+
+html[data-theme="dark"] .reference-hero__service-list li,
+html[data-theme="dark"] .reference-hero__signal strong {
+  color: rgba(248, 251, 255, 0.92);
 }
 
 html[data-theme="dark"] .landing-cta--primary {
@@ -3433,6 +3453,7 @@ html[data-theme="dark"] .resource-card__media {
 }
 
 @media (max-width: 1100px) {
+  .reference-hero__grid,
   .landing-hero__grid,
   .tracking-grid,
   .page-grid {
@@ -3448,6 +3469,15 @@ html[data-theme="dark"] .resource-card__media {
 @media (max-width: 767px) {
   .reference-hero {
     padding: calc(var(--header-height) + 1.5rem) 0 3.75rem;
+  }
+
+  .reference-hero__panel-top {
+    display: grid;
+  }
+
+  .reference-hero__service-grid,
+  .reference-hero__signal-grid {
+    grid-template-columns: 1fr;
   }
 
   .reference-hero__actions {
