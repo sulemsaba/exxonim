@@ -71,26 +71,6 @@ function bootstrapDocumentShell() {
     link.setAttribute("fetchpriority", "high");
     link.setAttribute("data-exxonim", "logo-preload");
   });
-
-  ensureLink('link[data-exxonim="preconnect-google"]', (link) => {
-    link.rel = "preconnect";
-    link.href = "https://fonts.googleapis.com";
-    link.setAttribute("data-exxonim", "preconnect-google");
-  });
-
-  ensureLink('link[data-exxonim="preconnect-gstatic"]', (link) => {
-    link.rel = "preconnect";
-    link.href = "https://fonts.gstatic.com";
-    link.crossOrigin = "anonymous";
-    link.setAttribute("data-exxonim", "preconnect-gstatic");
-  });
-
-  ensureLink('link[data-exxonim="manrope-font"]', (link) => {
-    link.rel = "stylesheet";
-    link.href =
-      "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap";
-    link.setAttribute("data-exxonim", "manrope-font");
-  });
 }
 
 bootstrapDocumentShell();

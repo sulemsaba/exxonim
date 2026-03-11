@@ -113,7 +113,7 @@ const footerStyles = String.raw`
 .footer-shell__tagline{
   margin:0;
   max-width:15rem;
-  font-family:"Manrope", sans-serif;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   font-size:.95rem;
   font-weight:500;
   line-height:1.7;
@@ -130,7 +130,7 @@ const footerStyles = String.raw`
   background:linear-gradient(90deg, #2c8b91, #86cfd3);
   color:#052326;
   text-decoration:none;
-  font-family:"Manrope", sans-serif;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   font-size:.95rem;
   font-weight:800;
   transition:transform 220ms ease, box-shadow 220ms ease;
@@ -171,7 +171,7 @@ const footerStyles = String.raw`
 .footer-shell__list a,
 .footer-shell__list span{
   display:block;
-  font-family:"Manrope", sans-serif;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   font-size:.95rem;
   font-weight:500;
   line-height:1.65;
@@ -222,7 +222,7 @@ const footerStyles = String.raw`
 
 .footer-shell__bottom p{
   margin:0;
-  font-family:"Manrope", sans-serif;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   font-size:.88rem;
   font-weight:500;
   letter-spacing:.04em;

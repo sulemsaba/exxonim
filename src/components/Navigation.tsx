@@ -99,7 +99,7 @@ const navigationStyles = String.raw`
 .nav-shell,
 .nav-shell__mobile{
   --nav-mono:ui-monospace,"SFMono-Regular","Menlo","Monaco","Consolas","Liberation Mono","Courier New",monospace;
-  --nav-sans:"Manrope",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --nav-sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --nav-ease:cubic-bezier(.25,1,.25,1);
   --nav-pill-bg:rgba(0,0,0,.06);
   --nav-pill-border:rgba(0,0,0,.05);

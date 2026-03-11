@@ -105,7 +105,7 @@ export default function App({ initialPathname }: AppProps) {
 
   const page =
     pathname === normalizePathname(routes.about) ? (
-      <AboutPage stackItems={stackItems} />
+      <AboutPage />
     ) : pathname === normalizePathname(routes.services) ? (
       <ServicesPage />
     ) : pathname === normalizePathname(routes.tracking) ? (
