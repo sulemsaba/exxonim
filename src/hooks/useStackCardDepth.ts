@@ -17,6 +17,10 @@ export function useStackCardDepth() {
       return;
     }
 
+    const reducedMotionQuery = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    );
+
     const resetDepth = () => {
       cardInners.forEach((inner) => {
         if (!inner) {
@@ -29,7 +33,7 @@ export function useStackCardDepth() {
     };
 
     const updateDepth = () => {
-      if (window.innerWidth < 861) {
+      if (window.innerWidth < 1280 || reducedMotionQuery.matches) {
         resetDepth();
         return;
       }
@@ -64,14 +68,19 @@ export function useStackCardDepth() {
           0,
           1
         );
-        const scale = 1 - progress * 0.048;
-        const translateY = progress * 34;
-        const brightness = 1 - progress * 0.08;
+        // Ease the outgoing card down and smaller as the next card enters view.
+        const easedProgress = 1 - Math.pow(1 - progress, 2.2);
+        const scale = 1 - easedProgress * 0.075;
+        const translateY = easedProgress * 68;
+        const brightness = 1 - easedProgress * 0.08;
+        const saturation = 1 - easedProgress * 0.12;
 
         inner.style.transform =
           `translate3d(0, ${translateY.toFixed(2)}px, 0) ` +
           `scale(${scale.toFixed(5)})`;
-        inner.style.filter = `brightness(${brightness.toFixed(5)})`;
+        inner.style.filter =
+          `brightness(${brightness.toFixed(3)}) ` +
+          `saturate(${saturation.toFixed(3)})`;
       });
     };
 
@@ -93,10 +102,12 @@ export function useStackCardDepth() {
     updateDepth();
     window.addEventListener("scroll", queueDepthUpdate, { passive: true });
     window.addEventListener("resize", updateDepth);
+    reducedMotionQuery.addEventListener("change", updateDepth);
 
     return () => {
       window.removeEventListener("scroll", queueDepthUpdate);
       window.removeEventListener("resize", updateDepth);
+      reducedMotionQuery.removeEventListener("change", updateDepth);
       resetDepth();
     };
   }, []);

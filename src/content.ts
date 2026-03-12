@@ -1,4 +1,9 @@
 import type {
+  BlogAuthor,
+  BlogCategory,
+  BlogCategoryId,
+  BlogFeaturedSlot,
+  BlogPost,
   BrandAssets,
   InsightPost,
   NavLink,
@@ -19,7 +24,7 @@ export const primaryNavLinks: NavLink[] = [
   { label: "Blogs", href: routes.resources },
   { label: "Contact", href: routes.contact },
   { label: "Career", href: routes.career },
-  { label: "FAQs", href: `${routes.resources}#faq` },
+  { label: "FAQs", href: `${routes.home}#faq` },
 ];
 
 export const serviceNavGroups: ServiceNavGroup[] = [
@@ -129,33 +134,350 @@ export const stackItems: StackItem[] = [
   },
 ];
 
-export const insightPosts: InsightPost[] = [
+export const blogCategories: BlogCategory[] = [
   {
-    tag: "Guide",
-    title: "Documents to prepare before company registration starts",
+    id: "registration",
+    label: "Registration",
     description:
-      "A practical shortlist for founders who want the filing process to move without repeated document requests.",
-    mediaLabel: "Registration prep",
+      "Entity setup, ownership structure, naming, and filing preparation before launch.",
   },
   {
-    tag: "Checklist",
-    title: "How to keep annual statutory returns from becoming a backlog",
+    id: "tax-compliance",
+    label: "Tax & Compliance",
     description:
-      "A simple way to map deadlines, responsible parties, and missing records before penalties stack up.",
-    mediaLabel: "Compliance rhythm",
+      "TIN setup, returns rhythm, filing control, and practical compliance discipline.",
   },
   {
-    tag: "Guide",
-    title: "When a business license application needs more than the base form",
+    id: "licensing-permits",
+    label: "Licensing & Permits",
     description:
-      "Supporting documents, sector requirements, and follow-up points that usually determine whether the application stalls.",
-    mediaLabel: "Licensing notes",
+      "Business licenses, sector approvals, and regulator follow-through for operating clearance.",
   },
   {
-    tag: "2026",
-    title: "What investors and lenders expect from a usable business plan",
+    id: "institutional-support",
+    label: "Institutional Support",
     description:
-      "A strong plan is less about volume and more about assumptions, structure, and financial coherence.",
-    mediaLabel: "Planning support",
+      "CRB, ERB, OSHA, NSSF, WCF, and other registrations that keep operations submission-ready.",
+  },
+  {
+    id: "business-support",
+    label: "Business Support",
+    description:
+      "Business plans, financial preparation, governance documents, and readiness material for decisions.",
   },
 ];
+
+export const blogAuthors: BlogAuthor[] = [
+  {
+    id: "aisha-msuya",
+    name: "Aisha Msuya",
+    role: "Business Registration Advisor",
+  },
+  {
+    id: "kelvin-mrema",
+    name: "Kelvin Mrema",
+    role: "Tax & Filing Lead",
+  },
+  {
+    id: "neema-kweka",
+    name: "Neema Kweka",
+    role: "Licensing Coordinator",
+  },
+  {
+    id: "rehema-kibwana",
+    name: "Rehema Kibwana",
+    role: "Institutional Compliance Officer",
+  },
+  {
+    id: "daniel-massawe",
+    name: "Daniel Massawe",
+    role: "Business Planning Consultant",
+  },
+];
+
+export const blogPosts: BlogPost[] = [
+  {
+    slug: "founder-registration-pack-that-keeps-moving",
+    title: "The Founder Registration Pack That Keeps a New Filing Moving",
+    excerpt:
+      "A lean document pack, ownership checklist, and naming sequence that reduce avoidable back-and-forth at the start.",
+    publishedAt: "2026-03-10",
+    categoryId: "registration",
+    authorId: "aisha-msuya",
+    mediaLabel: "Setup workflow",
+    featuredSlot: "hero",
+    featuredOnHome: true,
+    readTimeMinutes: 5,
+    relatedSlugs: [
+      "how-to-check-name-readiness-before-brela-submission",
+      "documents-founders-should-gather-before-first-filing-call",
+      "choosing-between-business-name-and-company-registration",
+    ],
+  },
+  {
+    slug: "annual-returns-control-rhythm-for-small-teams",
+    title: "Annual Returns Without the Last-Minute Panic",
+    excerpt:
+      "A practical control rhythm for smaller teams that need owners, evidence, and deadlines clear before penalties pile up.",
+    publishedAt: "2026-03-04",
+    categoryId: "tax-compliance",
+    authorId: "kelvin-mrema",
+    mediaLabel: "Compliance rhythm",
+    featuredSlot: "popular",
+    featuredOnHome: true,
+    readTimeMinutes: 4,
+    relatedSlugs: [
+      "building-a-filing-calendar-that-survives-busy-months",
+      "monthly-vat-prep-checks-before-submission-day",
+      "what-to-review-before-you-respond-to-a-tax-notice",
+    ],
+  },
+  {
+    slug: "business-license-renewal-delays-and-how-to-avoid-them",
+    title: "What Usually Delays a Business License Renewal",
+    excerpt:
+      "Most delays come from missing supporting records, mismatched business activity details, and late follow-through after submission.",
+    publishedAt: "2026-02-19",
+    categoryId: "licensing-permits",
+    authorId: "neema-kweka",
+    mediaLabel: "Approval notes",
+    featuredSlot: "editors-pick",
+    featuredOnHome: true,
+    readTimeMinutes: 4,
+    relatedSlugs: [
+      "when-a-license-application-needs-more-than-the-base-form",
+      "preparing-sector-approval-documents-without-rework",
+      "how-to-escalate-licensing-follow-up-with-clean-records",
+    ],
+  },
+  {
+    slug: "documents-founders-should-gather-before-first-filing-call",
+    title: "Documents Founders Should Gather Before the First Filing Call",
+    excerpt:
+      "Gathering identity records, ownership details, intended activities, and address evidence early makes the first review more productive.",
+    publishedAt: "2026-02-14",
+    categoryId: "registration",
+    authorId: "aisha-msuya",
+    mediaLabel: "Readiness pack",
+    featuredOnHome: true,
+    readTimeMinutes: 3,
+  },
+  {
+    slug: "building-a-filing-calendar-that-survives-busy-months",
+    title: "Build a Filing Calendar That Still Works During Busy Months",
+    excerpt:
+      "Use a short filing calendar built around trigger dates, handoff owners, and evidence folders instead of one spreadsheet no one updates.",
+    publishedAt: "2026-02-11",
+    categoryId: "tax-compliance",
+    authorId: "kelvin-mrema",
+    mediaLabel: "Calendar design",
+    readTimeMinutes: 5,
+  },
+  {
+    slug: "when-a-license-application-needs-more-than-the-base-form",
+    title: "When a License Application Needs More Than the Base Form",
+    excerpt:
+      "A base form rarely carries the process alone. Supporting letters, sector evidence, and prior approvals usually decide the pace.",
+    publishedAt: "2026-01-26",
+    categoryId: "licensing-permits",
+    authorId: "neema-kweka",
+    mediaLabel: "Licensing pack",
+    readTimeMinutes: 4,
+  },
+  {
+    slug: "how-to-prepare-crb-erb-registration-with-fewer-resubmissions",
+    title: "Prepare CRB or ERB Registration With Fewer Resubmissions",
+    excerpt:
+      "Qualification records, supporting signatures, and scope clarity matter more than volume when professional registrations are reviewed.",
+    publishedAt: "2026-01-22",
+    categoryId: "institutional-support",
+    authorId: "rehema-kibwana",
+    mediaLabel: "Institutional filing",
+    readTimeMinutes: 6,
+  },
+  {
+    slug: "what-investors-actually-check-in-a-business-plan",
+    title: "What Investors and Lenders Actually Check in a Business Plan",
+    excerpt:
+      "They look for coherent assumptions, a defendable model, and a plan that connects operations to financial reality.",
+    publishedAt: "2026-01-20",
+    categoryId: "business-support",
+    authorId: "daniel-massawe",
+    mediaLabel: "Plan readiness",
+    readTimeMinutes: 5,
+  },
+  {
+    slug: "monthly-vat-prep-checks-before-submission-day",
+    title: "Monthly VAT Checks to Run Before Submission Day",
+    excerpt:
+      "A short pre-submission review helps catch missing invoices, coding gaps, and reconciliation issues before they become repeated corrections.",
+    publishedAt: "2026-01-16",
+    categoryId: "tax-compliance",
+    authorId: "kelvin-mrema",
+    mediaLabel: "VAT control",
+    readTimeMinutes: 4,
+  },
+  {
+    slug: "preparing-sector-approval-documents-without-rework",
+    title: "Preparing Sector Approval Documents Without Rework",
+    excerpt:
+      "A clean evidence pack, consistent names, and a simple approval tracker prevent many licensing files from stalling midway.",
+    publishedAt: "2026-01-14",
+    categoryId: "licensing-permits",
+    authorId: "neema-kweka",
+    mediaLabel: "Sector approvals",
+    readTimeMinutes: 4,
+  },
+  {
+    slug: "osha-nssf-and-wcf-registration-sequencing-for-new-employers",
+    title: "How New Employers Should Sequence OSHA, NSSF, and WCF Registration",
+    excerpt:
+      "A better sequence reduces duplicate submissions and helps operations teams prepare the right records for each step.",
+    publishedAt: "2026-01-09",
+    categoryId: "institutional-support",
+    authorId: "rehema-kibwana",
+    mediaLabel: "Employer setup",
+    readTimeMinutes: 5,
+  },
+  {
+    slug: "financial-statements-and-memart-what-needs-to-match",
+    title: "Financial Statements and MEMART: What Needs to Match",
+    excerpt:
+      "Founders often treat governance documents and financials separately, but weak alignment shows up quickly during review.",
+    publishedAt: "2026-01-07",
+    categoryId: "business-support",
+    authorId: "daniel-massawe",
+    mediaLabel: "Governance fit",
+    readTimeMinutes: 4,
+  },
+  {
+    slug: "how-to-check-name-readiness-before-brela-submission",
+    title: "How to Check Name Readiness Before a BRELA Submission",
+    excerpt:
+      "A short internal screening can reduce avoidable name rejection and make the incorporation sequence cleaner from day one.",
+    publishedAt: "2026-01-05",
+    categoryId: "registration",
+    authorId: "aisha-msuya",
+    mediaLabel: "Name screening",
+    readTimeMinutes: 3,
+  },
+  {
+    slug: "what-to-review-before-you-respond-to-a-tax-notice",
+    title: "What to Review Before You Respond to a Tax Notice",
+    excerpt:
+      "Before replying, confirm the filing trail, underlying records, and the exact period in question so the response is defensible.",
+    publishedAt: "2025-12-18",
+    categoryId: "tax-compliance",
+    authorId: "kelvin-mrema",
+    mediaLabel: "Response prep",
+    readTimeMinutes: 4,
+  },
+];
+
+const slotOrder: BlogFeaturedSlot[] = ["hero", "popular", "editors-pick"];
+const categoryMap = new Map(blogCategories.map((category) => [category.id, category]));
+const authorMap = new Map(blogAuthors.map((author) => [author.id, author]));
+
+function toUtcDateValue(date: string) {
+  return new Date(`${date}T00:00:00Z`).getTime();
+}
+
+function comparePostsNewestFirst(a: BlogPost, b: BlogPost) {
+  return toUtcDateValue(b.publishedAt) - toUtcDateValue(a.publishedAt);
+}
+
+export function getBlogCategoryById(categoryId: BlogCategoryId) {
+  return categoryMap.get(categoryId);
+}
+
+export function getBlogAuthorById(authorId: string) {
+  return authorMap.get(authorId);
+}
+
+export function getFeaturedBlogPosts(posts: BlogPost[] = blogPosts) {
+  return posts
+    .filter((post) => post.featuredSlot)
+    .sort((left, right) => {
+      const leftIndex = slotOrder.indexOf(left.featuredSlot as BlogFeaturedSlot);
+      const rightIndex = slotOrder.indexOf(
+        right.featuredSlot as BlogFeaturedSlot
+      );
+
+      if (leftIndex === rightIndex) {
+        return comparePostsNewestFirst(left, right);
+      }
+
+      return leftIndex - rightIndex;
+    });
+}
+
+export function getVisibleBlogPosts(options?: {
+  posts?: BlogPost[];
+  categoryId?: BlogCategoryId | "all";
+  limit?: number;
+  excludeSlugs?: string[];
+}) {
+  const {
+    posts = blogPosts,
+    categoryId = "all",
+    limit,
+    excludeSlugs = [],
+  } = options ?? {};
+  const blockedSlugs = new Set(excludeSlugs);
+  const visiblePosts = posts
+    .filter((post) => {
+      if (blockedSlugs.has(post.slug)) {
+        return false;
+      }
+
+      if (categoryId === "all") {
+        return true;
+      }
+
+      return post.categoryId === categoryId;
+    })
+    .sort(comparePostsNewestFirst);
+
+  return typeof limit === "number" ? visiblePosts.slice(0, limit) : visiblePosts;
+}
+
+export function getHomeInsightPosts(posts: BlogPost[] = blogPosts): InsightPost[] {
+  const selectedPosts = posts
+    .filter((post) => post.featuredOnHome)
+    .sort(comparePostsNewestFirst)
+    .slice(0, 4);
+
+  return selectedPosts.map((post) => ({
+    tag: getBlogCategoryById(post.categoryId)?.label ?? "Insight",
+    title: post.title,
+    description: post.excerpt,
+    mediaLabel: post.mediaLabel,
+  }));
+}
+
+export function getRelatedBlogPosts(
+  slug: string,
+  posts: BlogPost[] = blogPosts
+) {
+  const currentPost = posts.find((post) => post.slug === slug);
+
+  if (!currentPost) {
+    return [];
+  }
+
+  if (currentPost.relatedSlugs?.length) {
+    return currentPost.relatedSlugs
+      .map((relatedSlug) => posts.find((post) => post.slug === relatedSlug))
+      .filter((post): post is BlogPost => Boolean(post))
+      .slice(0, 3);
+  }
+
+  return posts
+    .filter(
+      (post) =>
+        post.slug !== currentPost.slug &&
+        post.categoryId === currentPost.categoryId
+    )
+    .sort(comparePostsNewestFirst)
+    .slice(0, 3);
+}

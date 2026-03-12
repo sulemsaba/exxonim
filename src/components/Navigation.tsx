@@ -79,7 +79,7 @@ const resourcesColumns: MenuColumn[] = [
     borderLeft: true,
     items: [
       { label: "Sectors", href: `${routes.home}#industries` },
-      { label: "FAQ", href: `${routes.resources}#faq` },
+      { label: "FAQ", href: `${routes.home}#faq` },
     ],
   },
 ];
@@ -92,7 +92,7 @@ const mobileServices = [
 
 const mobileResources = [
   { label: "Blog", href: `${routes.resources}#resources` },
-  { label: "FAQ", href: `${routes.resources}#faq` },
+  { label: "FAQ", href: `${routes.home}#faq` },
 ] as const;
 
 const navigationStyles = String.raw`
@@ -313,7 +313,8 @@ button.nav-shell__tab.nav-shell__trigger{
 .nav-shell__tab:hover,
 .nav-shell__tab:focus-visible,
 .nav-shell__tab[data-active="true"],
-.nav-shell__trigger[aria-expanded="true"]{
+.nav-shell__trigger[aria-expanded="true"],
+.nav-shell__tab[data-open="true"]{
   background:var(--nav-pill-active-bg);
   color:var(--nav-pill-active-text);
   box-shadow:0 1px 3px rgba(0,0,0,.1);
@@ -334,7 +335,8 @@ button.nav-shell__tab.nav-shell__trigger{
   opacity:.6;
 }
 
-.nav-shell__trigger[aria-expanded="true"] .nav-shell__chevron{
+.nav-shell__trigger[aria-expanded="true"] .nav-shell__chevron,
+.nav-shell__trigger[data-open="true"] .nav-shell__chevron{
   transform:rotate(-180deg);
 }
 
@@ -1258,21 +1260,19 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
                 onFocusCapture={() => setDesktopMenu("services")}
                 onBlur={handleDropdownBlur}
               >
-                <button
+                <a
                   className="nav-shell__tab nav-shell__trigger"
-                  type="button"
+                  href={routes.services}
                   data-active={servicesActive}
-                  aria-expanded={desktopMenu === "services"}
-                  aria-controls={servicesMenuId}
-                  onClick={() =>
-                    setDesktopMenu((menu) => (menu === "services" ? null : "services"))
-                  }
+                  data-open={desktopMenu === "services" ? "true" : undefined}
+                  aria-current={servicesActive ? "page" : undefined}
+                  onClick={closeAllMenus}
                 >
                   Services
                   <svg className="nav-shell__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
                   </svg>
-                </button>
+                </a>
 
                 <div
                   id={servicesMenuId}
@@ -1303,21 +1303,19 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
                 onFocusCapture={() => setDesktopMenu("resources")}
                 onBlur={handleDropdownBlur}
               >
-                <button
+                <a
                   className="nav-shell__tab nav-shell__trigger"
-                  type="button"
+                  href={routes.resources}
                   data-active={resourcesActive}
-                  aria-expanded={desktopMenu === "resources"}
-                  aria-controls={resourcesMenuId}
-                  onClick={() =>
-                    setDesktopMenu((menu) => (menu === "resources" ? null : "resources"))
-                  }
+                  data-open={desktopMenu === "resources" ? "true" : undefined}
+                  aria-current={resourcesActive ? "page" : undefined}
+                  onClick={closeAllMenus}
                 >
                   Resources
                   <svg className="nav-shell__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
                   </svg>
-                </button>
+                </a>
 
                 <div
                   id={resourcesMenuId}

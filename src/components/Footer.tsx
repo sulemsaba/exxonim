@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
-import type { BrandAssets } from "../types";
+import type { BrandAssets, Theme } from "../types";
 import { routes } from "../routes";
 
 interface FooterProps {
   brand: BrandAssets;
+  theme: Theme;
 }
 
 const footerAnchorIds = [
@@ -16,7 +17,7 @@ const quickLinks = [
   { label: "About", href: routes.about },
   { label: "Services", href: routes.services },
   { label: "Track Your Consultation", href: routes.tracking },
-  { label: "Help (FAQ)", href: `${routes.resources}#faq` },
+  { label: "Help (FAQ)", href: `${routes.home}#faq` },
   { label: "Blogs", href: routes.resources },
   { label: "Contact", href: routes.contact },
 ];
@@ -30,14 +31,45 @@ const otherResources = [
 
 const footerStyles = String.raw`
 .footer-shell{
+  --footer-border:rgba(255,255,255,.10);
+  --footer-surface:#041214;
+  --footer-text:#ffffff;
+  --footer-muted:rgba(188,204,207,.80);
+  --footer-subtle:rgba(197,212,214,.78);
+  --footer-eyebrow:rgba(196,222,225,.56);
+  --footer-link-hover:#86cfd3;
+  --footer-cta-bg:linear-gradient(90deg, #2c8b91, #86cfd3);
+  --footer-cta-text:#052326;
+  --footer-cta-shadow:0 12px 32px rgba(12,82,88,.28);
+  --footer-cta-shadow-hover:0 16px 38px rgba(12,82,88,.32);
+  --footer-veil:rgba(4,18,20,.80);
+  --footer-logo-shadow:drop-shadow(0 12px 28px rgba(0,0,0,.28));
+  --footer-tagline-accent:rgba(134,207,211,.7);
   position:relative;
   isolation:isolate;
   overflow:hidden;
   z-index:10;
   margin-top:4.5rem;
-  border-top:1px solid rgba(255,255,255,.10);
-  background:#041214;
-  color:#ffffff;
+  border-top:1px solid var(--footer-border);
+  background:var(--footer-surface);
+  color:var(--footer-text);
+}
+
+.footer-shell[data-theme="dark"]{
+  --footer-border:rgba(4,18,20,.12);
+  --footer-surface:#cad6d7;
+  --footer-text:#071a1d;
+  --footer-muted:rgba(7,26,29,.82);
+  --footer-subtle:rgba(7,26,29,.74);
+  --footer-eyebrow:rgba(7,26,29,.56);
+  --footer-link-hover:#094449;
+  --footer-cta-bg:linear-gradient(90deg, #083d42, #0e6f77);
+  --footer-cta-text:#f4fbfb;
+  --footer-cta-shadow:0 12px 32px rgba(4,18,20,.16);
+  --footer-cta-shadow-hover:0 16px 38px rgba(4,18,20,.2);
+  --footer-veil:rgba(232,238,238,.62);
+  --footer-logo-shadow:drop-shadow(0 10px 22px rgba(4,18,20,.12));
+  --footer-tagline-accent:rgba(9,68,73,.55);
 }
 
 .footer-shell,
@@ -65,7 +97,7 @@ const footerStyles = String.raw`
 
 .footer-shell__veil{
   z-index:1;
-  background:rgba(4,18,20,.80);
+  background:var(--footer-veil);
   backdrop-filter:blur(32px);
   -webkit-backdrop-filter:blur(32px);
   pointer-events:none;
@@ -98,7 +130,7 @@ const footerStyles = String.raw`
 .footer-shell__brand-link{
   display:inline-flex;
   align-items:center;
-  color:#ffffff;
+  color:var(--footer-text);
   text-decoration:none;
 }
 
@@ -107,17 +139,66 @@ const footerStyles = String.raw`
   width:min(12rem, 100%);
   height:auto;
   object-fit:contain;
-  filter:drop-shadow(0 12px 28px rgba(0,0,0,.28));
+  filter:var(--footer-logo-shadow);
 }
 
 .footer-shell__tagline{
   margin:0;
   max-width:15rem;
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  position:relative;
+  display:inline-block;
+  font-family:"EB Garamond", serif;
   font-size:.95rem;
   font-weight:500;
+  font-style:italic;
   line-height:1.7;
-  color:rgba(197,212,214,.78);
+  color:var(--footer-subtle);
+  animation:footer-tagline-float 5.8s ease-in-out infinite;
+}
+
+.footer-shell__tagline::after{
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:-.18rem;
+  width:100%;
+  height:1px;
+  background:linear-gradient(90deg, transparent 0%, var(--footer-tagline-accent) 20%, transparent 100%);
+  transform-origin:left center;
+  animation:footer-tagline-line 4.8s ease-in-out infinite;
+  opacity:.35;
+  pointer-events:none;
+}
+
+@keyframes footer-tagline-float{
+  0%,100%{
+    transform:translateY(0);
+    opacity:1;
+  }
+
+  50%{
+    transform:translateY(-2px);
+    opacity:.92;
+  }
+}
+
+@keyframes footer-tagline-line{
+  0%,100%{
+    transform:scaleX(.45);
+    opacity:.14;
+  }
+
+  50%{
+    transform:scaleX(1);
+    opacity:.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .footer-shell__tagline,
+  .footer-shell__tagline::after{
+    animation:none;
+  }
 }
 
 .footer-shell__cta{
@@ -127,20 +208,20 @@ const footerStyles = String.raw`
   min-height:2.9rem;
   padding:.85rem 1.35rem;
   border-radius:.85rem;
-  background:linear-gradient(90deg, #2c8b91, #86cfd3);
-  color:#052326;
+  background:var(--footer-cta-bg);
+  color:var(--footer-cta-text);
   text-decoration:none;
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   font-size:.95rem;
   font-weight:800;
   transition:transform 220ms ease, box-shadow 220ms ease;
-  box-shadow:0 12px 32px rgba(12,82,88,.28);
+  box-shadow:var(--footer-cta-shadow);
 }
 
 .footer-shell__cta:hover,
 .footer-shell__cta:focus-visible{
   transform:translateY(-2px);
-  box-shadow:0 16px 38px rgba(12,82,88,.32);
+  box-shadow:var(--footer-cta-shadow-hover);
   outline:none;
 }
 
@@ -157,7 +238,7 @@ const footerStyles = String.raw`
   font-weight:800;
   letter-spacing:.18em;
   text-transform:uppercase;
-  color:rgba(196,222,225,.56);
+  color:var(--footer-eyebrow);
 }
 
 .footer-shell__list{
@@ -175,14 +256,14 @@ const footerStyles = String.raw`
   font-size:.95rem;
   font-weight:500;
   line-height:1.65;
-  color:rgba(188,204,207,.80);
+  color:var(--footer-muted);
   text-decoration:none;
   transition:color 180ms ease;
 }
 
 .footer-shell__list a:hover,
 .footer-shell__list a:focus-visible{
-  color:#86cfd3;
+  color:var(--footer-link-hover);
   outline:none;
 }
 
@@ -201,7 +282,7 @@ const footerStyles = String.raw`
   width:1.1rem;
   height:1.1rem;
   margin-top:.2rem;
-  color:#86cfd3;
+  color:var(--footer-link-hover);
 }
 
 .footer-shell__contact-copy--stacked{
@@ -212,7 +293,7 @@ const footerStyles = String.raw`
 .footer-shell__bottom{
   margin-top:4rem;
   padding-top:1.5rem;
-  border-top:1px solid rgba(255,255,255,.10);
+  border-top:1px solid var(--footer-border);
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -226,7 +307,7 @@ const footerStyles = String.raw`
   font-size:.88rem;
   font-weight:500;
   letter-spacing:.04em;
-  color:rgba(146,163,166,.78);
+  color:var(--footer-muted);
 }
 
 @media (max-width: 1023px){
@@ -294,7 +375,23 @@ function roundRectPath(
   context.closePath();
 }
 
-function getTileColor(value: number) {
+function getTileColor(value: number, theme: Theme) {
+  if (theme === "dark") {
+    if (value < 0.05) {
+      return "#b9cbcc";
+    }
+
+    if (value < 0.3) {
+      return "#9cb2b4";
+    }
+
+    if (value < 0.6) {
+      return "#5d8084";
+    }
+
+    return "#083d42";
+  }
+
   if (value < 0.05) {
     return "#000000";
   }
@@ -310,7 +407,7 @@ function getTileColor(value: number) {
   return "#86cfd3";
 }
 
-export function Footer({ brand }: FooterProps) {
+export function Footer({ brand, theme }: FooterProps) {
   const footerRef = useRef<HTMLElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const pointerRef = useRef({ x: -1000, y: -1000, active: false });
@@ -364,14 +461,6 @@ export function Footer({ brand }: FooterProps) {
       );
     };
 
-    const startLoop = () => {
-      if (animationFrameRef.current !== null) {
-        return;
-      }
-
-      animationFrameRef.current = window.requestAnimationFrame(renderFrame);
-    };
-
     const renderFrame = () => {
       animationFrameRef.current = null;
 
@@ -382,7 +471,7 @@ export function Footer({ brand }: FooterProps) {
       const pointer = pointerRef.current;
       let hasEnergy = false;
 
-      context.fillStyle = "#000000";
+      context.fillStyle = theme === "dark" ? "#cad6d7" : "#041214";
       context.fillRect(0, 0, width, height);
 
       for (let row = 0; row < rows; row += 1) {
@@ -412,7 +501,7 @@ export function Footer({ brand }: FooterProps) {
           grid[column][row] = value;
           hasEnergy = hasEnergy || value > 0;
 
-          context.fillStyle = getTileColor(value);
+          context.fillStyle = getTileColor(value, theme);
           roundRectPath(context, tileX, tileY, tileSize, tileSize, cornerRadius);
           context.fill();
         }
@@ -421,6 +510,14 @@ export function Footer({ brand }: FooterProps) {
       if (pointer.active || hasEnergy) {
         startLoop();
       }
+    };
+
+    const startLoop = () => {
+      if (animationFrameRef.current !== null) {
+        return;
+      }
+
+      animationFrameRef.current = window.requestAnimationFrame(renderFrame);
     };
 
     const updatePointer = (clientX: number, clientY: number) => {
@@ -449,11 +546,11 @@ export function Footer({ brand }: FooterProps) {
 
     const handlePointerLeave = () => {
       resetPointer();
-      startLoop();
+      renderFrame();
     };
 
     initializeCanvas();
-    startLoop();
+    renderFrame();
 
     footer.addEventListener("pointermove", handlePointerMove, { passive: true });
     footer.addEventListener("pointerleave", handlePointerLeave, { passive: true });
@@ -463,7 +560,7 @@ export function Footer({ brand }: FooterProps) {
 
     const handleResize = () => {
       initializeCanvas();
-      startLoop();
+      renderFrame();
     };
 
     const resizeObserver =
@@ -494,15 +591,23 @@ export function Footer({ brand }: FooterProps) {
 
       if (animationFrameRef.current !== null) {
         window.cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
+
+      resetPointer();
     };
-  }, []);
+  }, [theme]);
 
   return (
     <>
       <style>{footerStyles}</style>
 
-      <footer ref={footerRef} className="footer-shell" id="site-footer">
+      <footer
+        ref={footerRef}
+        className="footer-shell"
+        data-theme={theme}
+        id="site-footer"
+      >
         {footerAnchorIds.map((anchorId) => (
           <span
             key={anchorId}
@@ -529,7 +634,7 @@ export function Footer({ brand }: FooterProps) {
               >
                 <img
                   className="footer-shell__brand-logo"
-                  src={brand.lightLogoSrc}
+                  src={theme === "dark" ? brand.lightLogoSrc : brand.darkLogoSrc}
                   alt={brand.name}
                   loading="lazy"
                 />

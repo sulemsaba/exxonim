@@ -10,6 +10,10 @@ export const routes = {
 
 export const staticRoutePaths = Object.values(routes);
 
+export function resourcePost(slug: string) {
+  return `${routes.resources}${slug}/`;
+}
+
 export function normalizePathname(pathname: string | undefined) {
   if (!pathname || pathname === "/") {
     return "/";

@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import {
   brand,
-  insightPosts,
+  blogPosts,
+  getHomeInsightPosts,
   stackItems,
 } from "./content";
 import { Footer } from "./components/Footer";
@@ -96,8 +97,9 @@ export default function App({ initialPathname }: AppProps) {
     });
   };
 
-  const sharedResourcePageProps = {
-    posts: insightPosts,
+  const homeInsightPosts = getHomeInsightPosts(blogPosts);
+  const homeInsightsProps = {
+    posts: homeInsightPosts,
     railRef,
     onPrev: () => scrollRail(-1),
     onNext: () => scrollRail(1),
@@ -111,7 +113,7 @@ export default function App({ initialPathname }: AppProps) {
     ) : pathname === normalizePathname(routes.tracking) ? (
       <TrackConsultationPage />
     ) : pathname === normalizePathname(routes.resources) ? (
-      <ResourcesPage {...sharedResourcePageProps} />
+      <ResourcesPage />
     ) : pathname === normalizePathname(routes.career) ? (
       <CareerPage />
     ) : pathname === normalizePathname(routes.contact) ? (
@@ -119,7 +121,7 @@ export default function App({ initialPathname }: AppProps) {
     ) : (
       <HomePage
         stackItems={stackItems}
-        {...sharedResourcePageProps}
+        {...homeInsightsProps}
       />
     );
 
@@ -142,7 +144,7 @@ export default function App({ initialPathname }: AppProps) {
         {page}
       </main>
 
-      <Footer brand={brand} />
+      <Footer brand={brand} theme={theme} />
 
       <a
         className="whatsapp-float"
