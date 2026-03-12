@@ -79,7 +79,7 @@ const resourcesColumns: MenuColumn[] = [
     borderLeft: true,
     items: [
       { label: "Sectors", href: `${routes.home}#industries` },
-      { label: "FAQ", href: `${routes.home}#faq` },
+      { label: "FAQ", href: routes.faq },
     ],
   },
 ];
@@ -92,7 +92,7 @@ const mobileServices = [
 
 const mobileResources = [
   { label: "Blog", href: `${routes.resources}#resources` },
-  { label: "FAQ", href: `${routes.home}#faq` },
+  { label: "FAQ", href: routes.faq },
 ] as const;
 
 const navigationStyles = String.raw`
@@ -281,7 +281,7 @@ html[data-theme="dark"] .nav-shell__logo--dark{
 
 .nav-shell__tab,
 a.nav-shell__tab.nav-shell__link,
-button.nav-shell__tab.nav-shell__trigger{
+.nav-shell__tab.nav-shell__trigger{
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -312,9 +312,7 @@ button.nav-shell__tab.nav-shell__trigger{
 
 .nav-shell__tab:hover,
 .nav-shell__tab:focus-visible,
-.nav-shell__tab[data-active="true"],
-.nav-shell__trigger[aria-expanded="true"],
-.nav-shell__tab[data-open="true"]{
+.nav-shell__tab[data-active="true"]{
   background:var(--nav-pill-active-bg);
   color:var(--nav-pill-active-text);
   box-shadow:0 1px 3px rgba(0,0,0,.1);
@@ -333,6 +331,12 @@ button.nav-shell__tab.nav-shell__trigger{
   width:12px;
   height:12px;
   opacity:.6;
+}
+
+.nav-shell__tab:hover .nav-shell__chevron,
+.nav-shell__tab:focus-visible .nav-shell__chevron,
+.nav-shell__tab[data-active="true"] .nav-shell__chevron{
+  opacity:1;
 }
 
 .nav-shell__trigger[aria-expanded="true"] .nav-shell__chevron,

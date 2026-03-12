@@ -1,934 +1,873 @@
-import type { CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import type { StackItem } from "../types";
 
 interface StackSectionProps {
   items: StackItem[];
 }
 
+type FeatureRow = {
+  title: string;
+  description?: string;
+};
+
+type ExtendedStackItem = StackItem & {
+  emphasis?: string;
+  ctaHref?: string;
+  ctaLabel?: string;
+  featureRows?: FeatureRow[];
+};
+
 const stackSectionStyles = String.raw`
-  .stack-section {
+  :root {
+    --surface: #efefef;
+    --surface-2: #f6f6f6;
+    --surface-3: #e3e3e3;
+    --border: rgba(15, 23, 42, 0.12);
+    --text: #111111;
+    --text-soft: rgba(17, 17, 17, 0.74);
+    --muted: rgba(17, 17, 17, 0.5);
+    --green: #0d5b00;
+    --green-dark: #063f00;
+    --shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  .scroll-snap-wrapper {
     position: relative;
-    padding: 0 0 4rem;
-    overflow: visible;
+    background: var(--surface);
+    overflow-x: clip;
+    overflow-y: visible;
   }
 
-  .stack-section::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: -4%;
-    width: min(120rem, 160vw);
-    height: 72rem;
-    transform: translateX(-50%);
-    border-radius: 50%;
-    background:
-      radial-gradient(circle at center, rgba(13, 102, 106, 0.12) 0 30%, transparent 31%),
-      repeating-radial-gradient(circle at center, rgba(9, 68, 73, 0.08) 0 2px, transparent 3px 42px);
-    opacity: 0.38;
-    pointer-events: none;
-  }
-
-  .stack-section__inner {
-    display: block;
-    padding-bottom: 0;
-  }
-
-  .stack-card {
-    position: sticky;
-    top: var(--header-height);
-    display: flex;
-    align-items: stretch;
-    min-height: calc(100vh - var(--header-height));
-    z-index: calc(10 + var(--stack-index));
-  }
-
-  .stack-card__inner {
+  .stack-snap-item {
     position: relative;
-    width: 100%;
-    min-height: calc(100vh - var(--header-height));
-    overflow: hidden;
-    isolation: isolate;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    min-height: 100vh;
+    background: var(--surface);
     transform-origin: center top;
-    will-change: transform, filter;
-    background:
-      radial-gradient(circle at top right, rgba(44, 139, 145, 0.18), transparent 32%),
-      linear-gradient(180deg, #fbfefe, #e7f4f5);
+    will-change: transform;
+    transition: none;
   }
 
-  .stack-card__inner::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.5), transparent 42%),
-      radial-gradient(circle at bottom left, rgba(128, 184, 188, 0.12), transparent 28%);
-    pointer-events: none;
-    z-index: -1;
+  @media (min-width: 1024px) {
+    .stack-snap-item {
+      position: sticky;
+      top: calc(var(--stack-index) * 40px);
+    }
   }
 
-  .stack-card:nth-child(2) .stack-card__inner {
-    background:
-      radial-gradient(circle at top right, rgba(44, 139, 145, 0.16), transparent 32%),
-      linear-gradient(180deg, #f8fcfd, #deeff1);
-  }
-
-  .stack-card:nth-child(3) .stack-card__inner {
-    background:
-      radial-gradient(circle at top right, rgba(28, 118, 124, 0.16), transparent 32%),
-      linear-gradient(180deg, #f6fbfb, #d5ebed);
-  }
-
-  .stack-card__content {
-    display: grid;
-    grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
-    gap: clamp(2rem, 3vw, 3.6rem);
-    align-items: center;
-    width: min(1360px, calc(100% - 2rem));
-    min-height: calc(100vh - var(--header-height));
+  .stack-inner-container {
+    max-width: 1320px;
     margin: 0 auto;
-    padding: 2.9rem 0 3.4rem;
+    min-height: 100vh;
+    padding: 6.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
-  .stack-copy {
-    color: rgba(17, 35, 37, 0.92);
+  @media (max-width: 1023px) {
+    .stack-snap-item {
+      width: 100%;
+      margin-left: 0;
+      min-height: auto;
+    }
+
+    .stack-inner-container {
+      min-height: auto;
+      padding: 4rem 1rem;
+    }
   }
 
-  .stack-pill {
-    display: inline-flex;
+  .statement-layout,
+  .feature-layout {
+    display: grid;
     align-items: center;
-    gap: 0.7rem;
-    margin: 0 0 1.4rem;
-    padding: 0.72rem 1.15rem;
-    border: 1px solid rgba(9, 68, 73, 0.16);
-    border-radius: 999px;
-    background: rgba(247, 252, 252, 0.74);
-    color: rgba(17, 35, 37, 0.82);
-    font-size: 0.92rem;
-    font-weight: 800;
-    letter-spacing: 0.01em;
-    width: fit-content;
+    gap: 4rem;
   }
 
-  .stack-pill span {
-    display: inline-block;
-    width: 0.8rem;
-    height: 0.8rem;
-    border-radius: 50%;
-    background: linear-gradient(180deg, #2f9aa1, #0d666a);
+  .statement-layout {
+    grid-template-columns: minmax(0, 1.05fr) minmax(420px, 560px);
   }
 
-  .stack-copy h2 {
+  .feature-layout {
+    grid-template-columns: minmax(420px, 620px) minmax(0, 1fr);
+  }
+
+  @media (max-width: 1023px) {
+    .statement-layout,
+    .feature-layout {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  .copy-block {
+    max-width: 650px;
+  }
+
+  .stack-title {
     margin: 0;
-    max-width: 16ch;
-    font-family: var(--font-display);
-    font-size: clamp(2.7rem, 4.2vw, 4.55rem);
-    font-weight: 400;
-    line-height: 0.94;
-    letter-spacing: -0.045em;
-    color: rgba(17, 35, 37, 0.96);
-  }
-
-  .stack-subtitle,
-  .stack-note {
-    line-height: 1.6;
+    color: var(--text);
+    font-size: clamp(2.5rem, 5vw, 4.8rem);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.04em;
   }
 
   .stack-subtitle {
-    max-width: 26rem;
-    margin: 0.9rem 0 0;
-    font-size: clamp(1.08rem, 1.6vw, 1.32rem);
-    font-weight: 800;
-    color: rgba(17, 35, 37, 0.8);
+    margin: 1.4rem 0 0;
+    color: var(--text);
+    font-size: clamp(1.25rem, 2vw, 1.65rem);
+    line-height: 1.45;
+    font-weight: 600;
+    max-width: 58rem;
   }
 
-  .stack-note {
-    max-width: 30rem;
-    margin: 1.7rem 0 1.35rem;
-    padding: 1.4rem 1.5rem;
-    border-radius: 24px;
-    border: 1px solid rgba(9, 68, 73, 0.12);
-    background: rgba(247, 252, 252, 0.88);
-    box-shadow: none;
-    font-size: clamp(0.98rem, 1.45vw, 1.08rem);
-    color: rgba(17, 35, 37, 0.78);
-    text-shadow: none;
+  .stack-desc {
+    margin: 1.6rem 0 0;
+    color: var(--text-soft);
+    font-size: clamp(1rem, 1.2vw, 1.15rem);
+    line-height: 1.75;
+    max-width: 44rem;
+  }
+
+  .stack-emphasis {
+    margin: 1rem 0 0;
+    color: var(--text);
+    font-size: clamp(1.05rem, 1.35vw, 1.35rem);
+    line-height: 1.5;
+    font-style: italic;
+    font-weight: 600;
+  }
+
+  .stack-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2.2rem;
   }
 
   .stack-cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: fit-content;
-    min-height: 3.25rem;
-    padding: 0.9rem 1.3rem;
-    border: 1px solid rgba(9, 68, 73, 0.12);
+    min-height: 50px;
+    padding: 0 1.2rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.86);
-    color: rgba(17, 35, 37, 0.92);
-    font-size: 0.95rem;
-    font-weight: 700;
     text-decoration: none;
-    transition:
-      transform 180ms ease,
-      border-color 180ms ease,
-      background-color 180ms ease,
-      color 180ms ease;
-  }
-
-  .stack-cta:hover {
-    transform: translateY(-1px);
-    border-color: rgba(9, 68, 73, 0.2);
-    background: #ffffff;
-  }
-
-  .stack-visual {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    align-self: stretch;
-  }
-
-  .stack-window {
-    width: min(100%, 52rem);
-    align-self: center;
-    overflow: hidden;
-    border: 1px solid rgba(9, 68, 73, 0.12);
-    border-radius: 28px;
-    background: rgba(252, 254, 254, 0.74);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-    box-shadow: 0 28px 80px rgba(9, 68, 73, 0.14);
-  }
-
-  .stack-window__top {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-    padding: 1rem 1.15rem;
-    border-bottom: 1px solid rgba(9, 68, 73, 0.08);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(241, 248, 249, 0.78));
-  }
-
-  .stack-window__heading {
-    display: grid;
-    gap: 0.14rem;
-  }
-
-  .stack-window__eyebrow {
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: rgba(17, 35, 37, 0.48);
-  }
-
-  .stack-window__heading strong {
     font-size: 0.98rem;
-    line-height: 1.1;
-    color: rgba(17, 35, 37, 0.92);
+    font-weight: 500;
+    line-height: 1;
+    transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
   }
 
-  .stack-window__tag {
-    margin-left: auto;
-    padding: 0.42rem 0.74rem;
-    border-radius: 999px;
-    background: rgba(13, 102, 106, 0.12);
-    color: rgba(9, 68, 73, 0.82);
-    font-size: 0.74rem;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    white-space: nowrap;
+  .stack-cta--primary {
+    background: var(--green);
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(13, 91, 0, 0.18);
   }
 
-  .stack-window__body {
-    min-height: 31rem;
-    padding: 1.2rem;
-    background:
-      radial-gradient(circle at top right, rgba(44, 139, 145, 0.14), transparent 34%),
-      linear-gradient(180deg, rgba(234, 246, 247, 0.94), rgba(243, 250, 250, 0.9));
+  .stack-cta--primary:hover {
+    transform: translateY(-2px);
+    background: var(--green-dark);
   }
 
-  .stack-window__body .device-board {
-    height: 100%;
-  }
-
-  .stack-window__bar--reporting {
-    width: 78%;
-  }
-
-  .stack-window__bar--decision {
-    width: 71%;
-  }
-
-  .stack-window__bar--followthrough {
-    width: 84%;
-  }
-
-  .window-dots {
+  .stack-cta__arrow {
     display: inline-flex;
-    gap: 0.4rem;
+    margin-left: 0.65rem;
+    font-size: 1.1rem;
+    line-height: 1;
   }
 
-  .window-dots span {
-    display: block;
-    width: 0.85rem;
-    height: 0.85rem;
-    border-radius: 50%;
-  }
-
-  .window-dots span:nth-child(1) { background: #da4d44; }
-  .window-dots span:nth-child(2) { background: #d8a625; }
-  .window-dots span:nth-child(3) { background: #32b35b; }
-
-  .device-board {
-    display: grid;
-    gap: 0.85rem;
-    height: 100%;
-  }
-
-  .device-board__top {
+  .study-visual-shell {
+    width: 100%;
+    max-width: 560px;
+    min-height: 520px;
+    padding: 2.2rem;
+    border-radius: 34px;
+    background: #e7e7e7;
+    border: 1px solid rgba(17, 17, 17, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.85rem;
+    align-items: center;
+    justify-content: center;
   }
 
-  .device-board__top strong {
-    display: block;
-    margin-top: 0.24rem;
-    font-size: 1rem;
-    line-height: 1.2;
-    color: rgba(17, 35, 37, 0.92);
+  .study-visual-track {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 1.25rem;
+    overflow: hidden;
   }
 
-  .device-board__eyebrow {
-    font-size: 0.68rem;
+  .study-card {
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+    flex: 0 0 auto;
+  }
+
+  .study-card--light {
+    width: 188px;
+    min-height: 412px;
+    background: #dcdcdc;
+    color: #1b1b1b;
+    padding: 1rem 1rem 1.2rem;
+  }
+
+  .study-card--dark {
+    width: 198px;
+    min-height: 432px;
+    background: #050505;
+    color: #ffffff;
+    padding: 1rem 1rem 1.2rem;
+  }
+
+  .study-card--narrow {
+    width: 116px;
+    min-height: 430px;
+    background: #0a0a0a;
+    color: #ffffff;
+    padding: 0.9rem 0.75rem 1rem;
+  }
+
+  .study-topline {
+    width: 3.6rem;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.7;
+    margin-bottom: 1rem;
+  }
+
+  .study-brand {
+    font-size: 0.78rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: rgba(17, 35, 37, 0.52);
+    opacity: 0.9;
   }
 
-  .device-board__pill {
+  .study-small {
+    margin-top: 0.75rem;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    opacity: 0.7;
+  }
+
+  .study-big {
+    margin-top: 2rem;
+    font-size: 1.08rem;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .study-paragraph {
+    margin-top: 1rem;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    opacity: 0.82;
+  }
+
+  .study-divider {
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.12;
+    margin: 1rem 0;
+  }
+
+  .study-tag {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.45rem 0.72rem;
-    border-radius: 999px;
-    background: rgba(13, 102, 106, 0.12);
-    color: rgba(9, 68, 73, 0.86);
-    font-size: 0.74rem;
+    min-height: 22px;
+    padding: 0 0.45rem;
+    border-radius: 6px;
+    background: rgba(13, 91, 0, 0.16);
+    color: #1ec466;
+    font-size: 0.62rem;
     font-weight: 700;
-    white-space: nowrap;
+    text-transform: uppercase;
   }
 
-  .device-priority-grid,
-  .device-owner-grid {
+  .study-list {
+    margin-top: 0.8rem;
     display: grid;
-    gap: 0.7rem;
+    gap: 0.75rem;
   }
 
-  .device-priority-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .device-priority-card,
-  .device-kpi-card,
-  .device-agenda-item,
-  .device-progress-card,
-  .device-owner-card,
-  .device-roadmap__stage {
-    border: 1px solid rgba(9, 68, 73, 0.1);
-    background: rgba(255, 255, 255, 0.72);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
-  }
-
-  .device-priority-card {
-    display: grid;
-    gap: 0.35rem;
-    padding: 0.9rem;
-    border-radius: 18px;
-  }
-
-  .device-priority-card span,
-  .device-kpi-card span,
-  .device-progress-card span,
-  .device-owner-card span,
-  .device-roadmap__stage span:last-child {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    color: rgba(17, 35, 37, 0.54);
-  }
-
-  .device-priority-card strong,
-  .device-kpi-card strong,
-  .device-agenda-item strong,
-  .device-owner-card strong,
-  .device-roadmap__stage strong {
-    font-size: 0.95rem;
-    color: rgba(17, 35, 37, 0.92);
-  }
-
-  .device-priority-card p,
-  .device-owner-card p {
-    margin: 0;
-    font-size: 0.78rem;
+  .study-list-item {
+    font-size: 0.68rem;
     line-height: 1.45;
-    color: rgba(17, 35, 37, 0.64);
+    opacity: 0.88;
   }
 
-  .device-priority-card--accent {
-    background:
-      linear-gradient(180deg, rgba(13, 102, 106, 0.12), rgba(255, 255, 255, 0.84)),
-      rgba(255, 255, 255, 0.82);
-  }
-
-  .device-kpi-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.7rem;
-  }
-
-  .device-kpi-card {
-    display: grid;
-    gap: 0.22rem;
-    padding: 0.85rem 0.9rem;
-    border-radius: 16px;
-  }
-
-  .device-cadence-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    gap: 0.8rem;
-    flex: 1;
-  }
-
-  .device-agenda-list,
-  .device-progress-list,
-  .device-roadmap {
-    display: grid;
-    gap: 0.6rem;
-  }
-
-  .device-agenda-item {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 0.7rem;
-    align-items: center;
-    padding: 0.8rem 0.9rem;
-    border-radius: 16px;
-  }
-
-  .device-agenda-item__day,
-  .device-agenda-item__time {
-    font-size: 0.72rem;
+  .study-narrow-title {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.2;
     font-weight: 700;
-    color: rgba(17, 35, 37, 0.54);
   }
 
-  .device-progress-card {
-    display: grid;
-    gap: 0.45rem;
-    padding: 0.8rem 0.9rem;
-    border-radius: 16px;
+  .study-narrow-copy {
+    margin-top: 0.7rem;
+    font-size: 0.66rem;
+    line-height: 1.5;
+    opacity: 0.78;
   }
 
-  .device-progress-track {
-    height: 0.5rem;
-    border-radius: 999px;
-    background: rgba(9, 68, 73, 0.1);
+  .compose-visual {
+    width: 100%;
+    max-width: 620px;
+    min-height: 470px;
+    border-radius: 32px;
     overflow: hidden;
+    position: relative;
+    background:
+      radial-gradient(circle at top right, rgba(182, 198, 255, 0.9) 0%, rgba(182, 198, 255, 0.55) 14%, transparent 36%),
+      linear-gradient(135deg, #ffffff 0%, #f4f4f4 48%, #e7e7e7 100%);
+    border: 1px solid rgba(17, 17, 17, 0.08);
   }
 
-  .device-progress-bar {
-    display: block;
-    height: 100%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, #2f9aa1, #0d666a);
+  .compose-visual::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(135deg, transparent 0 74%, rgba(181, 203, 234, 0.65) 74% 76%, transparent 76%),
+      radial-gradient(circle at 90% 10%, rgba(255,255,255,0.8), transparent 34%);
+    pointer-events: none;
   }
 
-  .device-roadmap__stage {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 0.7rem;
+  .compose-rail {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 5rem;
+    background: linear-gradient(180deg, rgba(255,255,255,0.2), rgba(226,226,226,0.7));
+    border-right: 1px solid rgba(17,17,17,0.06);
+  }
+
+  .compose-card {
+    position: absolute;
+    left: 5.5rem;
+    top: 3.2rem;
+    width: min(68%, 420px);
+    min-height: 360px;
+    border-radius: 28px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(236,236,236,0.88));
+    box-shadow: 0 22px 50px rgba(120, 120, 160, 0.16);
+    border: 1px solid rgba(17, 17, 17, 0.06);
+    padding: 1.4rem 1.4rem 1.3rem;
+    backdrop-filter: blur(8px);
+  }
+
+  .compose-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #222;
+  }
+
+  .compose-label {
+    margin-top: 1.2rem;
+    font-size: 0.82rem;
+    color: rgba(17,17,17,0.64);
+  }
+
+  .compose-pill {
+    display: inline-flex;
     align-items: center;
-    padding: 0.82rem 0.9rem;
-    border-radius: 16px;
+    margin-top: 0.55rem;
+    min-height: 30px;
+    padding: 0 0.9rem;
+    border-radius: 999px;
+    background: rgba(176, 176, 243, 0.4);
+    color: #404066;
+    font-size: 0.82rem;
+    font-weight: 600;
   }
 
-  .device-roadmap__dot {
-    width: 0.72rem;
-    height: 0.72rem;
-    border-radius: 50%;
-    background: rgba(9, 68, 73, 0.18);
+  .compose-row {
+    margin-top: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid rgba(17,17,17,0.08);
+    font-size: 0.9rem;
+    color: #2b2b2b;
   }
 
-  .device-roadmap__stage--done .device-roadmap__dot,
-  .device-roadmap__stage--active .device-roadmap__dot {
-    background: linear-gradient(180deg, #2f9aa1, #0d666a);
+  .compose-subject {
+    margin-top: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.86rem;
+    color: rgba(17,17,17,0.72);
   }
 
-  .device-owner-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .compose-input {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 0.9rem;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.04);
+    color: #333;
+    font-size: 0.88rem;
   }
 
-  .device-owner-card {
+  .compose-message {
+    margin-top: 1.15rem;
+    padding: 1.1rem 1rem;
+    border: 1.5px solid rgba(0,0,0,0.24);
+    border-radius: 22px;
+    background: rgba(255,255,255,0.26);
+  }
+
+  .compose-message h4 {
+    margin: 0 0 0.7rem;
+    font-size: 1rem;
+    color: #1a1a1a;
+  }
+
+  .compose-message p {
+    margin: 0;
+    color: rgba(17,17,17,0.52);
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  .feature-side {
+    width: 100%;
+    max-width: 570px;
+  }
+
+  .feature-list {
+    margin-top: 0.4rem;
+  }
+
+  .feature-row {
     display: grid;
-    gap: 0.3rem;
-    padding: 0.9rem;
-    border-radius: 18px;
+    grid-template-columns: 46px 1fr 28px;
+    align-items: start;
+    gap: 1rem;
+    padding: 1.15rem 0;
+    border-top: 1px solid rgba(17,17,17,0.18);
   }
 
-  html[data-theme="dark"] .stack-section::before {
-    background:
-      radial-gradient(circle at center, rgba(44, 139, 145, 0.18) 0 30%, transparent 31%),
-      repeating-radial-gradient(circle at center, rgba(92, 176, 181, 0.09) 0 2px, transparent 3px 42px);
+  .feature-row:first-child {
+    border-top: 0;
+    padding-top: 0;
   }
 
-  html[data-theme="dark"] .stack-card__inner {
-    border-color: rgba(255, 255, 255, 0.08);
-    background:
-      radial-gradient(circle at top right, rgba(44, 139, 145, 0.22), transparent 32%),
-      linear-gradient(180deg, #0a2326, #061619);
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3);
+  .feature-row:last-child {
+    border-bottom: 1px solid rgba(17,17,17,0.18);
   }
 
-  html[data-theme="dark"] .stack-card__inner::before {
-    background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.06), transparent 42%),
-      radial-gradient(circle at bottom left, rgba(44, 139, 145, 0.12), transparent 28%);
+  .feature-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #d1d5db;
+    color: #111;
+    font-size: 0.95rem;
+    font-weight: 700;
   }
 
-  html[data-theme="dark"] .stack-card:nth-child(2) .stack-card__inner {
-    background:
-      radial-gradient(circle at top right, rgba(44, 139, 145, 0.2), transparent 32%),
-      linear-gradient(180deg, #0c2c2f, #081b1e);
+  .feature-row.is-active .feature-badge {
+    background: var(--green);
+    color: #fff;
   }
 
-  html[data-theme="dark"] .stack-card:nth-child(3) .stack-card__inner {
-    background:
-      radial-gradient(circle at top right, rgba(27, 108, 113, 0.18), transparent 32%),
-      linear-gradient(180deg, #10363a, #091d20);
+  .feature-text h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(1.55rem, 2vw, 1.95rem);
+    line-height: 1.2;
+    font-weight: 700;
   }
 
-  html[data-theme="dark"] .stack-pill {
-    border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.06);
-    color: rgba(244, 247, 255, 0.92);
+  .feature-text p {
+    margin: 0.9rem 0 0;
+    color: var(--text-soft);
+    font-size: 1.02rem;
+    line-height: 1.6;
+    max-width: 34rem;
   }
 
-  html[data-theme="dark"] .stack-copy h2 {
-    color: rgba(244, 247, 255, 0.96);
+  .feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--green);
+    font-size: 1.5rem;
+    line-height: 1;
+    padding-top: 0.1rem;
   }
 
-  html[data-theme="dark"] .stack-subtitle,
-  html[data-theme="dark"] .stack-note {
-    color: rgba(226, 232, 255, 0.72);
-  }
-
-  html[data-theme="dark"] .stack-note {
-    border-color: rgba(255, 255, 255, 0.08);
-    background: rgba(7, 24, 26, 0.9);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
-  }
-
-  html[data-theme="dark"] .stack-cta {
-    color: rgba(244, 247, 255, 0.92);
-    border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.06);
-  }
-
-  html[data-theme="dark"] .stack-cta:hover {
-    border-color: rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  html[data-theme="dark"] .device-board__top strong,
-  html[data-theme="dark"] .device-priority-card strong,
-  html[data-theme="dark"] .device-kpi-card strong,
-  html[data-theme="dark"] .device-agenda-item strong,
-  html[data-theme="dark"] .device-owner-card strong,
-  html[data-theme="dark"] .device-roadmap__stage strong {
-    color: rgba(244, 247, 255, 0.94);
-  }
-
-  html[data-theme="dark"] .device-board__eyebrow,
-  html[data-theme="dark"] .device-priority-card span,
-  html[data-theme="dark"] .device-kpi-card span,
-  html[data-theme="dark"] .device-progress-card span,
-  html[data-theme="dark"] .device-owner-card span,
-  html[data-theme="dark"] .device-roadmap__stage span:last-child,
-  html[data-theme="dark"] .device-agenda-item__day,
-  html[data-theme="dark"] .device-agenda-item__time {
-    color: rgba(226, 232, 255, 0.6);
-  }
-
-  html[data-theme="dark"] .device-priority-card,
-  html[data-theme="dark"] .device-kpi-card,
-  html[data-theme="dark"] .device-agenda-item,
-  html[data-theme="dark"] .device-progress-card,
-  html[data-theme="dark"] .device-owner-card,
-  html[data-theme="dark"] .device-roadmap__stage {
-    border-color: rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  }
-
-  html[data-theme="dark"] .device-priority-card--accent {
-    background:
-      linear-gradient(180deg, rgba(44, 139, 145, 0.18), rgba(255, 255, 255, 0.05)),
-      rgba(255, 255, 255, 0.05);
-  }
-
-  html[data-theme="dark"] .device-board__pill {
-    background: rgba(44, 139, 145, 0.18);
-    color: rgba(244, 247, 255, 0.92);
-  }
-
-  html[data-theme="dark"] .device-priority-card p,
-  html[data-theme="dark"] .device-owner-card p {
-    color: rgba(226, 232, 255, 0.7);
-  }
-
-  html[data-theme="dark"] .device-progress-track {
-    background: rgba(255, 255, 255, 0.08);
-  }
-
-  html[data-theme="dark"] .device-roadmap__dot {
-    background: rgba(255, 255, 255, 0.18);
-  }
-
-  html[data-theme="dark"] .stack-window {
-    border-color: rgba(255, 255, 255, 0.08);
-    background: rgba(7, 24, 26, 0.78);
-    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.3);
-  }
-
-  html[data-theme="dark"] .stack-window__top {
-    border-bottom-color: rgba(255, 255, 255, 0.06);
-    background: linear-gradient(180deg, rgba(14, 35, 38, 0.9), rgba(7, 24, 26, 0.8));
-  }
-
-  html[data-theme="dark"] .stack-window__eyebrow {
-    color: rgba(198, 224, 226, 0.56);
-  }
-
-  html[data-theme="dark"] .stack-window__heading strong {
-    color: rgba(239, 247, 247, 0.94);
-  }
-
-  html[data-theme="dark"] .stack-window__tag {
-    background: rgba(44, 139, 145, 0.18);
-    color: #86cfd3;
-  }
-
-  html[data-theme="dark"] .stack-window__body {
-    background:
-      radial-gradient(circle at top right, rgba(44, 139, 145, 0.18), transparent 34%),
-      linear-gradient(180deg, rgba(10, 35, 38, 0.96), rgba(8, 27, 30, 0.94));
-  }
-
-  @media (max-width: 1120px) {
-    .stack-card__content {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 1279px) {
-    .stack-copy h2 {
-      max-width: none;
-      letter-spacing: -0.035em;
-    }
-
-    .stack-card {
-      min-height: auto;
-      position: relative;
-      top: auto;
-    }
-
-    .stack-card__inner {
+  @media (max-width: 1023px) {
+    .study-visual-shell,
+    .compose-visual {
+      max-width: 100%;
       min-height: auto;
     }
 
-    .stack-card__content {
-      min-height: auto;
-      padding: 1.5rem 0 2rem;
+    .study-visual-shell {
+      padding: 1.25rem;
     }
 
-    .stack-window__body {
-      min-height: 18rem;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .stack-card__content {
-      width: min(1360px, calc(100% - 1rem));
+    .study-visual-track {
+      gap: 0.9rem;
     }
 
-    .stack-note {
-      padding: 1.15rem;
+    .study-card--light {
+      width: 160px;
+      min-height: 360px;
     }
 
-    .stack-copy h2 {
-      font-size: clamp(2.45rem, 13vw, 3.55rem);
-      line-height: 0.95;
+    .study-card--dark {
+      width: 170px;
+      min-height: 380px;
     }
 
-    .device-board__top,
-    .device-cadence-grid,
-    .device-priority-grid,
-    .device-kpi-row,
-    .device-owner-grid {
-      grid-template-columns: 1fr;
+    .study-card--narrow {
+      width: 100px;
+      min-height: 380px;
     }
 
-    .device-board__top {
-      display: grid;
+    .compose-visual {
+      aspect-ratio: 1.15 / 1;
     }
 
-    .stack-window__top {
-      display: grid;
-      align-items: flex-start;
+    .compose-card {
+      left: 4rem;
+      top: 2.3rem;
+      width: calc(100% - 6rem);
+      min-height: 320px;
     }
 
-    .stack-window__tag {
-      margin-left: 0;
-      justify-self: flex-start;
+    .feature-side {
+      max-width: 100%;
+    }
+
+    .feature-text h3 {
+      font-size: 1.7rem;
+    }
+
+    .stack-actions {
+      margin-top: 1.8rem;
     }
   }
 `;
 
-function renderStackVisual(index: number, item: StackItem) {
-  const viewLabel =
-    index === 0
-      ? "Executive focus"
-      : index === 1
-        ? "Management system"
-        : "Transformation control";
+function renderStudyVisual(index: number) {
+  if (index === 0) {
+    return (
+      <div className="study-visual-shell">
+        <div className="study-visual-track">
+          <div className="study-card study-card--light">
+            <div className="study-topline" />
+            <div className="study-brand">Exxonim</div>
+            <div className="study-small">Registration Overview</div>
+            <div className="study-big">
+              Company, business name, NGO, and trademark setup support.
+            </div>
+            <div className="study-paragraph">
+              Structure first. Delays later become easier to prevent.
+            </div>
+          </div>
 
-  switch (index) {
-    case 0:
-      return (
-        <div className="stack-window stack-window--strategy">
-          <div className="stack-window__top">
-            <div className="window-dots" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
+          <div className="study-card study-card--dark">
+            <div className="study-topline" />
+            <div className="study-brand">Exxonim</div>
+            <div className="study-divider" />
+            <div className="study-paragraph">
+              Clear documentation, coordinated follow-up, and fewer avoidable
+              corrections during setup.
             </div>
-            <div className="stack-window__heading">
-              <span className="stack-window__eyebrow">{viewLabel}</span>
-              <strong>{item.windowTitle}</strong>
+            <div className="study-divider" />
+            <span className="study-tag">Launch ready</span>
+            <div className="study-list">
+              <div className="study-list-item">
+                • Company registration support
+              </div>
+              <div className="study-list-item">
+                • Business name registration
+              </div>
+              <div className="study-list-item">
+                • NGO / organization registration
+              </div>
+              <div className="study-list-item">
+                • Trademark filing support
+              </div>
             </div>
-            <span className="stack-window__tag">{item.windowTag}</span>
           </div>
-          <div className="stack-window__body">
-            <div className="device-board device-board--priorities">
-              <div className="device-board__top">
-                <div>
-                  <span className="device-board__eyebrow">Board Priorities</span>
-                  <strong>12-week leadership agenda</strong>
-                </div>
-                <span className="device-board__pill">3 decisions this month</span>
-              </div>
-              <div className="device-priority-grid">
-                <article className="device-priority-card device-priority-card--accent">
-                  <span>Priority 01</span>
-                  <strong>Margin protection</strong>
-                  <p>Reset pricing discipline and protect profitable client work.</p>
-                </article>
-                <article className="device-priority-card">
-                  <span>Priority 02</span>
-                  <strong>Commercial focus</strong>
-                  <p>Direct leadership attention to the strongest pipeline segments.</p>
-                </article>
-                <article className="device-priority-card">
-                  <span>Priority 03</span>
-                  <strong>Decision speed</strong>
-                  <p>Remove approval drift so teams stop waiting for executive clarity.</p>
-                </article>
-              </div>
-              <div className="device-kpi-row">
-                <div className="device-kpi-card">
-                  <span>Strategic choices</span>
-                  <strong>4 open</strong>
-                </div>
-                <div className="device-kpi-card">
-                  <span>Owners named</span>
-                  <strong>100%</strong>
-                </div>
-                <div className="device-kpi-card">
-                  <span>Review forum</span>
-                  <strong>Tuesday</strong>
-                </div>
-              </div>
+
+          <div className="study-card study-card--narrow">
+            <div className="study-topline" />
+            <div className="study-brand">File</div>
+            <div className="study-narrow-title">Next-step visibility</div>
+            <div className="study-narrow-copy">
+              Better preparation before submission, review, and launch.
             </div>
           </div>
         </div>
-      );
-    case 1:
-      return (
-        <div className="stack-window stack-window--operations">
-          <div className="stack-window__top">
-            <div className="window-dots" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <div className="stack-window__heading">
-              <span className="stack-window__eyebrow">{viewLabel}</span>
-              <strong>{item.windowTitle}</strong>
-            </div>
-            <span className="stack-window__tag">{item.windowTag}</span>
-          </div>
-          <div className="stack-window__body">
-            <div className="device-board device-board--cadence">
-              <div className="device-board__top">
-                <div>
-                  <span className="device-board__eyebrow">Operating Cadence</span>
-                  <strong>Management rhythm redesign</strong>
-                </div>
-                <span className="device-board__pill">Weekly cycle</span>
-              </div>
-              <div className="device-cadence-grid">
-                <div className="device-agenda-list">
-                  <div className="device-agenda-item">
-                    <span className="device-agenda-item__day">Mon</span>
-                    <strong>Executive priorities</strong>
-                    <span className="device-agenda-item__time">45 min</span>
-                  </div>
-                  <div className="device-agenda-item">
-                    <span className="device-agenda-item__day">Wed</span>
-                    <strong>Pipeline and delivery</strong>
-                    <span className="device-agenda-item__time">60 min</span>
-                  </div>
-                  <div className="device-agenda-item">
-                    <span className="device-agenda-item__day">Fri</span>
-                    <strong>Decision clearing</strong>
-                    <span className="device-agenda-item__time">30 min</span>
-                  </div>
-                </div>
-                <div className="device-progress-list">
-                  <div className="device-progress-card">
-                    <span>Reporting quality</span>
-                    <div className="device-progress-track">
-                      <span className="device-progress-bar stack-window__bar--reporting"></span>
-                    </div>
-                  </div>
-                  <div className="device-progress-card">
-                    <span>Decision turnaround</span>
-                    <div className="device-progress-track">
-                      <span className="device-progress-bar stack-window__bar--decision"></span>
-                    </div>
-                  </div>
-                  <div className="device-progress-card">
-                    <span>Execution follow-through</span>
-                    <div className="device-progress-track">
-                      <span className="device-progress-bar stack-window__bar--followthrough"></span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    default:
-      return (
-        <div className="stack-window stack-window--delivery">
-          <div className="stack-window__top">
-            <div className="window-dots" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <div className="stack-window__heading">
-              <span className="stack-window__eyebrow">{viewLabel}</span>
-              <strong>{item.windowTitle}</strong>
-            </div>
-            <span className="stack-window__tag">{item.windowTag}</span>
-          </div>
-          <div className="stack-window__body">
-            <div className="device-board device-board--delivery">
-              <div className="device-board__top">
-                <div>
-                  <span className="device-board__eyebrow">Transformation Office</span>
-                  <strong>Governance and delivery control</strong>
-                </div>
-                <span className="device-board__pill">90-day sequence</span>
-              </div>
-              <div className="device-roadmap">
-                <div className="device-roadmap__stage device-roadmap__stage--done">
-                  <span className="device-roadmap__dot"></span>
-                  <strong>Steering group aligned</strong>
-                  <span>Done</span>
-                </div>
-                <div className="device-roadmap__stage device-roadmap__stage--active">
-                  <span className="device-roadmap__dot"></span>
-                  <strong>Workstreams in motion</strong>
-                  <span>Active</span>
-                </div>
-                <div className="device-roadmap__stage">
-                  <span className="device-roadmap__dot"></span>
-                  <strong>Benefits review locked</strong>
-                  <span>Next</span>
-                </div>
-              </div>
-              <div className="device-owner-grid">
-                <article className="device-owner-card">
-                  <span>Commercial reset</span>
-                  <strong>Managing director</strong>
-                  <p>Owns revenue focus, client mix, and weekly tradeoffs.</p>
-                </article>
-                <article className="device-owner-card">
-                  <span>Operating redesign</span>
-                  <strong>Functional leads</strong>
-                  <p>Drives cadence, reporting standards, and issue escalation.</p>
-                </article>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
+      </div>
+    );
   }
+
+  return (
+    <div className="study-visual-shell">
+      <div className="study-visual-track">
+        <div className="study-card study-card--light">
+          <div className="study-topline" />
+          <div className="study-brand">Exxonim</div>
+          <div className="study-small">Business Readiness Pack</div>
+          <div className="study-big">
+            Compliance, licensing, and institutional support you can act on.
+          </div>
+          <div className="study-paragraph">
+            Prepared documents move faster under review.
+          </div>
+        </div>
+
+        <div className="study-card study-card--dark">
+          <div className="study-topline" />
+          <div className="study-brand">Exxonim</div>
+          <div className="study-divider" />
+          <div className="study-paragraph">
+            Submission-ready support across tax, licensing, registrations, and
+            operating approvals.
+          </div>
+          <div className="study-divider" />
+          <span className="study-tag">Operational readiness</span>
+          <div className="study-list">
+            <div className="study-list-item">• TIN application support</div>
+            <div className="study-list-item">• Annual statutory returns</div>
+            <div className="study-list-item">• OSHA / NSSF / WCF support</div>
+            <div className="study-list-item">• Business plan preparation</div>
+          </div>
+        </div>
+
+        <div className="study-card study-card--narrow">
+          <div className="study-topline" />
+          <div className="study-brand">Review</div>
+          <div className="study-narrow-title">Prepared for decision</div>
+          <div className="study-narrow-copy">
+            Lender, authority, and internal review readiness.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function renderComposeVisual() {
+  return (
+    <div className="compose-visual">
+      <div className="compose-rail" />
+      <div className="compose-card">
+        <div className="compose-title">Service Coordination</div>
+
+        <div className="compose-label">Current workstream</div>
+        <div className="compose-pill">Compliance and approvals</div>
+
+        <div className="compose-row">
+          <span>Client</span>
+          <span>Exxonim Consultation</span>
+        </div>
+
+        <div className="compose-subject">
+          <span>Focus</span>
+          <span className="compose-input">TIN, licensing, returns, and approvals</span>
+        </div>
+
+        <div className="compose-message">
+          <h4>Clear next steps, fewer avoidable delays.</h4>
+          <p>
+            We organize the filing path, documentation, and authority follow-up
+            so the work moves forward with less back-and-forth and better
+            visibility.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function renderStatementCard(item: ExtendedStackItem, index: number) {
+  return (
+    <div className="statement-layout">
+      <div className="copy-block">
+        <h2 className="stack-title">{item.title}</h2>
+        <p className="stack-subtitle">{item.subtitle}</p>
+        <p className="stack-desc">{item.description}</p>
+        {item.emphasis ? <p className="stack-emphasis">{item.emphasis}</p> : null}
+
+        <div className="stack-actions">
+          <a href={item.ctaHref || "#"} className="stack-cta stack-cta--primary">
+            {item.ctaLabel || "Request Consultation"}
+            <span className="stack-cta__arrow">→</span>
+          </a>
+        </div>
+      </div>
+
+      {renderStudyVisual(index)}
+    </div>
+  );
+}
+
+function renderFeatureCard(item: ExtendedStackItem) {
+  const rows =
+    item.featureRows ||
+    [
+      {
+        title: "Registration and Setup",
+        description:
+          "Company registration, business name registration, NGO or organization registration, and trademark filing support before operations begin.",
+      },
+      { title: "Tax, Licensing, and Approvals" },
+      { title: "Institutional Support" },
+      { title: "Track Your Consultation" },
+    ];
+
+  return (
+    <div className="feature-layout">
+      {renderComposeVisual()}
+
+      <div className="feature-side">
+        <div className="feature-list">
+          {rows.map((row, idx) => {
+            const active = idx === 0;
+
+            return (
+              <div
+                key={`${row.title}-${idx}`}
+                className={`feature-row ${active ? "is-active" : ""}`}
+              >
+                <div className="feature-badge">{idx + 1}</div>
+
+                <div className="feature-text">
+                  <h3>{row.title}</h3>
+                  {row.description ? <p>{row.description}</p> : null}
+                </div>
+
+                <div className="feature-icon">{active ? "^" : "›"}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="stack-actions">
+          <a href={item.ctaHref || "#"} className="stack-cta stack-cta--primary">
+            {item.ctaLabel || "Explore Services"}
+            <span className="stack-cta__arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function StackSection({ items }: StackSectionProps) {
+  const cardsRef = useRef<(HTMLElement | null)[]>([]);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const updateCards = () => {
+      const cards = cardsRef.current.filter(Boolean) as HTMLElement[];
+
+      if (window.innerWidth < 1024) {
+        cards.forEach((card) => {
+          card.style.transform = "";
+        });
+        return;
+      }
+
+      cards.forEach((card, i) => {
+        let totalScale = 1;
+
+        for (let j = i + 1; j < cards.length; j += 1) {
+          const nextCard = cards[j];
+          const nextTop = nextCard.getBoundingClientRect().top;
+          const stickyPos = j * 40;
+          const viewportHeight = window.innerHeight;
+
+          let progress =
+            (viewportHeight - nextTop) / (viewportHeight - stickyPos);
+
+          progress = Math.max(0, Math.min(1, progress));
+
+          const eased = 1 - Math.pow(1 - progress, 3);
+          totalScale -= eased * 0.045;
+        }
+
+        totalScale = Math.max(totalScale, 0.88);
+        card.style.transform = `translate3d(0, 0, 0) scale(${totalScale})`;
+      });
+    };
+
+    const requestTick = () => {
+      if (rafRef.current !== null) return;
+
+      rafRef.current = window.requestAnimationFrame(() => {
+        updateCards();
+        rafRef.current = null;
+      });
+    };
+
+    window.addEventListener("scroll", requestTick, { passive: true });
+    window.addEventListener("resize", requestTick);
+
+    updateCards();
+
+    return () => {
+      window.removeEventListener("scroll", requestTick);
+      window.removeEventListener("resize", requestTick);
+
+      if (rafRef.current !== null) {
+        window.cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
+
   return (
     <>
       <style>{stackSectionStyles}</style>
-      <section className="stack-section" id="stacked-scroll" data-stack-container>
-        <div className="stack-section__inner">
-          {items.map((item, index) => (
-            <article
-              key={item.title}
-              className="stack-card"
-              data-stack-card
-              style={{ "--stack-index": index } as CSSProperties}
-            >
-              <div className="stack-card__inner">
-                <div className="stack-card__content">
-                  <div className="stack-copy">
-                    <p className="stack-pill">
-                      <span></span>What We Solve
-                    </p>
-                    <h2>{item.title}</h2>
-                    <p className="stack-subtitle">{item.subtitle}</p>
-                    <div className="stack-note">{item.description}</div>
-                    <a className="stack-cta" href={item.ctaHref}>
-                      {item.ctaLabel}
-                    </a>
-                  </div>
 
-                  <div className="stack-visual">
-                    {renderStackVisual(index, item)}
-                  </div>
-                </div>
+      <section className="scroll-snap-wrapper">
+        {items.map((rawItem, index) => {
+          const item = rawItem as ExtendedStackItem;
+          const isMiddle = index === 1;
+
+          return (
+            <article
+              key={`${item.title}-${index}`}
+              className="stack-snap-item"
+              ref={(el) => {
+                cardsRef.current[index] = el;
+              }}
+              style={{ "--stack-index": String(index) } as CSSProperties}
+            >
+              <div className="stack-inner-container">
+                {isMiddle ? renderFeatureCard(item) : renderStatementCard(item, index)}
               </div>
             </article>
-          ))}
-        </div>
+          );
+        })}
       </section>
     </>
   );

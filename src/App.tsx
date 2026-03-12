@@ -14,6 +14,7 @@ import { normalizePathname, routes } from "./routes";
 import { AboutPage } from "./pages/AboutPage";
 import { CareerPage } from "./pages/CareerPage";
 import { ContactPage } from "./pages/ContactPage";
+import { FaqPage } from "./pages/FaqPage";
 import { HomePage } from "./pages/HomePage";
 import { ResourcesPage } from "./pages/ResourcesPage";
 import { ServicesPage } from "./pages/ServicesPage";
@@ -108,6 +109,8 @@ export default function App({ initialPathname }: AppProps) {
   const page =
     pathname === normalizePathname(routes.about) ? (
       <AboutPage />
+    ) : pathname === normalizePathname(routes.faq) ? (
+      <FaqPage />
     ) : pathname === normalizePathname(routes.services) ? (
       <ServicesPage />
     ) : pathname === normalizePathname(routes.tracking) ? (

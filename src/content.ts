@@ -24,7 +24,7 @@ export const primaryNavLinks: NavLink[] = [
   { label: "Blogs", href: routes.resources },
   { label: "Contact", href: routes.contact },
   { label: "Career", href: routes.career },
-  { label: "FAQs", href: `${routes.home}#faq` },
+  { label: "FAQs", href: routes.faq },
 ];
 
 export const serviceNavGroups: ServiceNavGroup[] = [

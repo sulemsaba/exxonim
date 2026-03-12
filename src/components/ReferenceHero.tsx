@@ -1,110 +1,78 @@
+import heroImagePrimary from "../../assets/clients/smiling-woman-writing-notes-tablet-digital-device.jpg";
+import heroImageSecondary from "../../assets/clients/financial-consultant-writing-capital-allocation-details-from-archives.jpg";
 import { routes } from "../routes";
 
-const focusAreas = [
-  "BRELA",
-  "TRA",
-  "BOT",
-  "OSHA",
-] as const;
-
-const workflowSteps = [
+const heroHighlights = [
   {
     title: "Setup",
-    detail: "Company and tax registration",
+    detail: "Company registration, tax setup, and first-step filing preparation.",
   },
   {
-    title: "Filing",
-    detail: "Application packs and statutory submissions",
+    title: "Licensing",
+    detail: "Permit coordination and regulator-facing submission support.",
   },
   {
     title: "Follow-through",
-    detail: "Regulator coordination until release",
+    detail: "Practical updates until approvals, renewals, or next actions are clear.",
   },
 ] as const;
 
 export function ReferenceHero() {
   return (
     <section className="reference-hero" aria-labelledby="reference-hero-title">
-      <div className="container reference-hero__grid">
-        <div className="reference-hero__copy" data-reveal>
-          <p className="reference-hero__eyebrow">
-            <span
-              className="reference-hero__eyebrow-dot"
-              aria-hidden="true"
-            ></span>
-            Registration, licensing, and consultation support
-          </p>
+      <div className="container">
+        <div className="reference-hero__frame">
+          <div className="reference-hero__media" data-reveal>
+            <img
+              className="reference-hero__image reference-hero__image--primary"
+              src={heroImagePrimary}
+              alt=""
+              loading="eager"
+            />
+            <img
+              className="reference-hero__image reference-hero__image--secondary"
+              src={heroImageSecondary}
+              alt=""
+              loading="eager"
+            />
+            <div className="reference-hero__scrim" aria-hidden="true"></div>
 
-          <h1 id="reference-hero-title" className="reference-hero__title">
-            Setup. Filing. Follow-through. One workflow that keeps moving.
-          </h1>
+            <div className="reference-hero__content">
+              <p className="reference-hero__eyebrow">
+                Registration, licensing, and compliance support
+              </p>
 
-          <p className="reference-hero__lead">
-            Exxonim helps businesses, NGOs, and institutions handle company
-            registration, tax setup, licensing, and regulator-facing
-            submissions without turning critical operations into admin drag.
-          </p>
+              <h1 id="reference-hero-title" className="reference-hero__title">
+                Get help with the filings that keep business moving.
+              </h1>
 
-          <div className="reference-hero__actions">
-            <a
-              className="reference-hero__button reference-hero__button--primary"
-              href={routes.contact}
-            >
-              Request Consultation
-            </a>
-            <a
-              className="reference-hero__button reference-hero__button--secondary"
-              href={routes.services}
-            >
-              Explore Services
-            </a>
-          </div>
+              <p className="reference-hero__lead">
+                Exxonim supports founders, NGOs, and institutions with
+                registration, tax setup, licensing, and regulator-facing
+                submissions across Tanzania.
+              </p>
 
-          <div
-            className="reference-hero__support"
-            aria-label="Regulator touchpoints"
-          >
-            <span className="reference-hero__support-label">
-              Regulator touchpoints
-            </span>
-            <div className="reference-hero__chips">
-              {focusAreas.map((area) => (
-                <span key={area} className="reference-hero__chip">
-                  {area}
-                </span>
-              ))}
+              <div className="reference-hero__actions">
+                <a
+                  className="reference-hero__button reference-hero__button--primary"
+                  href={routes.contact}
+                >
+                  Request consultation
+                  <span aria-hidden="true">-&gt;</span>
+                </a>
+              </div>
             </div>
           </div>
-        </div>
 
-        <aside
-          className="reference-hero__visual"
-          data-reveal
-          aria-label="Exxonim workflow overview"
-        >
-          <div className="reference-hero__panel">
-            <span className="reference-hero__panel-label">Workflow</span>
-
-            <ol className="reference-hero__steps">
-              {workflowSteps.map((step, index) => (
-                <li key={step.title} className="reference-hero__step">
-                  <span className="reference-hero__step-index" aria-hidden="true">
-                    0{index + 1}
-                  </span>
-                  <div className="reference-hero__step-copy">
-                    <strong>{step.title}</strong>
-                    <p>{step.detail}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-
-            <p className="reference-hero__panel-note">
-              <strong>Best fit:</strong> Founders, NGOs, SMEs, and regulated
-              operators
-            </p>
+          <div className="reference-hero__stats" data-reveal>
+            {heroHighlights.map((item) => (
+              <article key={item.title} className="reference-hero__stat">
+                <strong>{item.title}</strong>
+                <p>{item.detail}</p>
+              </article>
+            ))}
           </div>
-        </aside>
+        </div>
       </div>
     </section>
   );

@@ -17,7 +17,7 @@ const quickLinks = [
   { label: "About", href: routes.about },
   { label: "Services", href: routes.services },
   { label: "Track Your Consultation", href: routes.tracking },
-  { label: "Help (FAQ)", href: `${routes.home}#faq` },
+  { label: "Help (FAQ)", href: routes.faq },
   { label: "Blogs", href: routes.resources },
   { label: "Contact", href: routes.contact },
 ];
