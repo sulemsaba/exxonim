@@ -1,13 +1,20 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import type { StackItem } from "../types";
 
 interface StackSectionProps {
   items: StackItem[];
 }
 
+type FeatureVisualKey =
+  | "registration"
+  | "tax"
+  | "institutional"
+  | "tracking";
+
 type FeatureRow = {
   title: string;
-  description?: string;
+  description: string;
+  visualKey: FeatureVisualKey;
 };
 
 type ExtendedStackItem = StackItem & {
@@ -17,25 +24,131 @@ type ExtendedStackItem = StackItem & {
   featureRows?: FeatureRow[];
 };
 
-const stackSectionStyles = String.raw`
-  :root {
-    --surface: #efefef;
-    --surface-2: #f6f6f6;
-    --surface-3: #e3e3e3;
-    --border: rgba(15, 23, 42, 0.12);
-    --text: #111111;
-    --text-soft: rgba(17, 17, 17, 0.74);
-    --muted: rgba(17, 17, 17, 0.5);
-    --green: #0d5b00;
-    --green-dark: #063f00;
-    --shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-  }
+const defaultFeatureRows: FeatureRow[] = [
+  {
+    title: "Registration and Setup",
+    description:
+      "Company registration, business name registration, NGO or organization registration, and trademark filing support before operations begin.",
+    visualKey: "registration",
+  },
+  {
+    title: "Tax, Licensing, and Approvals",
+    description:
+      "TIN applications, business licensing, annual returns, and regulator-facing approvals prepared with clearer documentation and follow-up.",
+    visualKey: "tax",
+  },
+  {
+    title: "Institutional Support",
+    description:
+      "OSHA, NSSF, WCF, CRB / ERB, and related institutional registrations coordinated so compliance work stays current and submission-ready.",
+    visualKey: "institutional",
+  },
+  {
+    title: "Track Your Consultation",
+    description:
+      "See what is in intake, review, submission, and follow-up so the next action and current status stay visible all the way to release.",
+    visualKey: "tracking",
+  },
+];
 
+const stackSectionStyles = String.raw`
   .scroll-snap-wrapper {
+    --stack-bg:
+      linear-gradient(
+        180deg,
+        rgba(246, 251, 251, 0.98) 0%,
+        rgba(230, 241, 242, 0.96) 52%,
+        rgba(241, 249, 249, 0.98) 100%
+      );
+    --stack-surface: rgba(249, 253, 253, 0.9);
+    --stack-surface-strong: rgba(229, 241, 242, 0.96);
+    --stack-surface-soft: rgba(223, 238, 239, 0.88);
+    --stack-surface-deep:
+      linear-gradient(180deg, rgba(9, 68, 73, 0.98) 0%, rgba(6, 40, 44, 0.98) 100%);
+    --stack-border: rgba(9, 68, 73, 0.12);
+    --stack-border-strong: rgba(9, 68, 73, 0.22);
+    --stack-text: var(--slate-950);
+    --stack-text-soft: rgba(17, 35, 37, 0.72);
+    --stack-muted: rgba(17, 35, 37, 0.56);
+    --stack-accent: var(--primary);
+    --stack-accent-strong: var(--primary-strong);
+    --stack-accent-soft: rgba(44, 139, 145, 0.16);
+    --stack-accent-soft-strong: rgba(44, 139, 145, 0.24);
+    --stack-accent-contrast: var(--white);
+    --stack-contrast-text: rgba(248, 252, 252, 0.96);
+    --stack-highlight-line: rgba(255, 255, 255, 0.58);
+    --stack-glow: rgba(44, 139, 145, 0.16);
+    --stack-glow-strong: rgba(13, 102, 106, 0.26);
+    --stack-shadow: 0 24px 60px rgba(9, 68, 73, 0.12);
+    --stack-shadow-hover: 0 30px 72px rgba(9, 68, 73, 0.18);
+    --stack-card-shadow: 0 16px 36px rgba(9, 68, 73, 0.12);
+    --stack-card-shadow-hover: 0 22px 50px rgba(9, 68, 73, 0.18);
+    --stack-panel-start: rgba(255, 255, 255, 0.94);
+    --stack-panel-end: rgba(228, 240, 241, 0.94);
+    --stack-compose-start: rgba(255, 255, 255, 0.97);
+    --stack-compose-mid: rgba(237, 246, 247, 0.95);
+    --stack-compose-end: rgba(222, 238, 239, 0.96);
+    --stack-compose-orb: rgba(44, 139, 145, 0.22);
+    --stack-compose-orb-soft: rgba(134, 207, 211, 0.26);
+    --stack-rail:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.36), rgba(213, 231, 233, 0.82));
+    --stack-pill-bg: rgba(44, 139, 145, 0.16);
+    --stack-pill-text: var(--navy-900);
+    --stack-input-bg: rgba(9, 68, 73, 0.06);
+    --stack-message-bg: rgba(247, 252, 252, 0.72);
+    --stack-message-border: rgba(9, 68, 73, 0.24);
     position: relative;
-    background: var(--surface);
+    background: var(--stack-bg);
     overflow-x: clip;
     overflow-y: visible;
+    isolation: isolate;
+  }
+
+  html[data-theme="dark"] .scroll-snap-wrapper {
+    --stack-bg:
+      linear-gradient(
+        180deg,
+        rgba(4, 23, 25, 0.96) 0%,
+        rgba(6, 40, 44, 0.92) 54%,
+        rgba(4, 18, 20, 0.98) 100%
+      );
+    --stack-surface: rgba(7, 24, 26, 0.84);
+    --stack-surface-strong: rgba(10, 33, 36, 0.92);
+    --stack-surface-soft: rgba(12, 38, 41, 0.9);
+    --stack-surface-deep:
+      linear-gradient(180deg, rgba(9, 68, 73, 0.94) 0%, rgba(4, 18, 20, 0.98) 100%);
+    --stack-border: rgba(134, 207, 211, 0.16);
+    --stack-border-strong: rgba(134, 207, 211, 0.3);
+    --stack-text: rgba(244, 247, 255, 0.96);
+    --stack-text-soft: rgba(226, 232, 255, 0.74);
+    --stack-muted: rgba(226, 232, 255, 0.56);
+    --stack-accent: #86cfd3;
+    --stack-accent-strong: #baf1f4;
+    --stack-accent-soft: rgba(134, 207, 211, 0.12);
+    --stack-accent-soft-strong: rgba(134, 207, 211, 0.22);
+    --stack-accent-contrast: #041214;
+    --stack-contrast-text: rgba(244, 247, 255, 0.96);
+    --stack-highlight-line: rgba(255, 255, 255, 0.12);
+    --stack-glow: rgba(134, 207, 211, 0.14);
+    --stack-glow-strong: rgba(134, 207, 211, 0.24);
+    --stack-shadow: 0 28px 72px rgba(0, 0, 0, 0.32);
+    --stack-shadow-hover: 0 34px 88px rgba(0, 0, 0, 0.42);
+    --stack-card-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
+    --stack-card-shadow-hover: 0 24px 56px rgba(0, 0, 0, 0.36);
+    --stack-panel-start: rgba(13, 40, 43, 0.96);
+    --stack-panel-end: rgba(7, 24, 26, 0.96);
+    --stack-compose-start: rgba(14, 41, 45, 0.96);
+    --stack-compose-mid: rgba(9, 31, 34, 0.96);
+    --stack-compose-end: rgba(4, 18, 20, 0.98);
+    --stack-compose-orb: rgba(134, 207, 211, 0.16);
+    --stack-compose-orb-soft: rgba(44, 139, 145, 0.18);
+    --stack-rail:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(12, 38, 41, 0.88));
+    --stack-pill-bg: rgba(134, 207, 211, 0.14);
+    --stack-pill-text: rgba(244, 247, 255, 0.9);
+    --stack-input-bg: rgba(255, 255, 255, 0.08);
+    --stack-message-bg: rgba(7, 24, 26, 0.84);
+    --stack-message-border: rgba(134, 207, 211, 0.26);
   }
 
   .stack-snap-item {
@@ -43,10 +156,28 @@ const stackSectionStyles = String.raw`
     width: 100vw;
     margin-left: calc(50% - 50vw);
     min-height: 100vh;
-    background: var(--surface);
+    background: var(--stack-bg);
     transform-origin: center top;
     will-change: transform;
     transition: none;
+    isolation: isolate;
+  }
+
+  .stack-snap-item::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(
+        520px circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh),
+        var(--stack-glow-strong) 0%,
+        var(--stack-glow) 24%,
+        transparent 64%
+      );
+    opacity: 0;
+    transition: opacity 220ms ease;
+    pointer-events: none;
+    z-index: 0;
   }
 
   @media (min-width: 1024px) {
@@ -64,6 +195,8 @@ const stackSectionStyles = String.raw`
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative;
+    z-index: 1;
   }
 
   @media (max-width: 1023px) {
@@ -108,7 +241,7 @@ const stackSectionStyles = String.raw`
 
   .stack-title {
     margin: 0;
-    color: var(--text);
+    color: var(--stack-text);
     font-size: clamp(2.5rem, 5vw, 4.8rem);
     font-weight: 700;
     line-height: 1.02;
@@ -117,7 +250,7 @@ const stackSectionStyles = String.raw`
 
   .stack-subtitle {
     margin: 1.4rem 0 0;
-    color: var(--text);
+    color: var(--stack-text);
     font-size: clamp(1.25rem, 2vw, 1.65rem);
     line-height: 1.45;
     font-weight: 600;
@@ -126,7 +259,7 @@ const stackSectionStyles = String.raw`
 
   .stack-desc {
     margin: 1.6rem 0 0;
-    color: var(--text-soft);
+    color: var(--stack-text-soft);
     font-size: clamp(1rem, 1.2vw, 1.15rem);
     line-height: 1.75;
     max-width: 44rem;
@@ -134,7 +267,7 @@ const stackSectionStyles = String.raw`
 
   .stack-emphasis {
     margin: 1rem 0 0;
-    color: var(--text);
+    color: var(--stack-text);
     font-size: clamp(1.05rem, 1.35vw, 1.35rem);
     line-height: 1.5;
     font-style: italic;
@@ -159,18 +292,28 @@ const stackSectionStyles = String.raw`
     font-size: 0.98rem;
     font-weight: 500;
     line-height: 1;
-    transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+    border: 1px solid transparent;
+    transition:
+      transform 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease;
   }
 
   .stack-cta--primary {
-    background: var(--green);
-    color: #ffffff;
-    box-shadow: 0 10px 24px rgba(13, 91, 0, 0.18);
+    background: linear-gradient(135deg, var(--stack-accent) 0%, var(--stack-accent-strong) 100%);
+    color: var(--stack-accent-contrast);
+    border-color: var(--stack-accent-soft);
+    box-shadow: var(--stack-card-shadow);
   }
 
-  .stack-cta--primary:hover {
+  .stack-cta--primary:hover,
+  .stack-cta--primary:focus-visible {
     transform: translateY(-2px);
-    background: var(--green-dark);
+    background: linear-gradient(135deg, var(--stack-accent-strong) 0%, var(--stack-accent) 100%);
+    border-color: var(--stack-accent-soft-strong);
+    box-shadow: var(--stack-card-shadow-hover);
   }
 
   .stack-cta__arrow {
@@ -186,12 +329,13 @@ const stackSectionStyles = String.raw`
     min-height: 520px;
     padding: 2.2rem;
     border-radius: 34px;
-    background: #e7e7e7;
-    border: 1px solid rgba(17, 17, 17, 0.12);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    background: linear-gradient(180deg, var(--stack-surface-strong), var(--stack-surface-soft));
+    border: 1px solid var(--stack-border);
+    box-shadow: inset 0 1px 0 var(--stack-highlight-line), var(--stack-shadow);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
   }
 
   .study-visual-track {
@@ -206,32 +350,33 @@ const stackSectionStyles = String.raw`
   .study-card {
     border-radius: 24px;
     overflow: hidden;
-    border: 1px solid rgba(17, 17, 17, 0.08);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--stack-border);
+    box-shadow: var(--stack-card-shadow);
     flex: 0 0 auto;
+    transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
   }
 
   .study-card--light {
     width: 188px;
     min-height: 412px;
-    background: #dcdcdc;
-    color: #1b1b1b;
+    background: linear-gradient(180deg, var(--stack-panel-start), var(--stack-panel-end));
+    color: var(--stack-text);
     padding: 1rem 1rem 1.2rem;
   }
 
   .study-card--dark {
     width: 198px;
     min-height: 432px;
-    background: #050505;
-    color: #ffffff;
+    background: var(--stack-surface-deep);
+    color: var(--stack-contrast-text);
     padding: 1rem 1rem 1.2rem;
   }
 
   .study-card--narrow {
     width: 116px;
     min-height: 430px;
-    background: #0a0a0a;
-    color: #ffffff;
+    background: var(--stack-surface-deep);
+    color: var(--stack-contrast-text);
     padding: 0.9rem 0.75rem 1rem;
   }
 
@@ -289,8 +434,8 @@ const stackSectionStyles = String.raw`
     min-height: 22px;
     padding: 0 0.45rem;
     border-radius: 6px;
-    background: rgba(13, 91, 0, 0.16);
-    color: #1ec466;
+    background: var(--stack-accent-soft);
+    color: var(--stack-accent-strong);
     font-size: 0.62rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -322,6 +467,32 @@ const stackSectionStyles = String.raw`
     opacity: 0.78;
   }
 
+  .feature-visual-stage {
+    width: 100%;
+    max-width: 620px;
+    min-height: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .feature-visual-stage__inner {
+    width: 100%;
+    animation: feature-visual-fade 220ms ease;
+  }
+
+  @keyframes feature-visual-fade {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .compose-visual {
     width: 100%;
     max-width: 620px;
@@ -330,9 +501,11 @@ const stackSectionStyles = String.raw`
     overflow: hidden;
     position: relative;
     background:
-      radial-gradient(circle at top right, rgba(182, 198, 255, 0.9) 0%, rgba(182, 198, 255, 0.55) 14%, transparent 36%),
-      linear-gradient(135deg, #ffffff 0%, #f4f4f4 48%, #e7e7e7 100%);
-    border: 1px solid rgba(17, 17, 17, 0.08);
+      radial-gradient(circle at top right, var(--stack-compose-orb) 0%, var(--stack-compose-orb-soft) 14%, transparent 36%),
+      linear-gradient(135deg, var(--stack-compose-start) 0%, var(--stack-compose-mid) 48%, var(--stack-compose-end) 100%);
+    border: 1px solid var(--stack-border);
+    box-shadow: var(--stack-shadow);
+    transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
   }
 
   .compose-visual::before {
@@ -340,8 +513,8 @@ const stackSectionStyles = String.raw`
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(135deg, transparent 0 74%, rgba(181, 203, 234, 0.65) 74% 76%, transparent 76%),
-      radial-gradient(circle at 90% 10%, rgba(255,255,255,0.8), transparent 34%);
+      linear-gradient(135deg, transparent 0 74%, var(--stack-accent-soft-strong) 74% 76%, transparent 76%),
+      radial-gradient(circle at 90% 10%, var(--stack-highlight-line), transparent 34%);
     pointer-events: none;
   }
 
@@ -351,8 +524,8 @@ const stackSectionStyles = String.raw`
     bottom: 0;
     left: 0;
     width: 5rem;
-    background: linear-gradient(180deg, rgba(255,255,255,0.2), rgba(226,226,226,0.7));
-    border-right: 1px solid rgba(17,17,17,0.06);
+    background: var(--stack-rail);
+    border-right: 1px solid var(--stack-border);
   }
 
   .compose-card {
@@ -362,23 +535,24 @@ const stackSectionStyles = String.raw`
     width: min(68%, 420px);
     min-height: 360px;
     border-radius: 28px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(236,236,236,0.88));
-    box-shadow: 0 22px 50px rgba(120, 120, 160, 0.16);
-    border: 1px solid rgba(17, 17, 17, 0.06);
+    background: linear-gradient(180deg, var(--stack-panel-start), var(--stack-panel-end));
+    box-shadow: var(--stack-card-shadow);
+    border: 1px solid var(--stack-border);
     padding: 1.4rem 1.4rem 1.3rem;
     backdrop-filter: blur(8px);
+    transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
   }
 
   .compose-title {
     font-size: 0.98rem;
     font-weight: 700;
-    color: #222;
+    color: var(--stack-text);
   }
 
   .compose-label {
     margin-top: 1.2rem;
     font-size: 0.82rem;
-    color: rgba(17,17,17,0.64);
+    color: var(--stack-muted);
   }
 
   .compose-pill {
@@ -388,8 +562,8 @@ const stackSectionStyles = String.raw`
     min-height: 30px;
     padding: 0 0.9rem;
     border-radius: 999px;
-    background: rgba(176, 176, 243, 0.4);
-    color: #404066;
+    background: var(--stack-pill-bg);
+    color: var(--stack-pill-text);
     font-size: 0.82rem;
     font-weight: 600;
   }
@@ -401,9 +575,9 @@ const stackSectionStyles = String.raw`
     justify-content: space-between;
     gap: 1rem;
     padding-bottom: 0.7rem;
-    border-bottom: 1px solid rgba(17,17,17,0.08);
+    border-bottom: 1px solid var(--stack-border);
     font-size: 0.9rem;
-    color: #2b2b2b;
+    color: var(--stack-text);
   }
 
   .compose-subject {
@@ -412,7 +586,7 @@ const stackSectionStyles = String.raw`
     align-items: center;
     gap: 0.8rem;
     font-size: 0.86rem;
-    color: rgba(17,17,17,0.72);
+    color: var(--stack-text-soft);
   }
 
   .compose-input {
@@ -421,29 +595,164 @@ const stackSectionStyles = String.raw`
     min-height: 34px;
     padding: 0 0.9rem;
     border-radius: 999px;
-    background: rgba(0,0,0,0.04);
-    color: #333;
+    background: var(--stack-input-bg);
+    color: var(--stack-text);
     font-size: 0.88rem;
   }
 
   .compose-message {
     margin-top: 1.15rem;
     padding: 1.1rem 1rem;
-    border: 1.5px solid rgba(0,0,0,0.24);
+    border: 1.5px solid var(--stack-message-border);
     border-radius: 22px;
-    background: rgba(255,255,255,0.26);
+    background: var(--stack-message-bg);
   }
 
   .compose-message h4 {
     margin: 0 0 0.7rem;
     font-size: 1rem;
-    color: #1a1a1a;
+    color: var(--stack-text);
   }
 
   .compose-message p {
     margin: 0;
-    color: rgba(17,17,17,0.52);
+    color: var(--stack-text-soft);
     font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  .compose-visual--support,
+  .compose-visual--tracking {
+    min-height: 520px;
+    padding: 1.3rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(170px, 210px);
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .compose-visual--support .compose-rail,
+  .compose-visual--tracking .compose-rail {
+    display: none;
+  }
+
+  .compose-visual--support .compose-card,
+  .compose-visual--tracking .compose-card {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    min-height: 100%;
+  }
+
+  .compose-visual__side-panel {
+    border-radius: 28px;
+    border: 1px solid var(--stack-border);
+    background: linear-gradient(180deg, var(--stack-panel-start), var(--stack-panel-end));
+    box-shadow: var(--stack-card-shadow);
+    padding: 1rem 0.95rem;
+    display: grid;
+    align-content: start;
+    gap: 0.8rem;
+  }
+
+  .compose-visual__side-label {
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--stack-muted);
+  }
+
+  .compose-visual__side-item {
+    display: grid;
+    gap: 0.22rem;
+    padding-top: 0.72rem;
+    border-top: 1px solid var(--stack-border);
+  }
+
+  .compose-visual__side-item:first-of-type {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .compose-visual__side-item strong {
+    color: var(--stack-text);
+    font-size: 0.92rem;
+    line-height: 1.3;
+  }
+
+  .compose-visual__side-item span {
+    color: var(--stack-text-soft);
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  .support-chip-grid {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .support-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 0 0.8rem;
+    border-radius: 999px;
+    background: var(--stack-accent-soft);
+    color: var(--stack-accent-strong);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .tracking-preview-list {
+    margin-top: 1rem;
+    display: grid;
+    gap: 0.78rem;
+  }
+
+  .tracking-preview-step {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  .tracking-preview-step__dot {
+    width: 12px;
+    height: 12px;
+    margin-top: 0.3rem;
+    border-radius: 999px;
+    background: var(--stack-accent-soft);
+    box-shadow: inset 0 0 0 1px var(--stack-border-strong);
+  }
+
+  .tracking-preview-step.is-complete .tracking-preview-step__dot {
+    background: var(--stack-accent-strong);
+    box-shadow: 0 0 0 4px var(--stack-accent-soft);
+  }
+
+  .tracking-preview-step.is-active .tracking-preview-step__dot {
+    background: var(--stack-accent);
+    box-shadow: 0 0 0 5px var(--stack-accent-soft);
+  }
+
+  .tracking-preview-step strong {
+    display: block;
+    color: var(--stack-text);
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .tracking-preview-step span {
+    display: block;
+    margin-top: 0.24rem;
+    color: var(--stack-text-soft);
+    font-size: 0.8rem;
     line-height: 1.55;
   }
 
@@ -454,24 +763,34 @@ const stackSectionStyles = String.raw`
 
   .feature-list {
     margin-top: 0.4rem;
+    display: grid;
+    gap: 0.55rem;
   }
 
   .feature-row {
+    width: 100%;
     display: grid;
     grid-template-columns: 46px 1fr 28px;
     align-items: start;
     gap: 1rem;
-    padding: 1.15rem 0;
-    border-top: 1px solid rgba(17,17,17,0.18);
+    padding: 1.05rem 0.9rem;
+    border-radius: 22px;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.02);
+    text-align: left;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    transition:
+      background 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease;
   }
 
-  .feature-row:first-child {
-    border-top: 0;
-    padding-top: 0;
-  }
-
-  .feature-row:last-child {
-    border-bottom: 1px solid rgba(17,17,17,0.18);
+  .feature-row.is-active {
+    border-color: var(--stack-border-strong);
+    background: linear-gradient(90deg, var(--stack-accent-soft) 0%, rgba(255, 255, 255, 0.02) 88%);
+    box-shadow: inset 0 1px 0 var(--stack-highlight-line);
   }
 
   .feature-badge {
@@ -481,28 +800,55 @@ const stackSectionStyles = String.raw`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #d1d5db;
-    color: #111;
+    background: var(--stack-surface-soft);
+    color: var(--stack-text);
+    border: 1px solid var(--stack-border);
     font-size: 0.95rem;
     font-weight: 700;
+    transition: background 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
   }
 
   .feature-row.is-active .feature-badge {
-    background: var(--green);
-    color: #fff;
+    background: var(--stack-accent);
+    border-color: var(--stack-accent-soft-strong);
+    color: var(--stack-accent-contrast);
+    box-shadow: 0 0 0 4px var(--stack-accent-soft);
   }
 
-  .feature-text h3 {
-    margin: 0;
-    color: var(--text);
+  .feature-text {
+    min-width: 0;
+  }
+
+  .feature-title {
+    display: block;
+    color: var(--stack-text);
     font-size: clamp(1.55rem, 2vw, 1.95rem);
     line-height: 1.2;
     font-weight: 700;
   }
 
-  .feature-text p {
-    margin: 0.9rem 0 0;
-    color: var(--text-soft);
+  .feature-copy {
+    display: block;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: translateY(-0.35rem);
+    transition:
+      max-height 220ms ease,
+      opacity 180ms ease,
+      transform 180ms ease;
+  }
+
+  .feature-row.is-active .feature-copy {
+    max-height: 10rem;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .feature-copy__inner {
+    display: block;
+    padding-top: 0.82rem;
+    color: var(--stack-text-soft);
     font-size: 1.02rem;
     line-height: 1.6;
     max-width: 34rem;
@@ -512,15 +858,67 @@ const stackSectionStyles = String.raw`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--green);
+    color: var(--stack-muted);
     font-size: 1.5rem;
     line-height: 1;
     padding-top: 0.1rem;
+    transition: color 180ms ease;
+  }
+
+  .feature-row.is-active .feature-icon {
+    color: var(--stack-accent);
+  }
+
+  .feature-icon svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    transition: transform 180ms ease;
+  }
+
+  .feature-row.is-active .feature-icon svg {
+    transform: rotate(90deg);
+  }
+
+  @media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
+    .stack-snap-item:hover::before,
+    .stack-snap-item:focus-within::before {
+      opacity: 1;
+    }
+
+    .study-visual-shell:hover,
+    .compose-visual:hover {
+      border-color: var(--stack-border-strong);
+      box-shadow: inset 0 1px 0 var(--stack-highlight-line), var(--stack-shadow-hover);
+    }
+
+    .study-visual-shell:hover .study-card,
+    .compose-visual:hover .compose-card {
+      border-color: var(--stack-border-strong);
+      box-shadow: var(--stack-card-shadow-hover);
+    }
+
+    .feature-row:hover {
+      border-color: var(--stack-border-strong);
+      background: linear-gradient(90deg, var(--stack-accent-soft) 0%, rgba(255, 255, 255, 0.02) 88%);
+      box-shadow: inset 0 1px 0 var(--stack-highlight-line);
+    }
+
+    .feature-row:hover .feature-badge {
+      background: var(--stack-accent);
+      border-color: var(--stack-accent-soft-strong);
+      color: var(--stack-accent-contrast);
+      box-shadow: 0 0 0 4px var(--stack-accent-soft);
+    }
+
+    .feature-row:hover .feature-icon {
+      color: var(--stack-accent);
+    }
   }
 
   @media (max-width: 1023px) {
     .study-visual-shell,
-    .compose-visual {
+    .compose-visual,
+    .feature-visual-stage {
       max-width: 100%;
       min-height: auto;
     }
@@ -552,6 +950,13 @@ const stackSectionStyles = String.raw`
       aspect-ratio: 1.15 / 1;
     }
 
+    .compose-visual--support,
+    .compose-visual--tracking {
+      aspect-ratio: auto;
+      grid-template-columns: 1fr;
+      padding: 1rem;
+    }
+
     .compose-card {
       left: 4rem;
       top: 2.3rem;
@@ -559,11 +964,19 @@ const stackSectionStyles = String.raw`
       min-height: 320px;
     }
 
+    .compose-visual--support .compose-card,
+    .compose-visual--tracking .compose-card {
+      left: auto;
+      top: auto;
+      width: 100%;
+      min-height: auto;
+    }
+
     .feature-side {
       max-width: 100%;
     }
 
-    .feature-text h3 {
+    .feature-title {
       font-size: 1.7rem;
     }
 
@@ -675,7 +1088,7 @@ function renderStudyVisual(index: number) {
   );
 }
 
-function renderComposeVisual() {
+function renderTaxApprovalsVisual() {
   return (
     <div className="compose-visual">
       <div className="compose-rail" />
@@ -708,6 +1121,142 @@ function renderComposeVisual() {
   );
 }
 
+function renderInstitutionalSupportVisual() {
+  return (
+    <div className="compose-visual compose-visual--support">
+      <div className="compose-card">
+        <div className="compose-title">Institutional Support</div>
+
+        <div className="compose-label">Active registrations</div>
+        <div className="compose-pill">OSHA, NSSF, WCF, CRB / ERB</div>
+
+        <div className="compose-message">
+          <h4>Employer-side registrations stay organized.</h4>
+          <p>
+            We keep institutional registrations aligned across workforce,
+            sector, and compliance bodies so the business stays ready for
+            review, filing, and renewal.
+          </p>
+        </div>
+
+        <div className="support-chip-grid">
+          <span className="support-chip">OSHA</span>
+          <span className="support-chip">NSSF</span>
+          <span className="support-chip">WCF</span>
+          <span className="support-chip">CRB / ERB</span>
+        </div>
+      </div>
+
+      <div className="compose-visual__side-panel">
+        <div className="compose-visual__side-label">Status board</div>
+        <div className="compose-visual__side-item">
+          <strong>Employer setup</strong>
+          <span>Workforce and compensation registrations prepared.</span>
+        </div>
+        <div className="compose-visual__side-item">
+          <strong>Sector boards</strong>
+          <span>Professional and contractor registrations tracked clearly.</span>
+        </div>
+        <div className="compose-visual__side-item">
+          <strong>Renewal visibility</strong>
+          <span>Keep follow-up practical before deadlines drift.</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function renderTrackingConsultationVisual() {
+  return (
+    <div className="compose-visual compose-visual--tracking">
+      <div className="compose-card">
+        <div className="compose-title">Consultation Tracking</div>
+
+        <div className="compose-label">Reference</div>
+        <div className="compose-pill">EXX-24091</div>
+
+        <div className="tracking-preview-list">
+          <div className="tracking-preview-step is-complete">
+            <span className="tracking-preview-step__dot" />
+            <div>
+              <strong>Intake confirmed</strong>
+              <span>Requirements captured and service scope agreed.</span>
+            </div>
+          </div>
+
+          <div className="tracking-preview-step is-complete">
+            <span className="tracking-preview-step__dot" />
+            <div>
+              <strong>Documents reviewed</strong>
+              <span>Submission pack checked before it goes active.</span>
+            </div>
+          </div>
+
+          <div className="tracking-preview-step is-active">
+            <span className="tracking-preview-step__dot" />
+            <div>
+              <strong>Authority follow-up</strong>
+              <span>Current status is visible and next action is clear.</span>
+            </div>
+          </div>
+
+          <div className="tracking-preview-step">
+            <span className="tracking-preview-step__dot" />
+            <div>
+              <strong>Final release</strong>
+              <span>Approval, certificate, or confirmation is handed over.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="compose-visual__side-panel">
+        <div className="compose-visual__side-label">Current note</div>
+        <div className="compose-visual__side-item">
+          <strong>Next-step visibility</strong>
+          <span>Know what is complete, active, and still outstanding.</span>
+        </div>
+        <div className="compose-visual__side-item">
+          <strong>Practical follow-up</strong>
+          <span>Less guessing while the consultation is moving.</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function renderFeatureVisual(visualKey: FeatureVisualKey) {
+  switch (visualKey) {
+    case "registration":
+      return renderStudyVisual(0);
+    case "institutional":
+      return renderInstitutionalSupportVisual();
+    case "tracking":
+      return renderTrackingConsultationVisual();
+    case "tax":
+    default:
+      return renderTaxApprovalsVisual();
+  }
+}
+
+function FeatureChevronIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M7 4.5L13 10L7 15.5"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function renderComposeVisual() {
+  return renderTaxApprovalsVisual();
+}
+
 function renderStatementCard(item: ExtendedStackItem, index: number) {
   return (
     <div className="statement-layout">
@@ -732,17 +1281,9 @@ function renderStatementCard(item: ExtendedStackItem, index: number) {
 
 function renderFeatureCard(item: ExtendedStackItem) {
   const rows =
-    item.featureRows ||
-    [
-      {
-        title: "Registration and Setup",
-        description:
-          "Company registration, business name registration, NGO or organization registration, and trademark filing support before operations begin.",
-      },
-      { title: "Tax, Licensing, and Approvals" },
-      { title: "Institutional Support" },
-      { title: "Track Your Consultation" },
-    ];
+    item.featureRows && item.featureRows.length > 0
+      ? item.featureRows
+      : defaultFeatureRows;
 
   return (
     <div className="feature-layout">
@@ -775,6 +1316,83 @@ function renderFeatureCard(item: ExtendedStackItem) {
           <a href={item.ctaHref || "#"} className="stack-cta stack-cta--primary">
             {item.ctaLabel || "Explore Services"}
             <span className="stack-cta__arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FeatureAccordionCard({ item }: { item: ExtendedStackItem }) {
+  const rows =
+    item.featureRows && item.featureRows.length > 0
+      ? item.featureRows
+      : defaultFeatureRows;
+  const accordionId = useId();
+  const [selectedFeatureIndex, setSelectedFeatureIndex] = useState(0);
+  const [hoveredFeatureIndex, setHoveredFeatureIndex] = useState<number | null>(
+    null
+  );
+  const activeFeatureIndex = hoveredFeatureIndex ?? selectedFeatureIndex;
+  const safeActiveFeatureIndex = Math.min(activeFeatureIndex, rows.length - 1);
+  const activeRow = rows[safeActiveFeatureIndex];
+
+  return (
+    <div className="feature-layout">
+      <div className="feature-visual-stage">
+        <div key={activeRow.visualKey} className="feature-visual-stage__inner">
+          {renderFeatureVisual(activeRow.visualKey)}
+        </div>
+      </div>
+
+      <div className="feature-side">
+        <div
+          className="feature-list"
+          onMouseLeave={() => setHoveredFeatureIndex(null)}
+        >
+          {rows.map((row, idx) => {
+            const active = idx === safeActiveFeatureIndex;
+            const panelId = `${accordionId}-feature-panel-${idx}`;
+
+            return (
+              <button
+                key={`${row.title}-${idx}`}
+                type="button"
+                className={`feature-row ${active ? "is-active" : ""}`}
+                aria-expanded={active}
+                aria-controls={panelId}
+                onClick={() => setSelectedFeatureIndex(idx)}
+                onFocus={() => {
+                  setHoveredFeatureIndex(null);
+                  setSelectedFeatureIndex(idx);
+                }}
+                onMouseEnter={() => setHoveredFeatureIndex(idx)}
+              >
+                <span className="feature-badge">{idx + 1}</span>
+
+                <span className="feature-text">
+                  <span className="feature-title">{row.title}</span>
+                  <span
+                    id={panelId}
+                    className="feature-copy"
+                    aria-hidden={!active}
+                  >
+                    <span className="feature-copy__inner">{row.description}</span>
+                  </span>
+                </span>
+
+                <span className="feature-icon" aria-hidden="true">
+                  <FeatureChevronIcon />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="stack-actions">
+          <a href={item.ctaHref || "#"} className="stack-cta stack-cta--primary">
+            {item.ctaLabel || "Explore Services"}
+            <span className="stack-cta__arrow">{"\u2192"}</span>
           </a>
         </div>
       </div>
@@ -863,7 +1481,11 @@ export function StackSection({ items }: StackSectionProps) {
               style={{ "--stack-index": String(index) } as CSSProperties}
             >
               <div className="stack-inner-container">
-                {isMiddle ? renderFeatureCard(item) : renderStatementCard(item, index)}
+                {isMiddle ? (
+                  <FeatureAccordionCard item={item} />
+                ) : (
+                  renderStatementCard(item, index)
+                )}
               </div>
             </article>
           );
