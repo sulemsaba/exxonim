@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import {
   brand,
   blogPosts,
-  getHomeInsightPosts,
+  getBlogPostBySlug,
+  getHomeBlogPosts,
   stackItems,
 } from "./content";
 import { Footer } from "./components/Footer";
@@ -10,12 +11,23 @@ import { Navigation } from "./components/Navigation";
 import { useRevealOnScroll } from "./hooks/useRevealOnScroll";
 import { useStackCardDepth } from "./hooks/useStackCardDepth";
 import { useTheme } from "./hooks/useTheme";
-import { normalizePathname, routes } from "./routes";
+import {
+  getResourcePostSlug,
+  normalizePathname,
+  routes,
+} from "./routes";
 import { AboutPage } from "./pages/AboutPage";
 import { CareerPage } from "./pages/CareerPage";
 import { ContactPage } from "./pages/ContactPage";
 import { FaqPage } from "./pages/FaqPage";
 import { HomePage } from "./pages/HomePage";
+import {
+  NotFoundPage,
+  PrivacyPage,
+  SupportPage,
+  TermsPage,
+} from "./pages/InfoPages";
+import { ResourceArticlePage } from "./pages/ResourceArticlePage";
 import { ResourcesPage } from "./pages/ResourcesPage";
 import { ServicesPage } from "./pages/ServicesPage";
 import { TrackConsultationPage } from "./pages/TrackConsultationPage";
@@ -45,12 +57,30 @@ export default function App({ initialPathname }: AppProps) {
     let targetY = window.innerHeight / 2;
     let currentX = targetX;
     let currentY = targetY;
+    let rafPending = false;
     let frameId = 0;
     const lerpFactor = 0.08;
+    const reducedMotionQuery = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    );
+
+    const writeGlowPosition = (x: number, y: number) => {
+      root.style.setProperty("--mouse-x", `${x}px`);
+      root.style.setProperty("--mouse-y", `${y}px`);
+    };
+
+    const stopGlowAnimation = () => {
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+        frameId = 0;
+      }
+      rafPending = false;
+    };
 
     const handlePointerMove = (event: MouseEvent) => {
       targetX = event.clientX;
       targetY = event.clientY;
+      queueGlowUpdate();
     };
 
     const updateScroll = () => {
@@ -58,25 +88,56 @@ export default function App({ initialPathname }: AppProps) {
     };
 
     const animateGlow = () => {
+      rafPending = false;
       currentX += (targetX - currentX) * lerpFactor;
       currentY += (targetY - currentY) * lerpFactor;
-      root.style.setProperty("--mouse-x", `${currentX}px`);
-      root.style.setProperty("--mouse-y", `${currentY}px`);
+      writeGlowPosition(currentX, currentY);
+
+      const delta =
+        Math.abs(targetX - currentX) + Math.abs(targetY - currentY);
+
+      if (!reducedMotionQuery.matches && delta > 0.5) {
+        queueGlowUpdate();
+      }
+    };
+
+    const queueGlowUpdate = () => {
+      if (reducedMotionQuery.matches || rafPending) {
+        return;
+      }
+
+      rafPending = true;
       frameId = window.requestAnimationFrame(animateGlow);
     };
 
-    root.style.setProperty("--mouse-x", `${currentX}px`);
-    root.style.setProperty("--mouse-y", `${currentY}px`);
+    const handleReducedMotionChange = () => {
+      stopGlowAnimation();
+
+      if (reducedMotionQuery.matches) {
+        currentX = window.innerWidth / 2;
+        currentY = window.innerHeight / 2;
+        targetX = currentX;
+        targetY = currentY;
+        writeGlowPosition(currentX, currentY);
+        return;
+      }
+
+      queueGlowUpdate();
+    };
+
+    writeGlowPosition(currentX, currentY);
     updateScroll();
-    frameId = window.requestAnimationFrame(animateGlow);
+    queueGlowUpdate();
 
     window.addEventListener("mousemove", handlePointerMove, { passive: true });
     window.addEventListener("scroll", updateScroll, { passive: true });
+    reducedMotionQuery.addEventListener("change", handleReducedMotionChange);
 
     return () => {
       window.removeEventListener("mousemove", handlePointerMove);
       window.removeEventListener("scroll", updateScroll);
-      window.cancelAnimationFrame(frameId);
+      reducedMotionQuery.removeEventListener("change", handleReducedMotionChange);
+      stopGlowAnimation();
     };
   }, []);
 
@@ -87,7 +148,9 @@ export default function App({ initialPathname }: AppProps) {
       return;
     }
 
-    const firstCard = rail.querySelector<HTMLElement>(".resource-card");
+    const firstCard = rail.querySelector<HTMLElement>(
+      ".home-insights__card, .blog-card, .resource-card, .cx-post-card"
+    );
     const scrollAmount = firstCard
       ? firstCard.getBoundingClientRect().width + 20
       : 360;
@@ -98,16 +161,23 @@ export default function App({ initialPathname }: AppProps) {
     });
   };
 
-  const homeInsightPosts = getHomeInsightPosts(blogPosts);
+  const homeInsightPosts = getHomeBlogPosts(blogPosts);
   const homeInsightsProps = {
     posts: homeInsightPosts,
     railRef,
     onPrev: () => scrollRail(-1),
     onNext: () => scrollRail(1),
   };
+  const articleSlug = getResourcePostSlug(pathname);
+  const articlePost = articleSlug ? getBlogPostBySlug(articleSlug, blogPosts) : null;
 
   const page =
-    pathname === normalizePathname(routes.about) ? (
+    pathname === normalizePathname(routes.home) ? (
+      <HomePage
+        stackItems={stackItems}
+        {...homeInsightsProps}
+      />
+    ) : pathname === normalizePathname(routes.about) ? (
       <AboutPage />
     ) : pathname === normalizePathname(routes.faq) ? (
       <FaqPage />
@@ -121,11 +191,16 @@ export default function App({ initialPathname }: AppProps) {
       <CareerPage />
     ) : pathname === normalizePathname(routes.contact) ? (
       <ContactPage />
+    ) : pathname === normalizePathname(routes.support) ? (
+      <SupportPage />
+    ) : pathname === normalizePathname(routes.terms) ? (
+      <TermsPage />
+    ) : pathname === normalizePathname(routes.privacy) ? (
+      <PrivacyPage />
+    ) : articlePost ? (
+      <ResourceArticlePage post={articlePost} />
     ) : (
-      <HomePage
-        stackItems={stackItems}
-        {...homeInsightsProps}
-      />
+      <NotFoundPage />
     );
 
   return (
@@ -133,7 +208,6 @@ export default function App({ initialPathname }: AppProps) {
       <div className="cinematic-bg" aria-hidden="true">
         <div className="cinematic-bg__orb cinematic-bg__orb--one"></div>
         <div className="cinematic-bg__orb cinematic-bg__orb--two"></div>
-        <div className="cinematic-bg__grid"></div>
         <div className="cinematic-bg__glow"></div>
       </div>
 

@@ -32,7 +32,11 @@ export function ProviderSection() {
 
   return (
     <section className="provider-section" id="industries">
-      <div className="container">
+      <div className="container provider-section__inner">
+        <div className="provider-heading" data-reveal>
+          <span className="provider-kicker">Our Clients</span>
+          <h2 className="provider-title">Trusted by Leading Companies</h2>
+        </div>
         <div
           className="provider-marquee"
           aria-label="Client and partner logos"

@@ -6,7 +6,7 @@ export function ContactPage() {
           <p className="section-pill section-pill--light">
             <span></span>Contact
           </p>
-          <h2>Reach Exxonim for registration, compliance, or licensing support.</h2>
+          <h1>Reach Exxonim for registration, compliance, or licensing support.</h1>
           <p>
             Use the contact points below to start a consultation, ask a
             question, or confirm the next step for an ongoing request.

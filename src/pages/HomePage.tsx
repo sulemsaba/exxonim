@@ -1,15 +1,14 @@
 import type { RefObject } from "react";
-import { EngineSection } from "../components/EngineSection";
 import { InsightsSection } from "../components/InsightsSection";
 import { ProviderSection } from "../components/ProviderSection";
 import { ReferenceHero } from "../components/ReferenceHero";
 import { ServicePackagesSection } from "../components/ServicePlansSection";
 import { StackSection } from "../components/StackSection";
-import type { InsightPost, StackItem } from "../types";
+import type { BlogPost, StackItem } from "../types";
 
 interface HomePageProps {
   stackItems: StackItem[];
-  posts: InsightPost[];
+  posts: BlogPost[];
   railRef: RefObject<HTMLDivElement>;
   onPrev: () => void;
   onNext: () => void;
@@ -27,7 +26,6 @@ export function HomePage({
       <ReferenceHero />
       <ProviderSection />
       <StackSection items={stackItems} />
-      <EngineSection />
       <ServicePackagesSection />
       <InsightsSection
         posts={posts}

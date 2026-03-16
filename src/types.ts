@@ -65,6 +65,17 @@ export interface BlogPost {
   relatedSlugs?: string[];
 }
 
+export interface BlogArticleSection {
+  heading: string;
+  paragraphs: string[];
+}
+
+export interface BlogArticleContent {
+  introduction: string;
+  highlights: string[];
+  sections: BlogArticleSection[];
+}
+
 export interface InsightPost {
   tag: string;
   title: string;

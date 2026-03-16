@@ -88,21 +88,21 @@ const clientExpectations = [
 
 const aboutPageStyles = String.raw`
   .cx-about-page {
-    --cx-page-text: #0e1f22;
-    --cx-muted: #43575a;
-    --cx-meta: #567074;
-    --cx-page-veil: rgba(245, 249, 249, 0.74);
-    --cx-page-glow: rgba(44, 139, 145, 0.16);
-    --cx-page-glow-soft: rgba(134, 207, 211, 0.08);
-    --cx-surface: rgba(235, 242, 242, 0.9);
-    --cx-surface-strong: rgba(255, 255, 255, 0.9);
-    --cx-surface-accent: rgba(226, 239, 240, 0.94);
-    --cx-border: rgba(44, 139, 145, 0.16);
-    --cx-border-strong: rgba(44, 139, 145, 0.28);
-    --cx-shadow: 0 12px 28px rgba(8, 61, 66, 0.06);
-    --cx-shadow-soft: 0 8px 18px rgba(8, 61, 66, 0.05);
-    --cx-link: #083d42;
-    --cx-link-hover: #0d666a;
+    --cx-page-text: var(--color-text);
+    --cx-muted: var(--color-text-muted);
+    --cx-meta: var(--color-text-soft);
+    --cx-page-veil: rgba(247, 247, 244, 0.78);
+    --cx-page-glow: var(--glow-accent);
+    --cx-page-glow-soft: rgba(127, 188, 193, 0.08);
+    --cx-surface: rgba(242, 244, 241, 0.92);
+    --cx-surface-strong: rgba(247, 247, 244, 0.92);
+    --cx-surface-accent: rgba(226, 230, 225, 0.94);
+    --cx-border: var(--color-border-soft);
+    --cx-border-strong: var(--color-border-strong);
+    --cx-shadow: 0 12px 28px rgba(8, 31, 35, 0.08);
+    --cx-shadow-soft: 0 8px 18px rgba(8, 31, 35, 0.05);
+    --cx-link: var(--color-accent);
+    --cx-link-hover: var(--color-accent-hover);
     position: relative;
     z-index: 1;
     overflow: hidden;
@@ -151,7 +151,7 @@ const aboutPageStyles = String.raw`
     padding: 0.7rem 1.1rem;
     border: 1px solid var(--cx-border);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.68);
+    background: rgba(248, 242, 232, 0.76);
     color: rgba(17, 35, 37, 0.84);
     font-size: 0.88rem;
     font-weight: 800;
@@ -162,7 +162,7 @@ const aboutPageStyles = String.raw`
     width: 0.72rem;
     height: 0.72rem;
     border-radius: 50%;
-    background: linear-gradient(180deg, #2f9aa1, #0d666a);
+    background: linear-gradient(180deg, var(--color-accent-secondary), var(--color-accent));
   }
 
   .cx-about-hero h1 {
@@ -210,7 +210,7 @@ const aboutPageStyles = String.raw`
     align-items: start;
     gap: 1.75rem;
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(232, 242, 242, 0.88)),
+      linear-gradient(180deg, rgba(249, 243, 234, 0.76), rgba(236, 227, 212, 0.9)),
       var(--cx-surface);
   }
 
@@ -416,32 +416,32 @@ const aboutPageStyles = String.raw`
   }
 
   .cx-about-button--primary {
-    background: #041214;
+    background: var(--color-accent);
     border-color: transparent;
-    color: #ffffff;
+    color: var(--color-accent-contrast);
   }
 
   .cx-about-button--secondary {
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(248, 242, 232, 0.8);
     color: var(--cx-link);
   }
 
   html[data-theme="dark"] .cx-about-page {
-    --cx-page-text: #edf7f7;
-    --cx-muted: #b7cfd1;
-    --cx-meta: #9fb6b8;
-    --cx-page-veil: rgba(7, 24, 26, 0.72);
-    --cx-page-glow: rgba(44, 139, 145, 0.18);
-    --cx-page-glow-soft: rgba(134, 207, 211, 0.08);
-    --cx-surface: rgba(10, 30, 33, 0.88);
-    --cx-surface-strong: rgba(14, 35, 38, 0.9);
-    --cx-surface-accent: rgba(12, 38, 41, 0.92);
-    --cx-border: rgba(134, 207, 211, 0.14);
-    --cx-border-strong: rgba(134, 207, 211, 0.24);
-    --cx-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+    --cx-page-text: var(--color-text);
+    --cx-muted: var(--color-text-muted);
+    --cx-meta: var(--color-text-soft);
+    --cx-page-veil: rgba(7, 21, 24, 0.72);
+    --cx-page-glow: var(--glow-accent);
+    --cx-page-glow-soft: rgba(127, 188, 193, 0.08);
+    --cx-surface: rgba(13, 34, 38, 0.9);
+    --cx-surface-strong: rgba(17, 43, 48, 0.9);
+    --cx-surface-accent: rgba(11, 31, 35, 0.92);
+    --cx-border: var(--color-border-soft);
+    --cx-border-strong: var(--color-border-strong);
+    --cx-shadow: 0 16px 34px rgba(0, 0, 0, 0.24);
     --cx-shadow-soft: 0 10px 22px rgba(0, 0, 0, 0.18);
-    --cx-link: #86cfd3;
-    --cx-link-hover: #9de1e4;
+    --cx-link: var(--color-accent);
+    --cx-link-hover: var(--color-accent-hover);
   }
 
   html[data-theme="dark"] .cx-about-pill {

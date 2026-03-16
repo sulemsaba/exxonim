@@ -7,46 +7,59 @@ import {
   getFeaturedBlogPosts,
   getVisibleBlogPosts,
 } from "../content";
+import { resourcePost } from "../routes";
 import type { BlogCategoryId, BlogFeaturedSlot, BlogPost } from "../types";
+
+const BLOG_TOP_MEDIA = {
+  hero:
+    "https://cdn.prod.website-files.com/685be7dcd32275d383065239/685be7ddd32275d38306a12e_large-Webinar%20Campaign_2024_12_Blog%20Cover_Step-by-Step.webp",
+  banner:
+    "https://cdn.prod.website-files.com/685be7dcd32275d3830651d3/685be7dcd32275d383066655_banner-editor-picks.webp",
+  trending: [
+    "https://cdn.prod.website-files.com/685be7dcd32275d383065239/685be7dcd32275d383065aef_Blog%20Cover_2022_08_%20How%20to%20Effectively%20Improve%20Zoom%20Recording%20Quality%20-%20Riverside.fm.webp",
+    "https://cdn.prod.website-files.com/685be7dcd32275d383065239/690b7e6235396f06d7b216ba_Frame%201851040321%20%285%29.webp",
+    "https://cdn.prod.website-files.com/685be7dcd32275d383065239/685be7dcd32275d383067e01_Blog-Cover_2022_05_The-15-Best-Podcast-Recording-Software-in-2022-%28Mac-_-PC%29-%281%29.webp",
+  ],
+} as const;
 
 const resourcesPageStyles = String.raw`
   .cx-blog-page {
-    --cx-page-text: #0e1f22;
-    --cx-muted: #43575a;
-    --cx-meta: #567074;
-    --cx-page-veil: rgba(245, 249, 249, 0.72);
-    --cx-page-veil-strong: rgba(235, 244, 244, 0.84);
-    --cx-page-glow: rgba(44, 139, 145, 0.16);
-    --cx-page-glow-soft: rgba(134, 207, 211, 0.08);
-    --cx-media-surface: rgba(255, 255, 255, 0.9);
-    --cx-content-surface: rgba(235, 242, 242, 0.92);
-    --cx-content-surface-hover: rgba(223, 238, 239, 0.96);
-    --cx-hover-border: rgba(44, 139, 145, 0.34);
+    --cx-page-text: var(--color-text);
+    --cx-muted: var(--color-text-muted);
+    --cx-meta: var(--color-text-soft);
+    --cx-page-veil: rgba(247, 247, 244, 0.74);
+    --cx-page-veil-strong: rgba(226, 230, 225, 0.86);
+    --cx-page-glow: var(--glow-accent);
+    --cx-page-glow-soft: rgba(127, 188, 193, 0.08);
+    --cx-media-surface: rgba(247, 247, 244, 0.92);
+    --cx-content-surface: rgba(242, 244, 241, 0.92);
+    --cx-content-surface-hover: rgba(226, 230, 225, 0.96);
+    --cx-hover-border: rgba(15, 92, 99, 0.28);
     --cx-radius: 8px;
     --cx-inner-radius: 6px;
-    --cx-card-border: rgba(44, 139, 145, 0.16);
-    --cx-card-shadow: 0 10px 20px rgba(8, 61, 66, 0.05);
-    --cx-card-shadow-hover: 0 14px 28px rgba(8, 61, 66, 0.1);
-    --cx-badge-border: #083d42;
-    --cx-badge-text: #083d42;
-    --cx-link: #083d42;
-    --cx-link-hover: #0d666a;
-    --cx-filter-border: rgba(44, 139, 145, 0.18);
-    --cx-filter-bg: rgba(44, 139, 145, 0.04);
-    --cx-filter-text: #43575a;
-    --cx-filter-active-bg: #083d42;
-    --cx-filter-active-text: #f7fbfb;
-    --cx-filter-active-border: #083d42;
-    --cx-empty-bg: rgba(235, 242, 242, 0.92);
-    --cx-empty-border: rgba(44, 139, 145, 0.16);
-    --cx-more-bg: #083d42;
-    --cx-more-text: #f7fbfb;
-    --cx-more-border: #083d42;
-    --cx-placeholder-copy: #0e1f22;
-    --cx-placeholder-meta: rgba(13, 102, 106, 0.62);
-    --cx-placeholder-accent: rgba(44, 139, 145, 0.08);
-    --cx-placeholder-border: rgba(44, 139, 145, 0.14);
-    --cx-hover-accent-glow: rgba(44, 139, 145, 0.12);
+    --cx-card-border: var(--color-border-soft);
+    --cx-card-shadow: 0 10px 20px rgba(8, 31, 35, 0.06);
+    --cx-card-shadow-hover: 0 14px 28px rgba(8, 31, 35, 0.1);
+    --cx-badge-border: var(--color-accent);
+    --cx-badge-text: var(--color-accent);
+    --cx-link: var(--color-accent);
+    --cx-link-hover: var(--color-accent-hover);
+    --cx-filter-border: var(--color-border-soft);
+    --cx-filter-bg: rgba(15, 92, 99, 0.05);
+    --cx-filter-text: var(--color-text-muted);
+    --cx-filter-active-bg: var(--color-accent);
+    --cx-filter-active-text: var(--color-accent-contrast);
+    --cx-filter-active-border: var(--color-accent);
+    --cx-empty-bg: rgba(242, 244, 241, 0.92);
+    --cx-empty-border: var(--color-border-soft);
+    --cx-more-bg: var(--color-accent);
+    --cx-more-text: var(--color-accent-contrast);
+    --cx-more-border: var(--color-accent);
+    --cx-placeholder-copy: var(--color-text);
+    --cx-placeholder-meta: rgba(15, 92, 99, 0.58);
+    --cx-placeholder-accent: rgba(15, 92, 99, 0.08);
+    --cx-placeholder-border: var(--color-border-soft);
+    --cx-hover-accent-glow: rgba(15, 92, 99, 0.12);
     position: relative;
     isolation: isolate;
     background: transparent;
@@ -58,40 +71,40 @@ const resourcesPageStyles = String.raw`
   }
 
   html[data-theme="dark"] .cx-blog-page {
-    --cx-page-text: #edf7f7;
-    --cx-muted: #a6c0c2;
-    --cx-meta: #86a7aa;
-    --cx-page-veil: rgba(6, 18, 20, 0.72);
-    --cx-page-veil-strong: rgba(10, 22, 24, 0.84);
-    --cx-page-glow: rgba(44, 139, 145, 0.18);
-    --cx-page-glow-soft: rgba(134, 207, 211, 0.08);
-    --cx-media-surface: rgba(8, 16, 18, 0.92);
-    --cx-content-surface: rgba(14, 28, 31, 0.92);
-    --cx-content-surface-hover: rgba(17, 49, 54, 0.94);
-    --cx-hover-border: rgba(134, 207, 211, 0.28);
-    --cx-card-border: rgba(134, 207, 211, 0.14);
+    --cx-page-text: var(--color-text);
+    --cx-muted: var(--color-text-muted);
+    --cx-meta: var(--color-text-soft);
+    --cx-page-veil: rgba(7, 21, 24, 0.72);
+    --cx-page-veil-strong: rgba(11, 31, 35, 0.84);
+    --cx-page-glow: var(--glow-accent);
+    --cx-page-glow-soft: rgba(127, 188, 193, 0.08);
+    --cx-media-surface: rgba(13, 34, 38, 0.92);
+    --cx-content-surface: rgba(11, 31, 35, 0.92);
+    --cx-content-surface-hover: rgba(17, 43, 48, 0.94);
+    --cx-hover-border: rgba(127, 188, 193, 0.26);
+    --cx-card-border: var(--color-border-soft);
     --cx-card-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
     --cx-card-shadow-hover: 0 18px 32px rgba(0, 0, 0, 0.3);
-    --cx-badge-border: #86cfd3;
-    --cx-badge-text: #86cfd3;
-    --cx-link: #86cfd3;
-    --cx-link-hover: #baf1f4;
-    --cx-filter-border: rgba(134, 207, 211, 0.2);
-    --cx-filter-bg: rgba(134, 207, 211, 0.06);
-    --cx-filter-text: #a6c0c2;
-    --cx-filter-active-bg: #86cfd3;
-    --cx-filter-active-text: #082a2f;
-    --cx-filter-active-border: #86cfd3;
-    --cx-empty-bg: rgba(14, 28, 31, 0.92);
-    --cx-empty-border: rgba(134, 207, 211, 0.14);
-    --cx-more-bg: #86cfd3;
-    --cx-more-text: #082a2f;
-    --cx-more-border: #86cfd3;
-    --cx-placeholder-copy: #edf7f7;
-    --cx-placeholder-meta: rgba(134, 207, 211, 0.74);
-    --cx-placeholder-accent: rgba(44, 139, 145, 0.12);
-    --cx-placeholder-border: rgba(134, 207, 211, 0.16);
-    --cx-hover-accent-glow: rgba(134, 207, 211, 0.1);
+    --cx-badge-border: var(--color-accent);
+    --cx-badge-text: var(--color-accent);
+    --cx-link: var(--color-accent);
+    --cx-link-hover: var(--color-accent-hover);
+    --cx-filter-border: var(--color-border-soft);
+    --cx-filter-bg: rgba(127, 188, 193, 0.08);
+    --cx-filter-text: var(--color-text-muted);
+    --cx-filter-active-bg: var(--color-accent);
+    --cx-filter-active-text: var(--color-accent-contrast);
+    --cx-filter-active-border: var(--color-accent);
+    --cx-empty-bg: rgba(11, 31, 35, 0.92);
+    --cx-empty-border: var(--color-border-soft);
+    --cx-more-bg: var(--color-accent);
+    --cx-more-text: var(--color-accent-contrast);
+    --cx-more-border: var(--color-accent);
+    --cx-placeholder-copy: var(--color-text);
+    --cx-placeholder-meta: rgba(127, 188, 193, 0.68);
+    --cx-placeholder-accent: rgba(127, 188, 193, 0.12);
+    --cx-placeholder-border: var(--color-border-soft);
+    --cx-hover-accent-glow: rgba(127, 188, 193, 0.1);
   }
 
   .cx-blog-page *,
@@ -114,15 +127,7 @@ const resourcesPageStyles = String.raw`
   }
 
   .cx-blog-page::after {
-    z-index: 0;
-    background:
-      radial-gradient(
-        420px circle at var(--mouse-x, 50vw) var(--mouse-y, 30vh),
-        var(--cx-page-glow) 0%,
-        var(--cx-page-glow-soft) 28%,
-        transparent 68%
-      );
-    opacity: 0.95;
+    display: none;
   }
 
   .cx-container {
@@ -133,12 +138,236 @@ const resourcesPageStyles = String.raw`
   }
 
   .cx-page-title {
-    margin: 0 0 24px;
+    margin: 0;
     color: var(--cx-page-text);
-    font-size: clamp(2.2rem, 5vw, 3.5rem);
-    font-weight: 400;
-    line-height: 0.96;
+    font-family: var(--font-display);
+    font-size: clamp(2.35rem, 4.6vw, 4.25rem);
+    font-weight: 500;
+    line-height: 0.94;
     letter-spacing: -0.05em;
+  }
+
+  .cx-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .cx-top-shell {
+    margin-bottom: 56px;
+  }
+
+  .cx-top-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.54fr) minmax(390px, 0.98fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .cx-top-hero-card {
+    display: grid;
+    gap: 28px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .cx-top-hero-media {
+    aspect-ratio: 1.53 / 1;
+    overflow: hidden;
+    border-radius: 4px;
+    background: var(--cx-media-surface);
+  }
+
+  .cx-top-hero-media img,
+  .cx-trending-thumb img,
+  .cx-trending-bannerImage {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+
+  .cx-top-hero-copy {
+    display: grid;
+    gap: 18px;
+  }
+
+  .cx-top-hero-copy h2 {
+    margin: 0;
+    max-width: 12.75ch;
+    color: var(--cx-page-text);
+    font-family: var(--font-display);
+    font-size: clamp(2.65rem, 4.05vw, 4rem);
+    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -0.06em;
+  }
+
+  .cx-top-hero-copy p {
+    margin: 0;
+    max-width: 46rem;
+    color: var(--cx-muted);
+    font-size: 0.97rem;
+    line-height: 1.52;
+  }
+
+  .cx-top-hero-byline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+  }
+
+  .cx-top-hero-byline .cx-author {
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .cx-top-hero-byline .cx-author-name {
+    color: var(--cx-page-text);
+    font-size: 0.96rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .cx-top-hero-role,
+  .cx-top-hero-metaText {
+    color: var(--cx-meta);
+    font-size: 0.92rem;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .cx-top-aside {
+    display: grid;
+    gap: 18px;
+  }
+
+  .cx-trending-banner {
+    position: relative;
+    overflow: hidden;
+    min-height: 214px;
+    border-radius: 4px;
+    color: #ffffff;
+  }
+
+  .cx-trending-banner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(17, 19, 32, 0.32) 0%, rgba(17, 19, 32, 0.12) 100%);
+    pointer-events: none;
+  }
+
+  .cx-trending-banner::after {
+    display: none;
+  }
+
+  .cx-trending-bannerImage {
+    position: absolute;
+    inset: 0;
+  }
+
+  .cx-trending-bannerContent {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    min-height: 214px;
+    padding: 24px 22px;
+  }
+
+  .cx-trending-banner h2 {
+    margin: 0;
+    max-width: 6.8ch;
+    color: #ffffff;
+    font-family: var(--font-display);
+    font-size: clamp(2.35rem, 3vw, 3.52rem);
+    font-weight: 500;
+    line-height: 0.94;
+    letter-spacing: -0.055em;
+  }
+
+  .cx-trending-list {
+    background: transparent;
+  }
+
+  .cx-trending-item {
+    display: grid;
+    grid-template-columns: 188px minmax(0, 1fr);
+    gap: 20px;
+    align-items: center;
+    padding: 20px 0;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .cx-trending-item:not(:first-child) {
+    border-top: 1px solid rgba(15, 23, 32, 0.12);
+  }
+
+  .cx-trending-item:first-child {
+    padding-top: 0;
+  }
+
+  .cx-trending-thumb {
+    aspect-ratio: 188 / 128;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #d8d8d8;
+  }
+
+  .cx-trending-content {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .cx-trending-content h3 {
+    margin: 0;
+    color: var(--cx-page-text);
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 1.7vw, 1.95rem);
+    font-weight: 500;
+    line-height: 1.14;
+    letter-spacing: -0.045em;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .cx-trending-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+  }
+
+  .cx-trending-metaText {
+    color: #7d8389;
+    font-size: 0.92rem;
+    line-height: 1.4;
+  }
+
+  .cx-trending-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 13px;
+    border-radius: 3px;
+    background: #e8ddff;
+    color: #8e73f2;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
   }
 
   /* --- Interactive Card Wrappers --- */
@@ -308,8 +537,9 @@ const resourcesPageStyles = String.raw`
   .cx-featured-content h2 {
     margin: 0 0 20px;
     color: var(--cx-page-text);
+    font-family: var(--font-display);
     font-size: clamp(2rem, 3.1vw, 3rem);
-    font-weight: 700;
+    font-weight: 500;
     line-height: 1.1;
     letter-spacing: -0.04em;
   }
@@ -428,8 +658,9 @@ const resourcesPageStyles = String.raw`
   .cx-sub-content h3 {
     margin: 0 0 12px;
     color: var(--cx-page-text);
+    font-family: var(--font-display);
     font-size: clamp(1.25rem, 2vw, 1.55rem);
-    font-weight: 700;
+    font-weight: 500;
     line-height: 1.18;
     letter-spacing: -0.03em;
   }
@@ -519,8 +750,9 @@ const resourcesPageStyles = String.raw`
   .cx-post-content h3 {
     margin: 0 0 12px;
     color: var(--cx-page-text);
+    font-family: var(--font-display);
     font-size: clamp(1.15rem, 1.8vw, 1.3rem);
-    font-weight: 700;
+    font-weight: 500;
     line-height: 1.2;
     letter-spacing: -0.03em;
     display: -webkit-box;
@@ -557,7 +789,9 @@ const resourcesPageStyles = String.raw`
   .cx-empty-state h2 {
     margin: 0 0 12px;
     color: var(--cx-page-text);
+    font-family: var(--font-display);
     font-size: 28px;
+    font-weight: 500;
     line-height: 1.12;
     letter-spacing: -0.03em;
   }
@@ -610,7 +844,7 @@ const resourcesPageStyles = String.raw`
     padding: 10px 12px;
     border: 1px solid rgba(44, 139, 145, 0.12);
     border-radius: var(--cx-inner-radius);
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(249, 243, 234, 0.94);
     color: #0e1f22;
   }
 
@@ -837,6 +1071,10 @@ const resourcesPageStyles = String.raw`
       padding-top: 28px;
     }
 
+    .cx-top-layout {
+      grid-template-columns: 1fr;
+    }
+
     .cx-featured-section {
       grid-template-columns: 1fr;
     }
@@ -859,8 +1097,42 @@ const resourcesPageStyles = String.raw`
       padding: 24px 16px 48px;
     }
 
-    .cx-page-title {
-      margin-bottom: 20px;
+    .cx-top-shell {
+      margin-bottom: 34px;
+    }
+
+    .cx-top-hero-card {
+      gap: 20px;
+    }
+
+    .cx-top-hero-media {
+      width: calc(100% + 32px);
+      margin-inline: -16px;
+      aspect-ratio: 1.08 / 1;
+      border-radius: 0;
+    }
+
+    .cx-top-hero-copy h2 {
+      font-size: 2.2rem;
+      max-width: 100%;
+    }
+
+    .cx-top-hero-copy p {
+      font-size: 0.98rem;
+    }
+
+    .cx-trending-banner {
+      min-height: 214px;
+    }
+
+    .cx-trending-item {
+      grid-template-columns: 1fr;
+      gap: 14px;
+      padding: 18px 0;
+    }
+
+    .cx-trending-thumb {
+      aspect-ratio: 16 / 10;
     }
 
     .cx-featured-content {
@@ -945,19 +1217,6 @@ function getAuthorInitials(name: string) {
     .join("");
 }
 
-function getFeaturedSlotLabel(slot?: BlogFeaturedSlot) {
-  switch (slot) {
-    case "hero":
-      return "Featured";
-    case "popular":
-      return "Most Popular";
-    case "editors-pick":
-      return "Editor's Pick";
-    default:
-      return null;
-  }
-}
-
 function getVisualSlot(post: BlogPost): VisualSlot {
   return post.featuredSlot ?? "default";
 }
@@ -1031,35 +1290,73 @@ function renderMedia(post: BlogPost, categoryLabel: string, slot: VisualSlot, va
   return renderPlaceholder(post, categoryLabel, slot, variant);
 }
 
-function renderSupportingCard(post: BlogPost) {
-  const categoryLabel = getBlogCategoryById(post.categoryId)?.label ?? "Insight";
-  const slot = getVisualSlot(post);
-  const badgeLabel = getFeaturedSlotLabel(post.featuredSlot);
-  const articleLink = `/blog/${post.slug}`;
+function renderTopHeroByline(post: BlogPost) {
+  const author = getBlogAuthorById(post.authorId);
+  const authorName = author?.name ?? "Exxonim Team";
+  const metaParts = [formatBlogDate(post.publishedAt)];
+
+  if (post.readTimeMinutes) {
+    metaParts.push(`${post.readTimeMinutes} min`);
+  }
 
   return (
-    <article className="cx-sub-card">
-      <div className="cx-sub-image">
-        {badgeLabel ? <div className="cx-tag">{badgeLabel}</div> : null}
-        {renderMedia(post, categoryLabel, slot, "supporting")}
+    <div className="cx-top-hero-byline">
+      <div className="cx-author">
+        {author?.avatarSrc ? (
+          <img
+            className="cx-author-img"
+            src={author.avatarSrc}
+            alt={author.name}
+            loading="lazy"
+          />
+        ) : (
+          <span className="cx-author-fallback" aria-hidden="true">
+            {getAuthorInitials(authorName)}
+          </span>
+        )}
+
+        <span className="cx-author-name">{authorName}</span>
       </div>
 
-      <div className="cx-sub-content">
-        <span className="cx-date">{formatBlogDate(post.publishedAt)}</span>
-        <h3>{post.title}</h3>
-        <p>{post.excerpt}</p>
-        <a href={articleLink} className="cx-learn-more cx-learn-more--push cx-click-overlay">
-          Learn more <span aria-hidden="true">&rarr;</span>
-        </a>
+      {author?.role ? <span className="cx-top-hero-role">{author.role}</span> : null}
+      <span className="cx-top-hero-metaText">{metaParts.join(" \u00b7 ")}</span>
+    </div>
+  );
+}
+
+function renderTopListItem(post: BlogPost, index: number) {
+  const categoryLabel = getBlogCategoryById(post.categoryId)?.label ?? "Insight";
+  const articleLink = resourcePost(post.slug);
+  const metaParts = [formatBlogDate(post.publishedAt)];
+  const thumbnailSrc =
+    BLOG_TOP_MEDIA.trending[index] ??
+    BLOG_TOP_MEDIA.trending[BLOG_TOP_MEDIA.trending.length - 1];
+
+  if (post.readTimeMinutes) {
+    metaParts.push(`${post.readTimeMinutes} min`);
+  }
+
+  return (
+    <a href={articleLink} className="cx-trending-item">
+      <div className="cx-trending-thumb">
+        <img src={thumbnailSrc} alt={post.title} loading="lazy" />
       </div>
-    </article>
+
+      <div className="cx-trending-content">
+        <h3>{post.title}</h3>
+        <div className="cx-trending-meta">
+          <span className="cx-trending-metaText">{metaParts.join(" · ")}</span>
+          <span className="cx-trending-pill">{categoryLabel}</span>
+        </div>
+      </div>
+    </a>
   );
 }
 
 function renderGridCard(post: BlogPost) {
   const categoryLabel = getBlogCategoryById(post.categoryId)?.label ?? "Insight";
   const slot = getVisualSlot(post);
-  const articleLink = `/blog/${post.slug}`;
+  const articleLink = resourcePost(post.slug);
 
   return (
     <article className="cx-post-card">
@@ -1093,12 +1390,19 @@ export function ResourcesPage() {
 
   const featuredPosts = getFeaturedBlogPosts(blogPosts).slice(0, 3);
   const heroPost = featuredPosts[0];
-  const supportingPosts = featuredPosts.slice(1, 3);
-  const featuredSlugs = featuredPosts.map((post) => post.slug);
+  const topRailPosts = getVisibleBlogPosts({
+    posts: blogPosts,
+    categoryId: "all",
+    limit: 3,
+    excludeSlugs: heroPost ? [heroPost.slug] : [],
+  });
+  const topSectionSlugs = [heroPost?.slug, ...topRailPosts.map((post) => post.slug)].filter(
+    Boolean
+  ) as string[];
   const filteredPosts = getVisibleBlogPosts({
     posts: blogPosts,
     categoryId: selectedCategory,
-    excludeSlugs: selectedCategory === "all" ? featuredSlugs : [],
+    excludeSlugs: selectedCategory === "all" ? topSectionSlugs : [],
   });
   const visiblePosts = filteredPosts.slice(0, visibleCount);
   const hasMorePosts = filteredPosts.length > visiblePosts.length;
@@ -1112,10 +1416,6 @@ export function ResourcesPage() {
     setVisibleCount(INITIAL_VISIBLE_COUNT);
   };
 
-  const heroCategoryLabel = heroPost
-    ? getBlogCategoryById(heroPost.categoryId)?.label ?? "Insight"
-    : "Insight";
-
   return (
     <>
       <style>{resourcesPageStyles}</style>
@@ -1125,38 +1425,44 @@ export function ResourcesPage() {
           <span className="section-anchor" id="resources" aria-hidden="true"></span>
           <span className="section-anchor" id="blogs" aria-hidden="true"></span>
 
-          <h1 className="cx-page-title">Exxonim Blog</h1>
+          <div className="cx-top-shell">
+            <h1 className="cx-sr-only">Exxonim Blog</h1>
+            {heroPost ? (
+              <div className="cx-top-layout">
+                <a href={resourcePost(heroPost.slug)} className="cx-top-hero-card">
+                  <div className="cx-top-hero-media">
+                    <img src={BLOG_TOP_MEDIA.hero} alt={heroPost.title} />
+                  </div>
 
-          {heroPost ? (
-            <div className="cx-featured-wrapper">
-              <div className="cx-featured-section">
-                <div className="cx-featured-image">
-                  {getFeaturedSlotLabel(heroPost.featuredSlot) ? (
-                    <div className="cx-tag">{getFeaturedSlotLabel(heroPost.featuredSlot)}</div>
-                  ) : null}
-                  {renderMedia(heroPost, heroCategoryLabel, getVisualSlot(heroPost), "hero")}
-                </div>
+                  <div className="cx-top-hero-copy">
+                    <h2>{heroPost.title}</h2>
+                    <p>{heroPost.excerpt}</p>
+                    {renderTopHeroByline(heroPost)}
+                  </div>
+                </a>
 
-                <div className="cx-featured-content">
-                  <span className="cx-date">{formatBlogDate(heroPost.publishedAt)}</span>
-                  <h2>{heroPost.title}</h2>
-                  <p>{heroPost.excerpt}</p>
-                  {renderAuthor(heroPost)}
-                  <a href={`/blog/${heroPost.slug}`} className="cx-learn-more cx-click-overlay">
-                    Learn more <span aria-hidden="true">&rarr;</span>
-                  </a>
-                </div>
+                <aside className="cx-top-aside" aria-label="Trending articles">
+                  <div className="cx-trending-banner">
+                    <img
+                      className="cx-trending-bannerImage"
+                      src={BLOG_TOP_MEDIA.banner}
+                      alt=""
+                      aria-hidden="true"
+                    />
+                    <div className="cx-trending-bannerContent">
+                      <h2>Trending on Exxonim</h2>
+                    </div>
+                  </div>
+
+                  <div className="cx-trending-list">
+                    {topRailPosts.map((post, index) => (
+                      <div key={post.slug}>{renderTopListItem(post, index)}</div>
+                    ))}
+                  </div>
+                </aside>
               </div>
-            </div>
-          ) : null}
-
-          {supportingPosts.length ? (
-            <div className="cx-sub-articles">
-              {supportingPosts.map((post) => (
-                <div key={post.slug}>{renderSupportingCard(post)}</div>
-              ))}
-            </div>
-          ) : null}
+            ) : null}
+          </div>
 
           <div className="cx-filters" aria-label="Blog categories">
             <button
@@ -1188,9 +1494,7 @@ export function ResourcesPage() {
               <button
                 key={category.id}
                 type="button"
-                className={`cx-filter-btn ${
-                  selectedCategory === category.id ? "active" : ""
-                }`}
+                className={`cx-filter-btn ${selectedCategory === category.id ? "active" : ""}`}
                 aria-pressed={selectedCategory === category.id}
                 onClick={() => handleSelectCategory(category.id)}
               >

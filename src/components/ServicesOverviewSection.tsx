@@ -55,16 +55,16 @@ const servicePromises = [
 
 const servicesOverviewStyles = String.raw`
   .services-overview {
-    --services-text: #0e1f22;
-    --services-muted: rgba(14, 31, 34, 0.72);
-    --services-soft: rgba(14, 31, 34, 0.58);
-    --services-surface: rgba(247, 252, 252, 0.76);
-    --services-surface-strong: rgba(255, 255, 255, 0.86);
-    --services-surface-deep: rgba(9, 68, 73, 0.96);
-    --services-border: rgba(44, 139, 145, 0.16);
-    --services-border-strong: rgba(44, 139, 145, 0.28);
-    --services-shadow: 0 22px 54px rgba(9, 68, 73, 0.1);
-    --services-glow: rgba(44, 139, 145, 0.12);
+    --services-text: var(--color-text);
+    --services-muted: var(--color-text-muted);
+    --services-soft: var(--color-text-soft);
+    --services-surface: rgba(247, 247, 244, 0.82);
+    --services-surface-strong: rgba(242, 244, 241, 0.92);
+    --services-surface-deep: linear-gradient(180deg, rgba(15, 92, 99, 0.96), rgba(8, 24, 27, 0.98));
+    --services-border: var(--color-border-soft);
+    --services-border-strong: var(--color-border-strong);
+    --services-shadow: var(--shadow-panel);
+    --services-glow: var(--glow-accent);
     position: relative;
     overflow: hidden;
     padding: 1.6rem 0 4.5rem;
@@ -81,31 +81,31 @@ const servicesOverviewStyles = String.raw`
   .services-overview::before {
     background:
       radial-gradient(circle at 15% 10%, var(--services-glow) 0, transparent 24%),
-      radial-gradient(circle at 85% 14%, rgba(134, 207, 211, 0.12) 0, transparent 22%);
+      radial-gradient(circle at 85% 14%, rgba(127, 188, 193, 0.12) 0, transparent 22%);
   }
 
   .services-overview::after {
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 24%),
+      linear-gradient(180deg, rgba(248, 242, 232, 0.08), transparent 24%),
       radial-gradient(
         460px circle at var(--mouse-x, 50vw) var(--mouse-y, 30vh),
-        rgba(44, 139, 145, 0.08) 0%,
+        rgba(15, 92, 99, 0.08) 0%,
         transparent 58%
       );
     opacity: 0.88;
   }
 
   html[data-theme="dark"] .services-overview {
-    --services-text: rgba(244, 247, 255, 0.96);
-    --services-muted: rgba(226, 232, 255, 0.76);
-    --services-soft: rgba(226, 232, 255, 0.58);
-    --services-surface: rgba(7, 24, 26, 0.68);
-    --services-surface-strong: rgba(9, 31, 34, 0.82);
-    --services-surface-deep: linear-gradient(180deg, rgba(9, 68, 73, 0.92), rgba(4, 18, 20, 0.98));
-    --services-border: rgba(134, 207, 211, 0.16);
-    --services-border-strong: rgba(134, 207, 211, 0.28);
-    --services-shadow: 0 26px 60px rgba(0, 0, 0, 0.28);
-    --services-glow: rgba(134, 207, 211, 0.12);
+    --services-text: var(--color-text);
+    --services-muted: var(--color-text-muted);
+    --services-soft: var(--color-text-soft);
+    --services-surface: rgba(13, 34, 38, 0.72);
+    --services-surface-strong: rgba(11, 31, 35, 0.86);
+    --services-surface-deep: linear-gradient(180deg, rgba(17, 43, 48, 0.94), rgba(7, 21, 24, 0.98));
+    --services-border: var(--color-border-soft);
+    --services-border-strong: var(--color-border-strong);
+    --services-shadow: var(--shadow-panel);
+    --services-glow: var(--glow-accent);
   }
 
   .services-overview__shell {
@@ -389,7 +389,7 @@ const servicesOverviewStyles = String.raw`
     height: 0.55rem;
     margin-top: 0.45rem;
     border-radius: 50%;
-    background: #2c8b91;
+    background: var(--color-accent);
     flex-shrink: 0;
   }
 
@@ -491,7 +491,7 @@ export function ServicesOverviewSection() {
 
               <div className="services-overview__actions">
                 <a className="landing-cta landing-cta--primary" href="#packages">
-                  Explore packages
+                  See package plans
                 </a>
                 <a
                   className="landing-cta landing-cta--secondary"

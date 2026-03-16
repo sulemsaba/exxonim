@@ -204,6 +204,9 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-03-10",
     categoryId: "registration",
     authorId: "aisha-msuya",
+    coverImageSrc:
+      "https://cdn.prod.website-files.com/685be7dcd32275d383065239/685be7ddd32275d38306a12e_large-Webinar%20Campaign_2024_12_Blog%20Cover_Step-by-Step.webp",
+    coverAlt: "Person reviewing business registration materials",
     mediaLabel: "Setup workflow",
     featuredSlot: "hero",
     featuredOnHome: true,
@@ -222,6 +225,9 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-03-04",
     categoryId: "tax-compliance",
     authorId: "kelvin-mrema",
+    coverImageSrc:
+      "https://cdn.prod.website-files.com/685be7dcd32275d383065239/685be7dcd32275d383065aef_Blog%20Cover_2022_08_%20How%20to%20Effectively%20Improve%20Zoom%20Recording%20Quality%20-%20Riverside.fm.webp",
+    coverAlt: "Desk setup representing compliance review work",
     mediaLabel: "Compliance rhythm",
     featuredSlot: "popular",
     featuredOnHome: true,
@@ -240,6 +246,9 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-02-19",
     categoryId: "licensing-permits",
     authorId: "neema-kweka",
+    coverImageSrc:
+      "https://cdn.prod.website-files.com/685be7dcd32275d383065239/690b7e6235396f06d7b216ba_Frame%201851040321%20%285%29.webp",
+    coverAlt: "Workspace used for licensing and approvals planning",
     mediaLabel: "Approval notes",
     featuredSlot: "editors-pick",
     featuredOnHome: true,
@@ -258,6 +267,9 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-02-14",
     categoryId: "registration",
     authorId: "aisha-msuya",
+    coverImageSrc:
+      "https://cdn.prod.website-files.com/685be7dcd32275d383065239/685be7dcd32275d383067e01_Blog-Cover_2022_05_The-15-Best-Podcast-Recording-Software-in-2022-%28Mac-_-PC%29-%281%29.webp",
+    coverAlt: "Administrative planning image for registration readiness",
     mediaLabel: "Readiness pack",
     featuredOnHome: true,
     readTimeMinutes: 3,
@@ -394,6 +406,13 @@ export function getBlogAuthorById(authorId: string) {
   return authorMap.get(authorId);
 }
 
+export function getBlogPostBySlug(
+  slug: string,
+  posts: BlogPost[] = blogPosts
+) {
+  return posts.find((post) => post.slug === slug) ?? null;
+}
+
 export function getFeaturedBlogPosts(posts: BlogPost[] = blogPosts) {
   return posts
     .filter((post) => post.featuredSlot)
@@ -453,6 +472,13 @@ export function getHomeInsightPosts(posts: BlogPost[] = blogPosts): InsightPost[
     description: post.excerpt,
     mediaLabel: post.mediaLabel,
   }));
+}
+
+export function getHomeBlogPosts(posts: BlogPost[] = blogPosts) {
+  return posts
+    .filter((post) => post.featuredOnHome)
+    .sort(comparePostsNewestFirst)
+    .slice(0, 4);
 }
 
 export function getRelatedBlogPosts(

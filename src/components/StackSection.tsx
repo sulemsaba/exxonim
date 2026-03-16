@@ -17,6 +17,15 @@ type FeatureRow = {
   visualKey: FeatureVisualKey;
 };
 
+type FeatureVisualContent = {
+  workstreamValue: string;
+  counterpartLabel: string;
+  counterpartValue: string;
+  focusValue: string;
+  summaryTitle: string;
+  summaryBody: string;
+};
+
 type ExtendedStackItem = StackItem & {
   emphasis?: string;
   ctaHref?: string;
@@ -51,52 +60,91 @@ const defaultFeatureRows: FeatureRow[] = [
   },
 ];
 
+const featureVisualContentMap: Record<FeatureVisualKey, FeatureVisualContent> = {
+  registration: {
+    workstreamValue: "Registration and setup",
+    counterpartLabel: "Client",
+    counterpartValue: "Exxonim Consultation",
+    focusValue: "Company, NGO, business name, and trademark setup",
+    summaryTitle: "Clear setup steps, fewer avoidable corrections.",
+    summaryBody:
+      "We organize the registration path, documentation, and filing order so the work moves forward with less confusion and better visibility.",
+  },
+  tax: {
+    workstreamValue: "Compliance and approvals",
+    counterpartLabel: "Client",
+    counterpartValue: "Exxonim Consultation",
+    focusValue: "TIN, licensing, returns, and approvals",
+    summaryTitle: "Clear next steps, fewer avoidable delays.",
+    summaryBody:
+      "We organize the filing path, documentation, and authority follow-up so the work moves forward with less back-and-forth and better visibility.",
+  },
+  institutional: {
+    workstreamValue: "Institutional support",
+    counterpartLabel: "Coverage",
+    counterpartValue: "Employer and board registrations",
+    focusValue: "OSHA, NSSF, WCF, CRB / ERB registrations",
+    summaryTitle: "Institutional registrations stay organized.",
+    summaryBody:
+      "We keep employer-side and institutional filing work aligned so renewals, compliance, and submission follow-up stay practical.",
+  },
+  tracking: {
+    workstreamValue: "Consultation tracking",
+    counterpartLabel: "Reference",
+    counterpartValue: "EXX-24091",
+    focusValue: "Status checkpoints, follow-up, and next actions",
+    summaryTitle: "Know what is complete and what comes next.",
+    summaryBody:
+      "We keep intake, review, submission, and authority follow-up visible so the next action stays clear from start to release.",
+  },
+};
+
 const stackSectionStyles = String.raw`
   .scroll-snap-wrapper {
     --stack-bg:
       linear-gradient(
         180deg,
-        rgba(246, 251, 251, 0.98) 0%,
-        rgba(230, 241, 242, 0.96) 52%,
-        rgba(241, 249, 249, 0.98) 100%
+        var(--color-surface) 0%,
+        var(--color-page) 52%,
+        var(--color-page-strong) 100%
       );
-    --stack-surface: rgba(249, 253, 253, 0.9);
-    --stack-surface-strong: rgba(229, 241, 242, 0.96);
-    --stack-surface-soft: rgba(223, 238, 239, 0.88);
+    --stack-surface: var(--color-surface);
+    --stack-surface-strong: var(--color-page-strong);
+    --stack-surface-soft: var(--color-surface-soft);
     --stack-surface-deep:
-      linear-gradient(180deg, rgba(9, 68, 73, 0.98) 0%, rgba(6, 40, 44, 0.98) 100%);
-    --stack-border: rgba(9, 68, 73, 0.12);
-    --stack-border-strong: rgba(9, 68, 73, 0.22);
-    --stack-text: var(--slate-950);
-    --stack-text-soft: rgba(17, 35, 37, 0.72);
-    --stack-muted: rgba(17, 35, 37, 0.56);
-    --stack-accent: var(--primary);
-    --stack-accent-strong: var(--primary-strong);
-    --stack-accent-soft: rgba(44, 139, 145, 0.16);
-    --stack-accent-soft-strong: rgba(44, 139, 145, 0.24);
-    --stack-accent-contrast: var(--white);
-    --stack-contrast-text: rgba(248, 252, 252, 0.96);
-    --stack-highlight-line: rgba(255, 255, 255, 0.58);
-    --stack-glow: rgba(44, 139, 145, 0.16);
-    --stack-glow-strong: rgba(13, 102, 106, 0.26);
-    --stack-shadow: 0 24px 60px rgba(9, 68, 73, 0.12);
-    --stack-shadow-hover: 0 30px 72px rgba(9, 68, 73, 0.18);
-    --stack-card-shadow: 0 16px 36px rgba(9, 68, 73, 0.12);
-    --stack-card-shadow-hover: 0 22px 50px rgba(9, 68, 73, 0.18);
-    --stack-panel-start: rgba(255, 255, 255, 0.94);
-    --stack-panel-end: rgba(228, 240, 241, 0.94);
-    --stack-compose-start: rgba(255, 255, 255, 0.97);
-    --stack-compose-mid: rgba(237, 246, 247, 0.95);
-    --stack-compose-end: rgba(222, 238, 239, 0.96);
-    --stack-compose-orb: rgba(44, 139, 145, 0.22);
-    --stack-compose-orb-soft: rgba(134, 207, 211, 0.26);
+      linear-gradient(180deg, rgba(15, 92, 99, 0.96) 0%, rgba(8, 24, 27, 0.98) 100%);
+    --stack-border: var(--color-border-soft);
+    --stack-border-strong: var(--color-border-strong);
+    --stack-text: var(--color-text);
+    --stack-text-soft: var(--color-text-muted);
+    --stack-muted: var(--color-text-soft);
+    --stack-accent: var(--color-accent);
+    --stack-accent-strong: var(--color-accent-hover);
+    --stack-accent-soft: var(--color-accent-soft);
+    --stack-accent-soft-strong: var(--color-accent-soft-strong);
+    --stack-accent-contrast: var(--color-accent-contrast);
+    --stack-contrast-text: rgba(247, 251, 251, 0.96);
+    --stack-highlight-line: rgba(247, 247, 244, 0.58);
+    --stack-glow: var(--glow-accent);
+    --stack-glow-strong: rgba(15, 92, 99, 0.22);
+    --stack-shadow: var(--shadow-panel);
+    --stack-shadow-hover: var(--shadow-panel-strong);
+    --stack-card-shadow: 0 16px 36px rgba(8, 31, 35, 0.1);
+    --stack-card-shadow-hover: 0 22px 50px rgba(8, 31, 35, 0.14);
+    --stack-panel-start: var(--color-surface);
+    --stack-panel-end: var(--color-page-strong);
+    --stack-compose-start: var(--color-surface);
+    --stack-compose-mid: var(--color-page);
+    --stack-compose-end: var(--color-page-strong);
+    --stack-compose-orb: rgba(15, 92, 99, 0.18);
+    --stack-compose-orb-soft: rgba(127, 188, 193, 0.18);
     --stack-rail:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.36), rgba(213, 231, 233, 0.82));
-    --stack-pill-bg: rgba(44, 139, 145, 0.16);
-    --stack-pill-text: var(--navy-900);
-    --stack-input-bg: rgba(9, 68, 73, 0.06);
-    --stack-message-bg: rgba(247, 252, 252, 0.72);
-    --stack-message-border: rgba(9, 68, 73, 0.24);
+      linear-gradient(180deg, var(--color-surface) 0%, var(--color-page-strong) 100%);
+    --stack-pill-bg: var(--color-accent-soft);
+    --stack-pill-text: var(--color-accent);
+    --stack-input-bg: rgba(15, 92, 99, 0.06);
+    --stack-message-bg: var(--color-surface);
+    --stack-message-border: var(--color-border-strong);
     position: relative;
     background: var(--stack-bg);
     overflow-x: clip;
@@ -108,47 +156,47 @@ const stackSectionStyles = String.raw`
     --stack-bg:
       linear-gradient(
         180deg,
-        rgba(4, 23, 25, 0.96) 0%,
-        rgba(6, 40, 44, 0.92) 54%,
-        rgba(4, 18, 20, 0.98) 100%
+        rgba(4, 23, 25, 1) 0%,
+        rgba(6, 40, 44, 1) 54%,
+        rgba(4, 18, 20, 1) 100%
       );
-    --stack-surface: rgba(7, 24, 26, 0.84);
-    --stack-surface-strong: rgba(10, 33, 36, 0.92);
-    --stack-surface-soft: rgba(12, 38, 41, 0.9);
+    --stack-surface: var(--color-surface);
+    --stack-surface-strong: var(--color-page-strong);
+    --stack-surface-soft: var(--color-surface-soft);
     --stack-surface-deep:
-      linear-gradient(180deg, rgba(9, 68, 73, 0.94) 0%, rgba(4, 18, 20, 0.98) 100%);
-    --stack-border: rgba(134, 207, 211, 0.16);
-    --stack-border-strong: rgba(134, 207, 211, 0.3);
-    --stack-text: rgba(244, 247, 255, 0.96);
-    --stack-text-soft: rgba(226, 232, 255, 0.74);
-    --stack-muted: rgba(226, 232, 255, 0.56);
-    --stack-accent: #86cfd3;
-    --stack-accent-strong: #baf1f4;
-    --stack-accent-soft: rgba(134, 207, 211, 0.12);
-    --stack-accent-soft-strong: rgba(134, 207, 211, 0.22);
-    --stack-accent-contrast: #041214;
-    --stack-contrast-text: rgba(244, 247, 255, 0.96);
+      linear-gradient(180deg, rgba(17, 43, 48, 0.96) 0%, rgba(7, 21, 24, 0.98) 100%);
+    --stack-border: var(--color-border-soft);
+    --stack-border-strong: var(--color-border-strong);
+    --stack-text: var(--color-text);
+    --stack-text-soft: var(--color-text-muted);
+    --stack-muted: var(--color-text-soft);
+    --stack-accent: var(--color-accent);
+    --stack-accent-strong: var(--color-accent-hover);
+    --stack-accent-soft: var(--color-accent-soft);
+    --stack-accent-soft-strong: var(--color-accent-soft-strong);
+    --stack-accent-contrast: var(--color-accent-contrast);
+    --stack-contrast-text: rgba(237, 244, 242, 0.96);
     --stack-highlight-line: rgba(255, 255, 255, 0.12);
-    --stack-glow: rgba(134, 207, 211, 0.14);
-    --stack-glow-strong: rgba(134, 207, 211, 0.24);
-    --stack-shadow: 0 28px 72px rgba(0, 0, 0, 0.32);
-    --stack-shadow-hover: 0 34px 88px rgba(0, 0, 0, 0.42);
+    --stack-glow: var(--glow-accent);
+    --stack-glow-strong: rgba(127, 188, 193, 0.22);
+    --stack-shadow: var(--shadow-panel);
+    --stack-shadow-hover: var(--shadow-panel-strong);
     --stack-card-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
     --stack-card-shadow-hover: 0 24px 56px rgba(0, 0, 0, 0.36);
-    --stack-panel-start: rgba(13, 40, 43, 0.96);
-    --stack-panel-end: rgba(7, 24, 26, 0.96);
-    --stack-compose-start: rgba(14, 41, 45, 0.96);
-    --stack-compose-mid: rgba(9, 31, 34, 0.96);
-    --stack-compose-end: rgba(4, 18, 20, 0.98);
-    --stack-compose-orb: rgba(134, 207, 211, 0.16);
-    --stack-compose-orb-soft: rgba(44, 139, 145, 0.18);
+    --stack-panel-start: var(--color-surface-soft);
+    --stack-panel-end: var(--color-page);
+    --stack-compose-start: var(--color-surface-soft);
+    --stack-compose-mid: var(--color-page-strong);
+    --stack-compose-end: var(--color-page);
+    --stack-compose-orb: rgba(127, 188, 193, 0.14);
+    --stack-compose-orb-soft: rgba(15, 92, 99, 0.16);
     --stack-rail:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(12, 38, 41, 0.88));
-    --stack-pill-bg: rgba(134, 207, 211, 0.14);
-    --stack-pill-text: rgba(244, 247, 255, 0.9);
+      linear-gradient(180deg, var(--color-surface-soft), var(--color-page-strong));
+    --stack-pill-bg: var(--color-accent-soft);
+    --stack-pill-text: rgba(237, 244, 242, 0.9);
     --stack-input-bg: rgba(255, 255, 255, 0.08);
-    --stack-message-bg: rgba(7, 24, 26, 0.84);
-    --stack-message-border: rgba(134, 207, 211, 0.26);
+    --stack-message-bg: var(--color-surface);
+    --stack-message-border: var(--color-border-strong);
   }
 
   .stack-snap-item {
@@ -161,23 +209,6 @@ const stackSectionStyles = String.raw`
     will-change: transform;
     transition: none;
     isolation: isolate;
-  }
-
-  .stack-snap-item::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(
-        520px circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh),
-        var(--stack-glow-strong) 0%,
-        var(--stack-glow) 24%,
-        transparent 64%
-      );
-    opacity: 0;
-    transition: opacity 220ms ease;
-    pointer-events: none;
-    z-index: 0;
   }
 
   @media (min-width: 1024px) {
@@ -478,7 +509,7 @@ const stackSectionStyles = String.raw`
 
   .feature-visual-stage__inner {
     width: 100%;
-    animation: feature-visual-fade 220ms ease;
+    min-height: 520px;
   }
 
   @keyframes feature-visual-fade {
@@ -496,7 +527,7 @@ const stackSectionStyles = String.raw`
   .compose-visual {
     width: 100%;
     max-width: 620px;
-    min-height: 470px;
+    min-height: 520px;
     border-radius: 32px;
     overflow: hidden;
     position: relative;
@@ -539,7 +570,6 @@ const stackSectionStyles = String.raw`
     box-shadow: var(--stack-card-shadow);
     border: 1px solid var(--stack-border);
     padding: 1.4rem 1.4rem 1.3rem;
-    backdrop-filter: blur(8px);
     transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
   }
 
@@ -759,41 +789,49 @@ const stackSectionStyles = String.raw`
   .feature-side {
     width: 100%;
     max-width: 570px;
+    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .feature-list {
     margin-top: 0.4rem;
-    display: grid;
-    gap: 0.55rem;
+    display: block;
+    border-top: 1px solid var(--stack-border);
   }
 
-  .feature-row {
+  .feature-accordion__item {
+    border-bottom: 1px solid var(--stack-border);
+    background: transparent;
+    transition: background 180ms ease;
+  }
+
+  .feature-accordion__item[data-state="open"] {
+    background: var(--stack-surface-strong);
+  }
+
+  .feature-accordion__trigger {
     width: 100%;
     display: grid;
     grid-template-columns: 46px 1fr 28px;
-    align-items: start;
+    align-items: center;
     gap: 1rem;
-    padding: 1.05rem 0.9rem;
-    border-radius: 22px;
-    border: 1px solid transparent;
-    background: rgba(255, 255, 255, 0.02);
+    min-height: 5.4rem;
+    padding: 1.1rem 0;
+    border: 0;
+    background: transparent;
     text-align: left;
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
-    transition:
-      background 180ms ease,
-      border-color 180ms ease,
-      box-shadow 180ms ease;
   }
 
-  .feature-row.is-active {
-    border-color: var(--stack-border-strong);
-    background: linear-gradient(90deg, var(--stack-accent-soft) 0%, rgba(255, 255, 255, 0.02) 88%);
-    box-shadow: inset 0 1px 0 var(--stack-highlight-line);
+  .feature-accordion__trigger:focus-visible {
+    outline: none;
   }
 
-  .feature-badge {
+  .feature-accordion__badge {
     width: 36px;
     height: 36px;
     border-radius: 6px;
@@ -808,18 +846,18 @@ const stackSectionStyles = String.raw`
     transition: background 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
   }
 
-  .feature-row.is-active .feature-badge {
+  .feature-accordion__item[data-state="open"] .feature-accordion__badge {
     background: var(--stack-accent);
     border-color: var(--stack-accent-soft-strong);
     color: var(--stack-accent-contrast);
     box-shadow: 0 0 0 4px var(--stack-accent-soft);
   }
 
-  .feature-text {
+  .feature-accordion__title-wrap {
     min-width: 0;
   }
 
-  .feature-title {
+  .feature-accordion__title {
     display: block;
     color: var(--stack-text);
     font-size: clamp(1.55rem, 2vw, 1.95rem);
@@ -827,92 +865,53 @@ const stackSectionStyles = String.raw`
     font-weight: 700;
   }
 
-  .feature-copy {
-    display: block;
-    max-height: 0;
-    opacity: 0;
+  .feature-accordion__panel {
+    height: 7.1rem;
+    padding: 0 0 1.15rem calc(46px + 1rem);
     overflow: hidden;
-    transform: translateY(-0.35rem);
-    transition:
-      max-height 220ms ease,
-      opacity 180ms ease,
-      transform 180ms ease;
   }
 
-  .feature-row.is-active .feature-copy {
-    max-height: 10rem;
-    opacity: 1;
-    transform: translateY(0);
+  .feature-accordion__panel[hidden] {
+    display: none;
   }
 
-  .feature-copy__inner {
-    display: block;
-    padding-top: 0.82rem;
+  .feature-accordion__panel-inner {
+    max-width: 34rem;
+    height: 100%;
+  }
+
+  .feature-accordion__copy p {
+    margin: 0;
     color: var(--stack-text-soft);
     font-size: 1.02rem;
     line-height: 1.6;
-    max-width: 34rem;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
   }
 
-  .feature-icon {
+  .feature-accordion__chevron {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--stack-muted);
-    font-size: 1.5rem;
     line-height: 1;
-    padding-top: 0.1rem;
     transition: color 180ms ease;
   }
 
-  .feature-row.is-active .feature-icon {
+  .feature-accordion__item[data-state="open"] .feature-accordion__chevron {
     color: var(--stack-accent);
   }
 
-  .feature-icon svg {
+  .feature-accordion__chevron svg {
     width: 1.15rem;
     height: 1.15rem;
     transition: transform 180ms ease;
   }
 
-  .feature-row.is-active .feature-icon svg {
+  .feature-accordion__item[data-state="open"] .feature-accordion__chevron svg {
     transform: rotate(90deg);
-  }
-
-  @media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
-    .stack-snap-item:hover::before,
-    .stack-snap-item:focus-within::before {
-      opacity: 1;
-    }
-
-    .study-visual-shell:hover,
-    .compose-visual:hover {
-      border-color: var(--stack-border-strong);
-      box-shadow: inset 0 1px 0 var(--stack-highlight-line), var(--stack-shadow-hover);
-    }
-
-    .study-visual-shell:hover .study-card,
-    .compose-visual:hover .compose-card {
-      border-color: var(--stack-border-strong);
-      box-shadow: var(--stack-card-shadow-hover);
-    }
-
-    .feature-row:hover {
-      border-color: var(--stack-border-strong);
-      background: linear-gradient(90deg, var(--stack-accent-soft) 0%, rgba(255, 255, 255, 0.02) 88%);
-      box-shadow: inset 0 1px 0 var(--stack-highlight-line);
-    }
-
-    .feature-row:hover .feature-badge {
-      background: var(--stack-accent);
-      border-color: var(--stack-accent-soft-strong);
-      color: var(--stack-accent-contrast);
-      box-shadow: 0 0 0 4px var(--stack-accent-soft);
-    }
-
-    .feature-row:hover .feature-icon {
-      color: var(--stack-accent);
-    }
   }
 
   @media (max-width: 1023px) {
@@ -974,9 +973,14 @@ const stackSectionStyles = String.raw`
 
     .feature-side {
       max-width: 100%;
+      min-height: auto;
     }
 
-    .feature-title {
+    .feature-visual-stage {
+      display: none;
+    }
+
+    .feature-accordion__title {
       font-size: 1.7rem;
     }
 
@@ -1226,17 +1230,34 @@ function renderTrackingConsultationVisual() {
 }
 
 function renderFeatureVisual(visualKey: FeatureVisualKey) {
-  switch (visualKey) {
-    case "registration":
-      return renderStudyVisual(0);
-    case "institutional":
-      return renderInstitutionalSupportVisual();
-    case "tracking":
-      return renderTrackingConsultationVisual();
-    case "tax":
-    default:
-      return renderTaxApprovalsVisual();
-  }
+  const content = featureVisualContentMap[visualKey];
+
+  return (
+    <div className="compose-visual">
+      <div className="compose-rail" />
+      <div className="compose-card">
+        <div className="compose-title">Service Coordination</div>
+
+        <div className="compose-label">Current workstream</div>
+        <div className="compose-pill">{content.workstreamValue}</div>
+
+        <div className="compose-row">
+          <span>{content.counterpartLabel}</span>
+          <span>{content.counterpartValue}</span>
+        </div>
+
+        <div className="compose-subject">
+          <span>Focus</span>
+          <span className="compose-input">{content.focusValue}</span>
+        </div>
+
+        <div className="compose-message">
+          <h4>{content.summaryTitle}</h4>
+          <p>{content.summaryBody}</p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function FeatureChevronIcon() {
@@ -1330,61 +1351,63 @@ function FeatureAccordionCard({ item }: { item: ExtendedStackItem }) {
       : defaultFeatureRows;
   const accordionId = useId();
   const [selectedFeatureIndex, setSelectedFeatureIndex] = useState(0);
-  const [hoveredFeatureIndex, setHoveredFeatureIndex] = useState<number | null>(
-    null
-  );
-  const activeFeatureIndex = hoveredFeatureIndex ?? selectedFeatureIndex;
-  const safeActiveFeatureIndex = Math.min(activeFeatureIndex, rows.length - 1);
+  const safeActiveFeatureIndex = Math.min(selectedFeatureIndex, rows.length - 1);
   const activeRow = rows[safeActiveFeatureIndex];
 
   return (
     <div className="feature-layout">
       <div className="feature-visual-stage">
-        <div key={activeRow.visualKey} className="feature-visual-stage__inner">
+        <div className="feature-visual-stage__inner">
           {renderFeatureVisual(activeRow.visualKey)}
         </div>
       </div>
 
       <div className="feature-side">
-        <div
-          className="feature-list"
-          onMouseLeave={() => setHoveredFeatureIndex(null)}
-        >
+        <div className="feature-list">
           {rows.map((row, idx) => {
             const active = idx === safeActiveFeatureIndex;
             const panelId = `${accordionId}-feature-panel-${idx}`;
 
             return (
-              <button
+              <div
                 key={`${row.title}-${idx}`}
-                type="button"
-                className={`feature-row ${active ? "is-active" : ""}`}
-                aria-expanded={active}
-                aria-controls={panelId}
-                onClick={() => setSelectedFeatureIndex(idx)}
-                onFocus={() => {
-                  setHoveredFeatureIndex(null);
-                  setSelectedFeatureIndex(idx);
-                }}
-                onMouseEnter={() => setHoveredFeatureIndex(idx)}
+                className="feature-accordion__item"
+                data-accordion-item=""
+                data-index={idx + 1}
+                data-state={active ? "open" : "closed"}
               >
-                <span className="feature-badge">{idx + 1}</span>
-
-                <span className="feature-text">
-                  <span className="feature-title">{row.title}</span>
-                  <span
-                    id={panelId}
-                    className="feature-copy"
-                    aria-hidden={!active}
-                  >
-                    <span className="feature-copy__inner">{row.description}</span>
+                <button
+                  type="button"
+                  className="feature-accordion__trigger"
+                  aria-expanded={active}
+                  aria-controls={panelId}
+                  onClick={() => setSelectedFeatureIndex(idx)}
+                >
+                  <span className="feature-accordion__badge" aria-hidden="true">
+                    {idx + 1}
                   </span>
-                </span>
 
-                <span className="feature-icon" aria-hidden="true">
-                  <FeatureChevronIcon />
-                </span>
-              </button>
+                  <span className="feature-accordion__title-wrap">
+                    <span className="feature-accordion__title">{row.title}</span>
+                  </span>
+
+                  <span className="feature-accordion__chevron" aria-hidden="true">
+                    <FeatureChevronIcon />
+                  </span>
+                </button>
+
+                <div
+                  className="feature-accordion__panel"
+                  id={panelId}
+                  hidden={!active}
+                >
+                  <div className="feature-accordion__panel-inner">
+                    <div className="feature-accordion__copy">
+                      <p>{row.description}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             );
           })}
         </div>

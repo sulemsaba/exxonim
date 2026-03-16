@@ -1,5 +1,5 @@
-import heroImagePrimary from "../../assets/clients/smiling-woman-writing-notes-tablet-digital-device.jpg";
-import heroImageSecondary from "../../assets/clients/financial-consultant-writing-capital-allocation-details-from-archives.jpg";
+import heroImagePrimary from "../../assets/clients/Freelance Creative Portfolio Website (1).png";
+import heroImageSecondary from "../../assets/clients/Freelance Creative Portfolio Website (1).png";
 import { routes } from "../routes";
 
 const heroHighlights = [

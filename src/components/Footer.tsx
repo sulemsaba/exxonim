@@ -7,12 +7,6 @@ interface FooterProps {
   theme: Theme;
 }
 
-const footerAnchorIds = [
-  "support",
-  "terms",
-  "privacy",
-] as const;
-
 const quickLinks = [
   { label: "About", href: routes.about },
   { label: "Services", href: routes.services },
@@ -24,27 +18,27 @@ const quickLinks = [
 
 const otherResources = [
   { label: "Career", href: routes.career },
-  { label: "Support", href: "#support" },
-  { label: "Terms of Use", href: "#terms" },
-  { label: "Privacy Policy", href: "#privacy" },
+  { label: "Support", href: routes.support },
+  { label: "Terms of Use", href: routes.terms },
+  { label: "Privacy Policy", href: routes.privacy },
 ];
 
 const footerStyles = String.raw`
 .footer-shell{
-  --footer-border:rgba(255,255,255,.10);
-  --footer-surface:#041214;
-  --footer-text:#ffffff;
-  --footer-muted:rgba(188,204,207,.80);
-  --footer-subtle:rgba(197,212,214,.78);
-  --footer-eyebrow:rgba(196,222,225,.56);
-  --footer-link-hover:#86cfd3;
-  --footer-cta-bg:linear-gradient(90deg, #2c8b91, #86cfd3);
-  --footer-cta-text:#052326;
-  --footer-cta-shadow:0 12px 32px rgba(12,82,88,.28);
-  --footer-cta-shadow-hover:0 16px 38px rgba(12,82,88,.32);
-  --footer-veil:rgba(4,18,20,.80);
-  --footer-logo-shadow:drop-shadow(0 12px 28px rgba(0,0,0,.28));
-  --footer-tagline-accent:rgba(134,207,211,.7);
+  --footer-border:var(--color-border-soft);
+  --footer-surface:var(--color-page-strong);
+  --footer-text:var(--color-text);
+  --footer-muted:var(--color-text-muted);
+  --footer-subtle:var(--color-text-soft);
+  --footer-eyebrow:rgba(16,37,41,.56);
+  --footer-link-hover:var(--color-accent);
+  --footer-cta-bg:var(--color-accent);
+  --footer-cta-text:var(--color-accent-contrast);
+  --footer-cta-shadow:0 12px 32px rgba(15,92,99,.18);
+  --footer-cta-shadow-hover:0 16px 38px rgba(15,92,99,.24);
+  --footer-veil:rgba(238,240,236,.72);
+  --footer-logo-shadow:drop-shadow(0 10px 22px rgba(8,24,27,.08));
+  --footer-tagline-accent:rgba(15,92,99,.52);
   position:relative;
   isolation:isolate;
   overflow:hidden;
@@ -56,20 +50,20 @@ const footerStyles = String.raw`
 }
 
 .footer-shell[data-theme="dark"]{
-  --footer-border:rgba(4,18,20,.12);
-  --footer-surface:#cad6d7;
-  --footer-text:#071a1d;
-  --footer-muted:rgba(7,26,29,.82);
-  --footer-subtle:rgba(7,26,29,.74);
-  --footer-eyebrow:rgba(7,26,29,.56);
-  --footer-link-hover:#094449;
-  --footer-cta-bg:linear-gradient(90deg, #083d42, #0e6f77);
-  --footer-cta-text:#f4fbfb;
-  --footer-cta-shadow:0 12px 32px rgba(4,18,20,.16);
-  --footer-cta-shadow-hover:0 16px 38px rgba(4,18,20,.2);
-  --footer-veil:rgba(232,238,238,.62);
-  --footer-logo-shadow:drop-shadow(0 10px 22px rgba(4,18,20,.12));
-  --footer-tagline-accent:rgba(9,68,73,.55);
+  --footer-border:var(--color-border-soft);
+  --footer-surface:var(--color-page-strong);
+  --footer-text:var(--color-text);
+  --footer-muted:var(--color-text-muted);
+  --footer-subtle:var(--color-text-soft);
+  --footer-eyebrow:rgba(237,244,242,.54);
+  --footer-link-hover:var(--color-accent-secondary);
+  --footer-cta-bg:var(--color-accent);
+  --footer-cta-text:var(--color-accent-contrast);
+  --footer-cta-shadow:0 12px 32px rgba(127,188,193,.16);
+  --footer-cta-shadow-hover:0 16px 38px rgba(127,188,193,.2);
+  --footer-veil:rgba(7,21,24,.72);
+  --footer-logo-shadow:drop-shadow(0 10px 22px rgba(0,0,0,.24));
+  --footer-tagline-accent:rgba(127,188,193,.52);
 }
 
 .footer-shell,
@@ -147,7 +141,7 @@ const footerStyles = String.raw`
   max-width:15rem;
   position:relative;
   display:inline-block;
-  font-family:"EB Garamond", serif;
+  font-family:var(--font-display);
   font-size:.95rem;
   font-weight:500;
   font-style:italic;
@@ -378,33 +372,33 @@ function roundRectPath(
 function getTileColor(value: number, theme: Theme) {
   if (theme === "dark") {
     if (value < 0.05) {
-      return "#b9cbcc";
+      return "#0b1f23";
     }
 
     if (value < 0.3) {
-      return "#9cb2b4";
+      return "#112b30";
     }
 
     if (value < 0.6) {
-      return "#5d8084";
+      return "#0f5c63";
     }
 
-    return "#083d42";
+    return "#7fbcc1";
   }
 
   if (value < 0.05) {
-    return "#000000";
+    return "#eef0ec";
   }
 
   if (value < 0.3) {
-    return "#0a2a2e";
+    return "#dfe5df";
   }
 
   if (value < 0.6) {
-    return "#2c8b91";
+    return "#7fbcc1";
   }
 
-  return "#86cfd3";
+  return "#0f5c63";
 }
 
 export function Footer({ brand, theme }: FooterProps) {
@@ -471,7 +465,7 @@ export function Footer({ brand, theme }: FooterProps) {
       const pointer = pointerRef.current;
       let hasEnergy = false;
 
-      context.fillStyle = theme === "dark" ? "#cad6d7" : "#041214";
+      context.fillStyle = theme === "dark" ? "#071518" : "#eef0ec";
       context.fillRect(0, 0, width, height);
 
       for (let row = 0; row < rows; row += 1) {
@@ -608,15 +602,6 @@ export function Footer({ brand, theme }: FooterProps) {
         data-theme={theme}
         id="site-footer"
       >
-        {footerAnchorIds.map((anchorId) => (
-          <span
-            key={anchorId}
-            className="footer-shell__anchor"
-            id={anchorId}
-            aria-hidden="true"
-          ></span>
-        ))}
-
         <canvas
           ref={canvasRef}
           className="footer-shell__canvas"
@@ -634,7 +619,7 @@ export function Footer({ brand, theme }: FooterProps) {
               >
                 <img
                   className="footer-shell__brand-logo"
-                  src={theme === "dark" ? brand.lightLogoSrc : brand.darkLogoSrc}
+                  src={theme === "dark" ? brand.darkLogoSrc : brand.lightLogoSrc}
                   alt={brand.name}
                   loading="lazy"
                 />

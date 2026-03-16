@@ -15,7 +15,7 @@ export function CareerPage() {
           <p className="section-pill section-pill--dark">
             <span></span>Career
           </p>
-          <h2>Build practical work that helps businesses move forward.</h2>
+          <h1>Build practical work that helps businesses move forward.</h1>
           <p>
             Exxonim is growing around client service, compliance support, and
             execution-heavy business operations. We look for people who are

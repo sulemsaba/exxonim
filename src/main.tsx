@@ -1,8 +1,10 @@
 import { createRoot, hydrateRoot } from "react-dom/client";
 import App from "./App";
+import { AppProviders } from "./providers/AppProviders";
+import { applyPageSeo } from "./seo";
 import "./styles.css";
 
-function bootstrapDocumentShell() {
+function bootstrapDocumentShell(pathname: string) {
   try {
     const savedTheme =
       localStorage.getItem("exxonim-theme") ??
@@ -15,20 +17,6 @@ function bootstrapDocumentShell() {
   }
 
   document.documentElement.lang = "en";
-  document.title = "Exxonim - Innovation Meets Efficiency";
-
-  let metaDescription = document.querySelector(
-    'meta[name="description"]'
-  ) as HTMLMetaElement | null;
-
-  if (!metaDescription) {
-    metaDescription = document.createElement("meta");
-    metaDescription.name = "description";
-    document.head.appendChild(metaDescription);
-  }
-
-  metaDescription.content =
-    "Exxonim helps businesses, NGOs, and institutions with registration, licensing, statutory filing, and practical compliance support in Tanzania.";
 
   let viewportMeta = document.querySelector(
     'meta[name="viewport"]'
@@ -71,9 +59,11 @@ function bootstrapDocumentShell() {
     link.setAttribute("fetchpriority", "high");
     link.setAttribute("data-exxonim", "logo-preload");
   });
+
+  applyPageSeo(pathname);
 }
 
-bootstrapDocumentShell();
+bootstrapDocumentShell(window.location.pathname);
 
 const container = document.getElementById("root");
 
@@ -82,7 +72,16 @@ if (!container) {
 }
 
 if (container.hasChildNodes()) {
-  hydrateRoot(container, <App />);
+  hydrateRoot(
+    container,
+    <AppProviders>
+      <App />
+    </AppProviders>
+  );
 } else {
-  createRoot(container).render(<App />);
+  createRoot(container).render(
+    <AppProviders>
+      <App />
+    </AppProviders>
+  );
 }

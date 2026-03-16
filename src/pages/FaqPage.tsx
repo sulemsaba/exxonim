@@ -30,7 +30,7 @@ export function FaqPage() {
             <p className="section-pill section-pill--light">
               <span></span>FAQ
             </p>
-            <h2>Common questions before you start.</h2>
+            <h1>Common questions before you start.</h1>
             <p>
               Practical answers around registration, filings, licenses, and the
               next step after you submit documents to Exxonim.

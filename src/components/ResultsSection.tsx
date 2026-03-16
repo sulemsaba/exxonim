@@ -50,7 +50,7 @@ export function ResultsSection() {
           <p className="section-pill section-pill--light">
             <span></span>Track your consultation
           </p>
-          <h2>A clearer view of what happens after you reach out.</h2>
+          <h1>A clearer view of what happens after you reach out.</h1>
           <p>
             Exxonim keeps engagements structured around intake, review,
             submission, and follow-up so you are not left guessing where the
@@ -62,15 +62,16 @@ export function ResultsSection() {
           <article className="tracking-card tracking-card--primary" data-reveal>
             <div className="tracking-card__top">
               <div>
-                <span className="tracking-card__eyebrow">Consultation status</span>
-                <strong>Reference EXX-24091</strong>
+                <span className="tracking-card__eyebrow">Consultation follow-through</span>
+                <strong>Typical workflow view</strong>
               </div>
-              <span className="tracking-card__badge">In progress</span>
+              <span className="tracking-card__badge">Example process</span>
             </div>
 
             <p className="tracking-card__copy">
-              Document review is complete and the submission package is active.
-              The current task is authority follow-up and final confirmation.
+              This snapshot shows the usual progress across intake, document
+              review, submission, and authority follow-up. Live updates for
+              client work are shared directly by Exxonim during the engagement.
             </p>
 
             <div className="tracking-progress">
