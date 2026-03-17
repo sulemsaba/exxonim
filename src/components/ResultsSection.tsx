@@ -1,6 +1,7 @@
 import { routes } from "../routes";
+import type { TrackingSectionContent } from "../types";
 
-const checkpoints = [
+const defaultCheckpoints = [
   {
     title: "Intake confirmed",
     detail: "Requirements captured and service scope agreed.",
@@ -23,7 +24,7 @@ const checkpoints = [
   },
 ] as const;
 
-const caseExamples = [
+const defaultCaseExamples = [
   {
     title: "Fast-moving company setup",
     detail: "New ventures that need a clean start across registration and tax setup.",
@@ -38,7 +39,19 @@ const caseExamples = [
   },
 ];
 
-export function ResultsSection() {
+interface ResultsSectionProps {
+  content: TrackingSectionContent;
+}
+
+export function ResultsSection({ content }: ResultsSectionProps) {
+  const checkpoints = content.checkpoints.length
+    ? content.checkpoints
+    : defaultCheckpoints;
+  const caseExamples = content.case_examples.length
+    ? content.case_examples
+    : defaultCaseExamples;
+  const workflowSteps = content.workflow_steps;
+
   return (
     <section className="tracking-section dark-grid-section" id="track-consultation">
       <span className="section-anchor" id="case-examples" aria-hidden="true"></span>
@@ -48,14 +61,11 @@ export function ResultsSection() {
           data-reveal
         >
           <p className="section-pill section-pill--light">
-            <span></span>Track your consultation
+            <span></span>
+            {content.eyebrow}
           </p>
-          <h1>A clearer view of what happens after you reach out.</h1>
-          <p>
-            Exxonim keeps engagements structured around intake, review,
-            submission, and follow-up so you are not left guessing where the
-            work stands.
-          </p>
+          <h1>{content.title}</h1>
+          <p>{content.description}</p>
         </div>
 
         <div className="tracking-grid">
@@ -103,27 +113,12 @@ export function ResultsSection() {
             <article className="tracking-card" data-reveal>
               <span className="tracking-card__eyebrow">How it works</span>
               <div className="tracking-steps">
-                <div className="tracking-steps__item">
-                  <strong>1. Intake and scoping</strong>
-                  <p>
-                    We clarify the service, requirements, and target outcome
-                    before work starts.
-                  </p>
-                </div>
-                <div className="tracking-steps__item">
-                  <strong>2. Preparation and submission</strong>
-                  <p>
-                    Documents are checked, gaps are flagged, and the filing pack
-                    is prepared.
-                  </p>
-                </div>
-                <div className="tracking-steps__item">
-                  <strong>3. Follow-up and release</strong>
-                  <p>
-                    Exxonim tracks the outstanding step until approval,
-                    confirmation, or certificate handover.
-                  </p>
-                </div>
+                {workflowSteps.map((step) => (
+                  <div key={step.title} className="tracking-steps__item">
+                    <strong>{step.title}</strong>
+                    <p>{step.detail}</p>
+                  </div>
+                ))}
               </div>
             </article>
 

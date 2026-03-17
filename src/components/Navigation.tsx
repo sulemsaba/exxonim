@@ -5,8 +5,18 @@ import {
   useState,
   type FocusEvent,
 } from "react";
+import { useNavigation } from "../hooks/useNavigation";
+import { useSiteSetting } from "../hooks/useSiteSetting";
 import { normalizePathname, routes } from "../routes";
-import type { Theme } from "../types";
+import type { BrandAssets, CompanyInfo, Theme } from "../types";
+import {
+  findNavigationLinksByTitle,
+  getNavigationColumns,
+  getNavigationRoot,
+  getPrimaryLinks,
+} from "../utils/navigation";
+import { ErrorMessage } from "./ErrorMessage";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 interface NavigationProps {
   pathname: string;
@@ -34,74 +44,6 @@ function getFocusableElements(node: HTMLElement) {
     )
   ).filter((element) => !element.hasAttribute("disabled"));
 }
-
-const desktopLinks = [
-  { label: "Home", href: routes.home },
-  { label: "About", href: routes.about },
-  { label: "Career", href: routes.career },
-  { label: "Contact", href: routes.contact },
-] as const;
-
-const servicesColumns: MenuColumn[] = [
-  {
-    title: "Registration & Setup",
-    items: [
-      { label: "Company Registration", href: `${routes.services}#company` },
-      { label: "Business Name Registration", href: `${routes.services}#business-name` },
-      { label: "NGO / Organization Registration", href: `${routes.services}#ngo` },
-      { label: "Trademark Registration", href: `${routes.services}#trademark` },
-    ],
-  },
-  {
-    title: "Tax, Licensing & BOT",
-    borderLeft: true,
-    items: [
-      { label: "TIN Application", href: `${routes.services}#tin` },
-      { label: "Annual Statutory Returns", href: `${routes.services}#returns` },
-      { label: "Business License Applications", href: `${routes.services}#license` },
-      { label: "BOT / Central Bank Licensing", href: `${routes.services}#bot` },
-    ],
-  },
-  {
-    title: "Institutional & Support",
-    borderLeft: true,
-    items: [
-      { label: "CRB / ERB Registration", href: `${routes.services}#crb` },
-      { label: "OSHA Registration", href: `${routes.services}#osha` },
-      { label: "NSSF / WCF Registration", href: `${routes.services}#nssf` },
-      { label: "Business Plan Preparation", href: `${routes.services}#plan` },
-    ],
-  },
-];
-
-const resourcesColumns: MenuColumn[] = [
-  {
-    title: "Insights",
-    items: [
-      { label: "Blog", href: `${routes.resources}#resources` },
-      { label: "Case Examples", href: `${routes.tracking}#case-examples` },
-    ],
-  },
-  {
-    title: "Company",
-    borderLeft: true,
-    items: [
-      { label: "Sectors", href: `${routes.home}#industries` },
-      { label: "FAQ", href: routes.faq },
-    ],
-  },
-];
-
-const mobileServices = [
-  { label: "Company Registration", href: `${routes.services}#company` },
-  { label: "TIN Application", href: `${routes.services}#tin` },
-  { label: "Business Licensing", href: `${routes.services}#license` },
-] as const;
-
-const mobileResources = [
-  { label: "Blog", href: `${routes.resources}#resources` },
-  { label: "FAQ", href: routes.faq },
-] as const;
 
 const navigationStyles = String.raw`
 .nav-shell,
@@ -1180,6 +1122,41 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
   const currentPath = normalizePathname(pathname);
   const [desktopMenu, setDesktopMenu] = useState<MenuKey | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const {
+    data: navigationItems = [],
+    isPending: navigationPending,
+    error: navigationError,
+  } = useNavigation();
+  const {
+    data: brandSetting,
+    isPending: brandPending,
+    error: brandError,
+  } = useSiteSetting<BrandAssets>("brand");
+  const {
+    data: companySetting,
+    isPending: companyPending,
+    error: companyError,
+  } = useSiteSetting<CompanyInfo>("company_info");
+
+  const brand = brandSetting?.value;
+  const company = companySetting?.value;
+  const servicesRoot = getNavigationRoot(navigationItems, "Services");
+  const resourcesRoot = getNavigationRoot(navigationItems, "Resources");
+  const desktopLinks = getPrimaryLinks(navigationItems);
+  const servicesColumns = getNavigationColumns(servicesRoot) as MenuColumn[];
+  const resourcesColumns = getNavigationColumns(resourcesRoot) as MenuColumn[];
+  const mobileServices = findNavigationLinksByTitle(
+    servicesRoot ? [servicesRoot] : navigationItems,
+    [
+      "Company Registration",
+      "TIN Application",
+      "Business License Applications",
+    ]
+  );
+  const mobileResources = findNavigationLinksByTitle(navigationItems, [
+    "Blog",
+    "FAQ",
+  ]);
 
   useEffect(() => {
     const header = headerRef.current;
@@ -1329,6 +1306,27 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
     setDesktopMenu(null);
   };
 
+  if (navigationPending || brandPending || companyPending) {
+    return <LoadingSpinner compact label="Loading navigation..." />;
+  }
+
+  if (
+    navigationError ||
+    brandError ||
+    companyError ||
+    !brand ||
+    !company ||
+    desktopLinks.length === 0
+  ) {
+    return (
+      <ErrorMessage
+        compact={true}
+        title="Unable to load navigation."
+        detail="Check that the navigation and site settings APIs are available."
+      />
+    );
+  }
+
   return (
     <>
       <style>{navigationStyles}</style>
@@ -1336,8 +1334,17 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
       <header ref={headerRef} className="nav-shell" data-theme={theme}>
         <div className="nav-shell__bar">
           <a className="nav-shell__brand" href={routes.home} onClick={closeAllMenus}>
-            <img className="nav-shell__logo nav-shell__logo--light" src="/exxonim-logo.webp" alt="Exxonim" />
-            <img className="nav-shell__logo nav-shell__logo--dark" src="/logo-dark.png" alt="" aria-hidden="true" />
+            <img
+              className="nav-shell__logo nav-shell__logo--light"
+              src={brand.lightLogoSrc}
+              alt={brand.name}
+            />
+            <img
+              className="nav-shell__logo nav-shell__logo--dark"
+              src={brand.darkLogoSrc}
+              alt=""
+              aria-hidden="true"
+            />
           </a>
 
           <div className="nav-shell__desktop">
@@ -1464,7 +1471,10 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
             {renderThemeToggle("tutorial-toggle nav-shell__theme-desktop", theme, onToggleTheme)}
             {renderThemeToggle("tutorial-toggle tutorial-toggle--mobile nav-shell__theme-mobile", theme, onToggleTheme)}
 
-            <a className="nav-shell__call-button" href="tel:+255794689099">
+            <a
+              className="nav-shell__call-button"
+              href={`tel:${company.phones[0].replace(/\s+/g, "")}`}
+            >
               <div className="nav-shell__call-icon">
                 <svg className="animate-ring" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path
@@ -1477,7 +1487,7 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
               </div>
               <div className="nav-shell__call-copy">
                 <span className="nav-shell__call-label">Call Now</span>
-                <span className="nav-shell__call-number">+255 794 689 099</span>
+                <span className="nav-shell__call-number">{company.phones[0]}</span>
               </div>
             </a>
 
@@ -1608,11 +1618,13 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
               <div className="nav-shell__mobile-bottom">
                 <a
                   className="nav-shell__mobile-bottom-link"
-                  href="tel:+255794689099"
+                  href={`tel:${company.phones[0].replace(/\s+/g, "")}`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span className="nav-shell__mobile-bottom-label">Call Now</span>
-                  <span className="nav-shell__mobile-bottom-number">+255 794 689 099</span>
+                  <span className="nav-shell__mobile-bottom-number">
+                    {company.phones[0]}
+                  </span>
                 </a>
               </div>
             </div>

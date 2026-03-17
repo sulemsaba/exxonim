@@ -1,7 +1,7 @@
-import { serviceNavGroups } from "../content";
 import { routes } from "../routes";
+import type { ServicesOverviewContent } from "../types";
 
-const serviceSignals = [
+const defaultServiceSignals = [
   {
     value: "5",
     label: "service lanes",
@@ -19,7 +19,7 @@ const serviceSignals = [
   },
 ] as const;
 
-const serviceFlow = [
+const defaultServiceFlow = [
   {
     step: "01",
     title: "Scope the exact requirement",
@@ -46,7 +46,7 @@ const serviceFlow = [
   },
 ] as const;
 
-const servicePromises = [
+const defaultServicePromises = [
   "Clearer requirements before submission starts",
   "Better organized documents across recurring filings",
   "Support that holds up under authority review",
@@ -465,7 +465,24 @@ const servicesOverviewStyles = String.raw`
   }
 `;
 
-export function ServicesOverviewSection() {
+interface ServicesOverviewSectionProps {
+  content: ServicesOverviewContent;
+}
+
+export function ServicesOverviewSection({
+  content,
+}: ServicesOverviewSectionProps) {
+  const serviceSignals = content.service_signals.length
+    ? content.service_signals
+    : defaultServiceSignals;
+  const serviceNavGroups = content.service_nav_groups;
+  const serviceFlow = content.service_flow.length
+    ? content.service_flow
+    : defaultServiceFlow;
+  const servicePromises = content.service_promises.length
+    ? content.service_promises
+    : defaultServicePromises;
+
   return (
     <>
       <style>{servicesOverviewStyles}</style>
@@ -477,17 +494,11 @@ export function ServicesOverviewSection() {
         <div className="services-overview__shell">
           <div className="services-overview__hero">
             <article className="services-overview__copy" data-reveal>
-              <p className="services-overview__eyebrow">Exxonim services</p>
+              <p className="services-overview__eyebrow">{content.eyebrow}</p>
               <h1 id="services-overview-title">
-                Practical support for registrations, filings, permits, and
-                business readiness.
+                {content.title}
               </h1>
-              <p>
-                Exxonim works across business setup, tax compliance, licensing,
-                institutional registrations, and business support documents.
-                The goal is simple: cleaner preparation, less avoidable
-                back-and-forth, and a clearer next step after every submission.
-              </p>
+              <p>{content.description}</p>
 
               <div className="services-overview__actions">
                 <a className="landing-cta landing-cta--primary" href="#packages">
@@ -503,14 +514,8 @@ export function ServicesOverviewSection() {
             </article>
 
             <aside className="services-overview__panel" data-reveal>
-              <strong>
-                Services designed around real filing paths, not generic advice.
-              </strong>
-              <p>
-                From BRELA and TRA work to licenses, employer-side registrations,
-                and business plans, Exxonim helps prepare the requirement,
-                coordinate the documents, and keep follow-up moving.
-              </p>
+              <strong>{content.panel_title}</strong>
+              <p>{content.panel_body}</p>
 
               <div className="services-overview__signals">
                 {serviceSignals.map((signal) => (

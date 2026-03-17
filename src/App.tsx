@@ -1,26 +1,25 @@
-import { useEffect, useRef } from "react";
-import {
-  brand,
-  blogPosts,
-  getBlogPostBySlug,
-  getHomeBlogPosts,
-  stackItems,
-} from "./content";
+import { useEffect } from "react";
 import { Footer } from "./components/Footer";
 import { Navigation } from "./components/Navigation";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { useSiteSetting } from "./hooks/useSiteSetting";
 import { useRevealOnScroll } from "./hooks/useRevealOnScroll";
 import { useStackCardDepth } from "./hooks/useStackCardDepth";
 import { useTheme } from "./hooks/useTheme";
+import { matchAdminRoute } from "./lib/adminRoutes";
 import {
   getResourcePostSlug,
   normalizePathname,
   routes,
 } from "./routes";
+import type { CompanyInfo } from "./types";
 import { AboutPage } from "./pages/AboutPage";
 import { CareerPage } from "./pages/CareerPage";
 import { ContactPage } from "./pages/ContactPage";
 import { FaqPage } from "./pages/FaqPage";
 import { HomePage } from "./pages/HomePage";
+import { AdminApp } from "./pages/admin/AdminApp";
+import { AdminLoginPage } from "./pages/admin/Login";
 import {
   NotFoundPage,
   PrivacyPage,
@@ -38,7 +37,7 @@ interface AppProps {
 
 export default function App({ initialPathname }: AppProps) {
   const { theme, toggleTheme } = useTheme();
-  const railRef = useRef<HTMLDivElement>(null);
+  const { data: companySetting } = useSiteSetting<CompanyInfo>("company_info");
   const pathname =
     typeof window === "undefined"
       ? normalizePathname(initialPathname)
@@ -140,43 +139,24 @@ export default function App({ initialPathname }: AppProps) {
       stopGlowAnimation();
     };
   }, []);
-
-  const scrollRail = (direction: number) => {
-    const rail = railRef.current;
-
-    if (!rail) {
-      return;
-    }
-
-    const firstCard = rail.querySelector<HTMLElement>(
-      ".home-insights__card, .blog-card, .resource-card, .cx-post-card"
-    );
-    const scrollAmount = firstCard
-      ? firstCard.getBoundingClientRect().width + 20
-      : 360;
-
-    rail.scrollBy({
-      left: direction * scrollAmount,
-      behavior: "smooth",
-    });
-  };
-
-  const homeInsightPosts = getHomeBlogPosts(blogPosts);
-  const homeInsightsProps = {
-    posts: homeInsightPosts,
-    railRef,
-    onPrev: () => scrollRail(-1),
-    onNext: () => scrollRail(1),
-  };
   const articleSlug = getResourcePostSlug(pathname);
-  const articlePost = articleSlug ? getBlogPostBySlug(articleSlug, blogPosts) : null;
+  const whatsappUrl = companySetting?.value.whatsapp;
+  const adminMatch = matchAdminRoute(pathname);
+  const isAdminLoginRoute = pathname === normalizePathname(routes.adminLogin);
+  const isAdminRoute = isAdminLoginRoute || Boolean(adminMatch);
 
-  const page =
-    pathname === normalizePathname(routes.home) ? (
-      <HomePage
-        stackItems={stackItems}
-        {...homeInsightsProps}
+  const page = isAdminLoginRoute ? (
+    <AdminLoginPage />
+  ) : adminMatch ? (
+    <ProtectedRoute pathname={pathname}>
+      <AdminApp
+        match={adminMatch}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
+    </ProtectedRoute>
+  ) : pathname === normalizePathname(routes.home) ? (
+      <HomePage />
     ) : pathname === normalizePathname(routes.about) ? (
       <AboutPage />
     ) : pathname === normalizePathname(routes.faq) ? (
@@ -197,8 +177,8 @@ export default function App({ initialPathname }: AppProps) {
       <TermsPage />
     ) : pathname === normalizePathname(routes.privacy) ? (
       <PrivacyPage />
-    ) : articlePost ? (
-      <ResourceArticlePage post={articlePost} />
+    ) : articleSlug ? (
+      <ResourceArticlePage slug={articleSlug} />
     ) : (
       <NotFoundPage />
     );
@@ -211,35 +191,39 @@ export default function App({ initialPathname }: AppProps) {
         <div className="cinematic-bg__glow"></div>
       </div>
 
-      <Navigation
-        pathname={pathname}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-      />
+      {isAdminRoute ? null : (
+        <Navigation
+          pathname={pathname}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+      )}
 
       <main id="top" className="site-main">
         {page}
       </main>
 
-      <Footer brand={brand} theme={theme} />
+      {isAdminRoute ? null : <Footer theme={theme} />}
 
-      <a
-        className="whatsapp-float"
-        href="https://wa.me/255794689099"
-        target="_blank"
-        rel="noreferrer"
-        aria-label="Chat on WhatsApp"
-      >
-        <span className="whatsapp-float__pulse" aria-hidden="true"></span>
-        <svg
-          className="whatsapp-float__icon"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          aria-hidden="true"
+      {isAdminRoute || !whatsappUrl ? null : (
+        <a
+          className="whatsapp-float"
+          href={whatsappUrl}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Chat on WhatsApp"
         >
-          <path d="M12.01 2.014a9.96 9.96 0 0 0-8.52 15.11L2 22l4.985-1.465a9.961 9.961 0 1 0 5.025-18.52Zm0 18.067a8.093 8.093 0 0 1-4.14-1.134l-.297-.176-3.082.906.924-2.977-.193-.306A8.098 8.098 0 1 1 12.01 20.08Zm4.437-6.042c-.244-.122-1.439-.711-1.662-.793-.223-.081-.385-.122-.547.122-.162.244-.628.793-.77.955-.142.162-.284.183-.528.061-1.18-.56-2.072-1.1-2.884-2.522-.083-.146-.01-.223.111-.345.11-.11.244-.284.366-.427.122-.142.162-.244.244-.407.081-.162.041-.305-.02-.427-.061-.122-.547-1.32-.75-1.808-.198-.475-.399-.411-.547-.419-.142-.008-.305-.008-.468-.008-.162 0-.427.061-.65.305-.223.244-.852.833-.852 2.032s.873 2.358.995 2.522c.122.162 1.714 2.628 4.153 3.67.58.24 1.033.383 1.385.49.582.185 1.112.158 1.531.096.47-.07 1.439-.588 1.642-1.157.203-.569.203-1.056.142-1.157-.061-.101-.223-.162-.468-.284Z" />
-        </svg>
-      </a>
+          <span className="whatsapp-float__pulse" aria-hidden="true"></span>
+          <svg
+            className="whatsapp-float__icon"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M12.01 2.014a9.96 9.96 0 0 0-8.52 15.11L2 22l4.985-1.465a9.961 9.961 0 1 0 5.025-18.52Zm0 18.067a8.093 8.093 0 0 1-4.14-1.134l-.297-.176-3.082.906.924-2.977-.193-.306A8.098 8.098 0 1 1 12.01 20.08Zm4.437-6.042c-.244-.122-1.439-.711-1.662-.793-.223-.081-.385-.122-.547.122-.162.244-.628.793-.77.955-.142.162-.284.183-.528.061-1.18-.56-2.072-1.1-2.884-2.522-.083-.146-.01-.223.111-.345.11-.11.244-.284.366-.427.122-.142.162-.244.244-.407.081-.162.041-.305-.02-.427-.061-.122-.547-1.32-.75-1.808-.198-.475-.399-.411-.547-.419-.142-.008-.305-.008-.468-.008-.162 0-.427.061-.65.305-.223.244-.852.833-.852 2.032s.873 2.358.995 2.522c.122.162 1.714 2.628 4.153 3.67.58.24 1.033.383 1.385.49.582.185 1.112.158 1.531.096.47-.07 1.439-.588 1.642-1.157.203-.569.203-1.056.142-1.157-.061-.101-.223-.162-.468-.284Z" />
+          </svg>
+        </a>
+      )}
     </div>
   );
 }

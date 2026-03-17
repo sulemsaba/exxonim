@@ -1,26 +1,17 @@
 import { useState } from "react";
-import {
-  blogCategories,
-  blogPosts,
-  getBlogAuthorById,
-  getBlogCategoryById,
-  getFeaturedBlogPosts,
-  getVisibleBlogPosts,
-} from "../content";
+import { ErrorMessage } from "../components/ErrorMessage";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { useBlogCategories } from "../hooks/useBlogCategories";
+import { useBlogPosts } from "../hooks/useBlogPosts";
+import { usePage } from "../hooks/usePage";
 import { resourcePost } from "../routes";
-import type { BlogCategoryId, BlogFeaturedSlot, BlogPost } from "../types";
-
-const BLOG_TOP_MEDIA = {
-  hero:
-    "https://cdn.prod.website-files.com/685be7dcd32275d383065239/685be7ddd32275d38306a12e_large-Webinar%20Campaign_2024_12_Blog%20Cover_Step-by-Step.webp",
-  banner:
-    "https://cdn.prod.website-files.com/685be7dcd32275d3830651d3/685be7dcd32275d383066655_banner-editor-picks.webp",
-  trending: [
-    "https://cdn.prod.website-files.com/685be7dcd32275d383065239/685be7dcd32275d383065aef_Blog%20Cover_2022_08_%20How%20to%20Effectively%20Improve%20Zoom%20Recording%20Quality%20-%20Riverside.fm.webp",
-    "https://cdn.prod.website-files.com/685be7dcd32275d383065239/690b7e6235396f06d7b216ba_Frame%201851040321%20%285%29.webp",
-    "https://cdn.prod.website-files.com/685be7dcd32275d383065239/685be7dcd32275d383067e01_Blog-Cover_2022_05_The-15-Best-Podcast-Recording-Software-in-2022-%28Mac-_-PC%29-%281%29.webp",
-  ],
-} as const;
+import type {
+  BlogCategoryId,
+  BlogFeaturedSlot,
+  BlogPost,
+  ResourcesPageContent,
+} from "../types";
+import { getFeaturedBlogPosts, getVisibleBlogPosts } from "../utils/blog";
 
 const resourcesPageStyles = String.raw`
   .cx-blog-page {
@@ -1222,16 +1213,15 @@ function getVisualSlot(post: BlogPost): VisualSlot {
 }
 
 function renderAuthor(post: BlogPost) {
-  const author = getBlogAuthorById(post.authorId);
-  const authorName = author?.name ?? "Exxonim Team";
+  const authorName = post.author?.name ?? "Exxonim Team";
 
   return (
     <div className="cx-author">
-      {author?.avatarSrc ? (
+      {post.author?.avatarSrc ? (
         <img
           className="cx-author-img"
-          src={author.avatarSrc}
-          alt={author.name}
+          src={post.author.avatarSrc}
+          alt={post.author.name}
           loading="lazy"
         />
       ) : (
@@ -1291,8 +1281,7 @@ function renderMedia(post: BlogPost, categoryLabel: string, slot: VisualSlot, va
 }
 
 function renderTopHeroByline(post: BlogPost) {
-  const author = getBlogAuthorById(post.authorId);
-  const authorName = author?.name ?? "Exxonim Team";
+  const authorName = post.author?.name ?? "Exxonim Team";
   const metaParts = [formatBlogDate(post.publishedAt)];
 
   if (post.readTimeMinutes) {
@@ -1302,11 +1291,11 @@ function renderTopHeroByline(post: BlogPost) {
   return (
     <div className="cx-top-hero-byline">
       <div className="cx-author">
-        {author?.avatarSrc ? (
+        {post.author?.avatarSrc ? (
           <img
             className="cx-author-img"
-            src={author.avatarSrc}
-            alt={author.name}
+            src={post.author.avatarSrc}
+            alt={post.author.name}
             loading="lazy"
           />
         ) : (
@@ -1318,19 +1307,24 @@ function renderTopHeroByline(post: BlogPost) {
         <span className="cx-author-name">{authorName}</span>
       </div>
 
-      {author?.role ? <span className="cx-top-hero-role">{author.role}</span> : null}
+      {post.author?.role ? (
+        <span className="cx-top-hero-role">{post.author.role}</span>
+      ) : null}
       <span className="cx-top-hero-metaText">{metaParts.join(" \u00b7 ")}</span>
     </div>
   );
 }
 
-function renderTopListItem(post: BlogPost, index: number) {
-  const categoryLabel = getBlogCategoryById(post.categoryId)?.label ?? "Insight";
+function renderTopListItem(
+  post: BlogPost,
+  index: number,
+  trendingMedia: string[]
+) {
+  const categoryLabel = post.category?.label ?? "Insight";
   const articleLink = resourcePost(post.slug);
   const metaParts = [formatBlogDate(post.publishedAt)];
   const thumbnailSrc =
-    BLOG_TOP_MEDIA.trending[index] ??
-    BLOG_TOP_MEDIA.trending[BLOG_TOP_MEDIA.trending.length - 1];
+    trendingMedia[index] ?? trendingMedia[trendingMedia.length - 1];
 
   if (post.readTimeMinutes) {
     metaParts.push(`${post.readTimeMinutes} min`);
@@ -1354,7 +1348,7 @@ function renderTopListItem(post: BlogPost, index: number) {
 }
 
 function renderGridCard(post: BlogPost) {
-  const categoryLabel = getBlogCategoryById(post.categoryId)?.label ?? "Insight";
+  const categoryLabel = post.category?.label ?? "Insight";
   const slot = getVisualSlot(post);
   const articleLink = resourcePost(post.slug);
 
@@ -1387,11 +1381,40 @@ function renderGridCard(post: BlogPost) {
 export function ResourcesPage() {
   const [selectedCategory, setSelectedCategory] = useState<ActiveCategory>("all");
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
+  const {
+    data: posts = [],
+    isPending: postsPending,
+    error: postsError,
+  } = useBlogPosts();
+  const {
+    data: categories = [],
+    isPending: categoriesPending,
+    error: categoriesError,
+  } = useBlogCategories();
+  const {
+    data: page,
+    isPending: pagePending,
+    error: pageError,
+  } = usePage<ResourcesPageContent>("resources");
 
-  const featuredPosts = getFeaturedBlogPosts(blogPosts).slice(0, 3);
+  if (postsPending || categoriesPending || pagePending) {
+    return <LoadingSpinner label="Loading resources..." />;
+  }
+
+  if (postsError || categoriesError || pageError || !page) {
+    return (
+      <ErrorMessage
+        title="Unable to load resources."
+        detail="Check that the blog and page endpoints are available."
+      />
+    );
+  }
+
+  const topMedia = page.content.top_media;
+  const featuredPosts = getFeaturedBlogPosts(posts).slice(0, 3);
   const heroPost = featuredPosts[0];
   const topRailPosts = getVisibleBlogPosts({
-    posts: blogPosts,
+    posts,
     categoryId: "all",
     limit: 3,
     excludeSlugs: heroPost ? [heroPost.slug] : [],
@@ -1400,7 +1423,7 @@ export function ResourcesPage() {
     Boolean
   ) as string[];
   const filteredPosts = getVisibleBlogPosts({
-    posts: blogPosts,
+    posts,
     categoryId: selectedCategory,
     excludeSlugs: selectedCategory === "all" ? topSectionSlugs : [],
   });
@@ -1409,7 +1432,7 @@ export function ResourcesPage() {
   const activeCategory =
     selectedCategory === "all"
       ? null
-      : blogCategories.find((category) => category.id === selectedCategory);
+      : categories.find((category) => category.id === selectedCategory);
 
   const handleSelectCategory = (categoryId: ActiveCategory) => {
     setSelectedCategory(categoryId);
@@ -1426,12 +1449,12 @@ export function ResourcesPage() {
           <span className="section-anchor" id="blogs" aria-hidden="true"></span>
 
           <div className="cx-top-shell">
-            <h1 className="cx-sr-only">Exxonim Blog</h1>
+            <h1 className="cx-sr-only">{page.content.hero_title}</h1>
             {heroPost ? (
               <div className="cx-top-layout">
                 <a href={resourcePost(heroPost.slug)} className="cx-top-hero-card">
                   <div className="cx-top-hero-media">
-                    <img src={BLOG_TOP_MEDIA.hero} alt={heroPost.title} />
+                    <img src={topMedia.hero} alt={heroPost.title} />
                   </div>
 
                   <div className="cx-top-hero-copy">
@@ -1445,7 +1468,7 @@ export function ResourcesPage() {
                   <div className="cx-trending-banner">
                     <img
                       className="cx-trending-bannerImage"
-                      src={BLOG_TOP_MEDIA.banner}
+                      src={topMedia.banner}
                       alt=""
                       aria-hidden="true"
                     />
@@ -1456,7 +1479,9 @@ export function ResourcesPage() {
 
                   <div className="cx-trending-list">
                     {topRailPosts.map((post, index) => (
-                      <div key={post.slug}>{renderTopListItem(post, index)}</div>
+                      <div key={post.slug}>
+                        {renderTopListItem(post, index, topMedia.trending)}
+                      </div>
                     ))}
                   </div>
                 </aside>
@@ -1490,7 +1515,7 @@ export function ResourcesPage() {
               Latest
             </button>
 
-            {blogCategories.map((category) => (
+            {categories.map((category) => (
               <button
                 key={category.id}
                 type="button"
@@ -1515,11 +1540,11 @@ export function ResourcesPage() {
               <h2>
                 {activeCategory
                   ? `${activeCategory.label} posts will appear here.`
-                  : "Blog posts will appear here."}
+                  : page.content.empty_state.title}
               </h2>
               <p>
                 {activeCategory?.description ??
-                  "Published posts will populate this grid automatically as the library grows."}
+                  page.content.empty_state.description}
               </p>
             </article>
           )}

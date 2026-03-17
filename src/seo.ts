@@ -1,5 +1,9 @@
-import { blogPosts, getBlogPostBySlug } from "./content";
-import { getResourcePostSlug, normalizePathname, resourcePost, routes } from "./routes";
+import {
+  getResourcePostSlug,
+  normalizePathname,
+  resourcePost,
+  routes,
+} from "./routes";
 
 export interface PageSeo {
   title: string;
@@ -12,6 +16,8 @@ export interface PageSeo {
 
 export const siteOrigin = "https://exxonim.tz";
 const defaultImage = `${siteOrigin}/exxonim-logo.webp`;
+const resourceArticleFallbackDescription =
+  "Read practical guidance on registration, compliance, licensing, and business readiness from Exxonim.";
 
 const pageSeoMap: Record<string, Omit<PageSeo, "canonicalPath">> = {
   [normalizePathname(routes.home)]: {
@@ -153,26 +159,19 @@ export function getPageSeo(pathname: string | undefined): PageSeo {
   const articleSlug = getResourcePostSlug(normalizedPathname);
 
   if (articleSlug) {
-    const post = getBlogPostBySlug(articleSlug, blogPosts);
-
-    if (post) {
-      return {
-        title: `${post.title} | Exxonim Resources`,
-        description: post.excerpt,
-        canonicalPath: resourcePost(post.slug),
-        image: post.coverImageSrc ?? defaultImage,
-        type: "article",
-        robots: "index,follow",
-      };
-    }
-
     return {
-      ...pageSeoMap[normalizePathname(routes.notFound)],
-      canonicalPath: routes.notFound,
+      title: "Exxonim Resource Article",
+      description: resourceArticleFallbackDescription,
+      canonicalPath: resourcePost(articleSlug),
+      image: defaultImage,
+      type: "article",
+      robots: "index,follow",
     };
   }
 
-  const pageSeo = pageSeoMap[normalizedPathname] ?? pageSeoMap[normalizePathname(routes.notFound)];
+  const pageSeo =
+    pageSeoMap[normalizedPathname] ??
+    pageSeoMap[normalizePathname(routes.notFound)];
 
   return {
     ...pageSeo,
@@ -185,8 +184,7 @@ export function getPageSeo(pathname: string | undefined): PageSeo {
   };
 }
 
-export function applyPageSeo(pathname: string | undefined) {
-  const seo = getPageSeo(pathname);
+export function applyResolvedSeo(seo: PageSeo) {
   const canonicalUrl = buildAbsoluteUrl(seo.canonicalPath);
 
   document.title = seo.title;
@@ -274,6 +272,10 @@ export function applyPageSeo(pathname: string | undefined) {
     }
   );
   canonicalLink.href = canonicalUrl;
+}
+
+export function applyPageSeo(pathname: string | undefined) {
+  applyResolvedSeo(getPageSeo(pathname));
 }
 
 export function escapeSeoValue(value: string) {

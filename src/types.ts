@@ -1,11 +1,6 @@
 export type Theme = "light" | "dark";
-export type BlogCategoryId =
-  | "registration"
-  | "tax-compliance"
-  | "licensing-permits"
-  | "institutional-support"
-  | "business-support";
-export type BlogFeaturedSlot = "hero" | "popular" | "editors-pick";
+export type BlogCategoryId = string;
+export type BlogFeaturedSlot = "hero" | "popular" | "editors-pick" | string;
 
 export interface BrandAssets {
   name: string;
@@ -13,9 +8,42 @@ export interface BrandAssets {
   darkLogoSrc: string;
 }
 
+export interface CompanyInfo {
+  name: string;
+  phones: string[];
+  emails: string[];
+  address: string;
+  whatsapp: string;
+}
+
 export interface NavLink {
   label: string;
   href: string;
+}
+
+export interface FooterContent {
+  quickLinks: NavLink[];
+  otherResources: NavLink[];
+  tagline: string;
+  primaryCta: {
+    label: string;
+    href: string;
+  };
+  copyright: string;
+}
+
+export interface NavigationItem {
+  id: number;
+  title: string;
+  url: string;
+  description?: string;
+  kind: string;
+  order: number;
+  isActive: boolean;
+  parentId?: number | null;
+  createdAt: string;
+  updatedAt: string;
+  children: NavigationItem[];
 }
 
 export interface ServiceNavGroup {
@@ -23,6 +51,11 @@ export interface ServiceNavGroup {
   summary: string;
   href: string;
   items: string[];
+}
+
+export interface ProviderLogo {
+  alt: string;
+  src: string;
 }
 
 export interface StackItem {
@@ -36,10 +69,25 @@ export interface StackItem {
   videoSrc: string;
 }
 
+export interface FeatureRow {
+  title: string;
+  description: string;
+  visualKey: string;
+}
+
+export interface FeatureVisualContent {
+  workstreamValue: string;
+  counterpartLabel: string;
+  counterpartValue: string;
+  focusValue: string;
+  summaryTitle: string;
+  summaryBody: string;
+}
+
 export interface BlogCategory {
   id: BlogCategoryId;
   label: string;
-  description: string;
+  description?: string;
 }
 
 export interface BlogAuthor {
@@ -47,22 +95,6 @@ export interface BlogAuthor {
   name: string;
   role?: string;
   avatarSrc?: string;
-}
-
-export interface BlogPost {
-  slug: string;
-  title: string;
-  excerpt: string;
-  publishedAt: string;
-  categoryId: BlogCategoryId;
-  authorId: string;
-  coverImageSrc?: string;
-  coverAlt?: string;
-  mediaLabel: string;
-  featuredSlot?: BlogFeaturedSlot;
-  featuredOnHome?: boolean;
-  readTimeMinutes?: number;
-  relatedSlugs?: string[];
 }
 
 export interface BlogArticleSection {
@@ -76,14 +108,297 @@ export interface BlogArticleContent {
   sections: BlogArticleSection[];
 }
 
-export interface InsightPost {
-  tag: string;
+export interface BlogPost {
+  id: number;
+  slug: string;
   title: string;
-  description: string;
+  excerpt: string;
+  publishedAt: string;
+  category?: BlogCategory;
+  author?: BlogAuthor;
+  coverImageSrc?: string;
+  coverAlt?: string;
   mediaLabel: string;
+  featuredSlot?: BlogFeaturedSlot;
+  featuredOnHome: boolean;
+  readTimeMinutes?: number;
+  relatedSlugs: string[];
+  metaTitle?: string;
+  metaDescription?: string;
+  content?: BlogArticleContent;
 }
 
-export interface FooterLinkGroup {
+export interface Testimonial {
+  id: number;
+  eyebrow: string;
+  headline: string;
+  support: string;
+  quote: string;
+  name: string;
+  role: string;
+  initials: string;
+}
+
+export interface PricingFeature {
+  label: string;
+  included: boolean;
+}
+
+export interface PricingPlan {
+  id: number;
+  name: string;
+  badge?: string;
+  description: string;
+  notes: string;
+  recommended: boolean;
+  features: PricingFeature[];
+}
+
+export interface ServiceSignal {
+  value: string;
+  label: string;
+  detail: string;
+}
+
+export interface ServiceFlowItem {
+  step: string;
   title: string;
-  links: NavLink[];
+  detail: string;
+}
+
+export interface ServiceCatalogItem {
+  id: string;
+  label: string;
+  detail: string;
+}
+
+export interface ServiceCatalogGroup {
+  title: string;
+  description: string;
+  services: ServiceCatalogItem[];
+}
+
+export interface TrackingCheckpoint {
+  title: string;
+  detail: string;
+  status: string;
+}
+
+export interface TrackingCaseExample {
+  title: string;
+  detail: string;
+}
+
+export interface TrackingWorkflowStep {
+  title: string;
+  detail: string;
+}
+
+export interface ContentSection {
+  title: string;
+  paragraphs: string[];
+  bullets?: string[];
+}
+
+export interface PageRecord<TContent = Record<string, unknown>> {
+  id: number;
+  title: string;
+  slug: string;
+  content: TContent;
+  metaTitle?: string;
+  metaDescription?: string;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SiteSetting<TValue = unknown> {
+  id: number;
+  key: string;
+  value: TValue;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HomeHeroContent {
+  eyebrow: string;
+  title: string;
+  description: string;
+  cta: {
+    label: string;
+    href: string;
+  };
+  highlights: Array<{
+    title: string;
+    detail: string;
+  }>;
+}
+
+export interface ProviderSectionContent {
+  kicker: string;
+  title: string;
+  logos: ProviderLogo[];
+}
+
+export interface HomeInsightsContent {
+  title: string;
+  intro: string;
+  footer_copy: string;
+}
+
+export interface HomePageContent {
+  hero: HomeHeroContent;
+  provider_section: ProviderSectionContent;
+  stack_section: {
+    items: StackItem[];
+    default_feature_rows: FeatureRow[];
+    feature_visual_content: Record<string, FeatureVisualContent>;
+  };
+  insights_section: HomeInsightsContent;
+}
+
+export interface AboutPageContent {
+  hero: {
+    eyebrow: string;
+    title: string;
+    description: string;
+  };
+  company_profile: {
+    eyebrow: string;
+    title: string;
+    paragraphs: string[];
+    working_style: string;
+  };
+  support_profiles: Array<{
+    title: string;
+    description: string;
+  }>;
+  service_scope: Array<{
+    title: string;
+    description: string;
+  }>;
+  operating_model: Array<{
+    step: string;
+    title: string;
+    description: string;
+  }>;
+  client_expectations: string[];
+  cta: {
+    title: string;
+    description: string;
+    primary: {
+      label: string;
+      href: string;
+    };
+    secondary: {
+      label: string;
+      href: string;
+    };
+  };
+}
+
+export interface FaqPageContent {
+  hero: {
+    eyebrow: string;
+    title: string;
+    description: string;
+  };
+  items: Array<{
+    question: string;
+    answer: string;
+  }>;
+}
+
+export interface CareerPageContent {
+  hero: {
+    eyebrow: string;
+    title: string;
+    description: string;
+  };
+  focus_areas: string[];
+  status: {
+    label: string;
+    description: string;
+    primary: {
+      label: string;
+      href: string;
+    };
+    secondary: {
+      label: string;
+      href: string;
+    };
+  };
+}
+
+export interface ContactPageContent {
+  hero: {
+    eyebrow: string;
+    title: string;
+    description: string;
+  };
+  cards: Array<{
+    label: string;
+    value: string;
+    description: string;
+    action: {
+      label: string;
+      href: string;
+    };
+  }>;
+}
+
+export interface ServicesOverviewContent {
+  eyebrow: string;
+  title: string;
+  description: string;
+  panel_title: string;
+  panel_body: string;
+  service_signals: ServiceSignal[];
+  service_nav_groups: ServiceNavGroup[];
+  service_flow: ServiceFlowItem[];
+  service_promises: string[];
+}
+
+export interface ServicesCatalogContent {
+  eyebrow: string;
+  title: string;
+  description: string;
+  service_groups: ServiceCatalogGroup[];
+}
+
+export interface TrackingSectionContent {
+  eyebrow: string;
+  title: string;
+  description: string;
+  checkpoints: TrackingCheckpoint[];
+  case_examples: TrackingCaseExample[];
+  workflow_steps: TrackingWorkflowStep[];
+}
+
+export interface ServicesPageContent {
+  overview: ServicesOverviewContent;
+  catalog: ServicesCatalogContent;
+  tracking_section: TrackingSectionContent;
+}
+
+export interface ResourcesPageContent {
+  hero_title: string;
+  top_media: {
+    hero: string;
+    banner: string;
+    trending: string[];
+  };
+  empty_state: {
+    title: string;
+    description: string;
+  };
+}
+
+export interface InfoPageContent {
+  hero: {
+    eyebrow: string;
+    title: string;
+    description: string;
+  };
+  sections: ContentSection[];
 }

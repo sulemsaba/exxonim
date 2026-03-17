@@ -1,10 +1,6 @@
 import type { RefObject } from "react";
-import {
-  getBlogAuthorById,
-  getBlogCategoryById,
-} from "../content";
 import { resourcePost, routes } from "../routes";
-import type { BlogPost } from "../types";
+import type { BlogPost, HomeInsightsContent } from "../types";
 
 const homeInsightsStyles = `
   .home-insights {
@@ -407,6 +403,7 @@ const homeInsightsStyles = `
 `;
 
 interface InsightsSectionProps {
+  content: HomeInsightsContent;
   posts: BlogPost[];
   railRef: RefObject<HTMLDivElement>;
   onPrev: () => void;
@@ -476,6 +473,7 @@ function renderMedia(post: BlogPost, categoryLabel: string) {
 }
 
 export function InsightsSection({
+  content,
   posts,
   railRef,
   onPrev,
@@ -488,20 +486,16 @@ export function InsightsSection({
       <div className="container home-insights__shell">
         <div className="home-insights__heading" data-reveal>
           <div className="home-insights__topline">
-            <h2>Insights and News</h2>
+            <h2>{content.title}</h2>
           </div>
-          <p className="home-insights__intro">
-            Sharp guidance for filings, approvals, and growth readiness.
-          </p>
+          <p className="home-insights__intro">{content.intro}</p>
         </div>
 
         <div className="home-insights__bleed" data-reveal>
           <div className="home-insights__rail" ref={railRef}>
             {posts.map((post) => {
-              const categoryLabel =
-                getBlogCategoryById(post.categoryId)?.label ?? "Insight";
-              const author = getBlogAuthorById(post.authorId);
-              const authorName = author?.name ?? "Exxonim Team";
+              const categoryLabel = post.category?.label ?? "Insight";
+              const authorName = post.author?.name ?? "Exxonim Team";
 
               return (
                 <article key={post.slug} className="home-insights__card">
@@ -531,7 +525,7 @@ export function InsightsSection({
                             {authorName}
                           </span>
                           <span className="home-insights__author-role">
-                            {author?.role ?? "Exxonim Team"}
+                            {post.author?.role ?? "Exxonim Team"}
                           </span>
                         </span>
                       </div>
@@ -548,9 +542,7 @@ export function InsightsSection({
         </div>
 
         <div className="home-insights__footer" data-reveal>
-          <p className="home-insights__footer-copy">
-            Explore more practical articles from the Exxonim resource library.
-          </p>
+          <p className="home-insights__footer-copy">{content.footer_copy}</p>
           <div className="home-insights__footer-actions">
             <button
               className="rail-button home-insights__rail-control"

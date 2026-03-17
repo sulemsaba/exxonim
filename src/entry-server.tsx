@@ -1,9 +1,8 @@
 import { renderToString } from "react-dom/server";
 import App from "./App";
 import { AppProviders } from "./providers/AppProviders";
-import { blogPosts } from "./content";
 import { getPageSeo, siteOrigin } from "./seo";
-import { legacyBlogPost, resourcePost, routes } from "./routes";
+import { routes } from "./routes";
 
 export function render(url = "/") {
   return renderToString(
@@ -21,12 +20,9 @@ export function renderPage(url = "/") {
 }
 
 export function getPrerenderRoutes() {
-  const articleRoutes = blogPosts.flatMap((post) => [
-    resourcePost(post.slug),
-    legacyBlogPost(post.slug),
-  ]);
-
-  return [...new Set([...Object.values(routes), ...articleRoutes])];
+  return [...new Set(Object.values(routes))].filter(
+    (route) => route !== routes.admin && route !== routes.adminLogin
+  );
 }
 
 export { siteOrigin };

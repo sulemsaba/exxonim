@@ -1,11 +1,12 @@
-import { getBlogArticleContent } from "../blogArticleContent";
-import {
-  getBlogAuthorById,
-  getBlogCategoryById,
-  getRelatedBlogPosts,
-} from "../content";
+import { useEffect } from "react";
+import { ErrorMessage } from "../components/ErrorMessage";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { useBlogPost } from "../hooks/useBlogPost";
+import { useBlogPosts } from "../hooks/useBlogPosts";
 import { resourcePost, routes } from "../routes";
+import { applyResolvedSeo, siteOrigin } from "../seo";
 import type { BlogPost } from "../types";
+import { getRelatedBlogPosts } from "../utils/blog";
 
 const resourceArticlePageStyles = String.raw`
   .resource-article-page {
@@ -306,11 +307,42 @@ function getAuthorInitials(name: string) {
 }
 
 interface ResourceArticlePageProps {
-  post: BlogPost;
+  slug: string;
 }
 
-export function ResourceArticlePage({ post }: ResourceArticlePageProps) {
-  const article = getBlogArticleContent(post.slug) ?? {
+export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
+  const { data: post, isPending, error } = useBlogPost(slug);
+  const { data: posts = [] } = useBlogPosts();
+
+  useEffect(() => {
+    if (!post) {
+      return;
+    }
+
+    applyResolvedSeo({
+      title: post.metaTitle ?? `${post.title} | Exxonim Resources`,
+      description: post.metaDescription ?? post.excerpt,
+      canonicalPath: resourcePost(post.slug),
+      image: post.coverImageSrc ?? `${siteOrigin}/exxonim-logo.webp`,
+      type: "article",
+      robots: "index,follow",
+    });
+  }, [post]);
+
+  if (isPending) {
+    return <LoadingSpinner label="Loading article..." />;
+  }
+
+  if (error || !post) {
+    return (
+      <ErrorMessage
+        title="Unable to load the article."
+        detail="Check that the blog API is available."
+      />
+    );
+  }
+
+  const article = post.content ?? {
     introduction: post.excerpt,
     highlights: [
       "Confirm the core facts before the filing or follow-up starts.",
@@ -330,10 +362,9 @@ export function ResourceArticlePage({ post }: ResourceArticlePageProps) {
       },
     ],
   };
-  const author = getBlogAuthorById(post.authorId);
-  const categoryLabel = getBlogCategoryById(post.categoryId)?.label ?? "Insight";
-  const authorName = author?.name ?? "Exxonim Team";
-  const relatedPosts = getRelatedBlogPosts(post.slug);
+  const categoryLabel = post.category?.label ?? "Insight";
+  const authorName = post.author?.name ?? "Exxonim Team";
+  const relatedPosts = getRelatedBlogPosts(post, posts);
 
   return (
     <>
@@ -363,7 +394,7 @@ export function ResourceArticlePage({ post }: ResourceArticlePageProps) {
               </span>
               <div>
                 <strong>{authorName}</strong>
-                <div>{author?.role ?? "Exxonim Team"}</div>
+                <div>{post.author?.role ?? "Exxonim Team"}</div>
               </div>
             </div>
 
@@ -416,7 +447,7 @@ export function ResourceArticlePage({ post }: ResourceArticlePageProps) {
                     href={resourcePost(relatedPost.slug)}
                   >
                     <span className="page-card__eyebrow">
-                      {getBlogCategoryById(relatedPost.categoryId)?.label ?? "Insight"}
+                      {relatedPost.category?.label ?? "Insight"}
                     </span>
                     <strong>{relatedPost.title}</strong>
                     <p>{relatedPost.excerpt}</p>

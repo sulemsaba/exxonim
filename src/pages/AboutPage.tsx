@@ -1,90 +1,8 @@
 import { routes } from "../routes";
-
-const supportProfiles = [
-  {
-    title: "Founders and owner-led businesses",
-    description:
-      "Businesses that need clear support while setting up entities, preparing filings, and handling early compliance requirements.",
-  },
-  {
-    title: "Growing operating teams",
-    description:
-      "Companies managing recurring registrations, statutory submissions, and regulator-facing follow-up as operations expand.",
-  },
-  {
-    title: "NGOs and institutions",
-    description:
-      "Organizations that need structured handling of registrations, employer-side compliance, and institutional reporting workflows.",
-  },
-  {
-    title: "Regulated and approval-heavy businesses",
-    description:
-      "Teams that need practical coordination across permits, licensing steps, and documentation that must hold up under review.",
-  },
-];
-
-const serviceScope = [
-  {
-    title: "Registration and setup",
-    description:
-      "Company, business name, and organizational registration support built around correct preparation before submission.",
-  },
-  {
-    title: "Tax and statutory compliance",
-    description:
-      "Support for tax registration, returns, annual filings, and routine compliance work that cannot be left to drift.",
-  },
-  {
-    title: "Licensing and permits",
-    description:
-      "Practical coordination for sector licenses, operating permits, and regulated approval processes that require disciplined follow-through.",
-  },
-  {
-    title: "Institutional registrations",
-    description:
-      "Employer-side and institutional registration workflows tied to public systems, boards, and compliance bodies.",
-  },
-  {
-    title: "Business support documents",
-    description:
-      "Planning materials and submission support that help clients present requirements clearly and move decisions forward.",
-  },
-];
-
-const operatingModel = [
-  {
-    step: "01",
-    title: "Clarify the requirement",
-    description:
-      "We start by identifying the exact filing, registration, license, or regulator expectation so the work is scoped correctly from the beginning.",
-  },
-  {
-    step: "02",
-    title: "Prepare the document path",
-    description:
-      "Documents, ownership details, business information, and supporting records are reviewed against what the process actually demands.",
-  },
-  {
-    step: "03",
-    title: "Coordinate submission and follow-up",
-    description:
-      "Once the filing or application is submitted, Exxonim helps track the next action instead of leaving clients with open-ended waiting.",
-  },
-  {
-    step: "04",
-    title: "Keep the next step practical",
-    description:
-      "Where there is backlog, risk, or missing information, we work from the immediate requirement first so the process can move again.",
-  },
-];
-
-const clientExpectations = [
-  "Clearer requirements before submission work begins",
-  "Tighter follow-up after documents are filed or delivered",
-  "Practical communication tied to the next required action",
-  "Better handling of overdue filings and compliance backlogs",
-  "Support organized around progress, not vague status updates",
-];
+import { ErrorMessage } from "../components/ErrorMessage";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { usePage } from "../hooks/usePage";
+import type { AboutPageContent } from "../types";
 
 const aboutPageStyles = String.raw`
   .cx-about-page {
@@ -525,6 +443,23 @@ const aboutPageStyles = String.raw`
 `;
 
 export function AboutPage() {
+  const { data: page, isPending, error } = usePage<AboutPageContent>("about");
+
+  if (isPending) {
+    return <LoadingSpinner label="Loading about page..." />;
+  }
+
+  if (error || !page) {
+    return (
+      <ErrorMessage
+        title="Unable to load the about page."
+        detail="Check that the page endpoint is available."
+      />
+    );
+  }
+
+  const content = page.content;
+
   return (
     <>
       <style>{aboutPageStyles}</style>
@@ -532,40 +467,28 @@ export function AboutPage() {
         <div className="cx-about-shell">
           <section className="cx-about-hero">
             <p className="cx-about-pill">
-              <span></span>About Exxonim
+              <span></span>
+              {content.hero.eyebrow}
             </p>
-            <h1>Practical support for registration, compliance, and regulatory follow-through.</h1>
-            <p>
-              Exxonim helps businesses, NGOs, and institutions move through setup,
-              statutory filing, licensing, and institutional registration work
-              with clearer preparation and fewer avoidable delays.
-            </p>
+            <h1>{content.hero.title}</h1>
+            <p>{content.hero.description}</p>
           </section>
 
           <div className="cx-about-layout">
             <section className="cx-about-panel cx-about-panel--hero">
               <div className="cx-about-panel__copy">
-                <p className="cx-about-panel__eyebrow">What Exxonim is built for</p>
-                <h2>A company profile grounded in execution, not vague advisory language.</h2>
-                <p>
-                  Exxonim exists to help clients handle the work that usually slows
-                  progress: preparing correct information, meeting filing requirements,
-                  following up after submission, and keeping registration or approval
-                  processes moving when details start to drift.
+                <p className="cx-about-panel__eyebrow">
+                  {content.company_profile.eyebrow}
                 </p>
-                <p>
-                  The focus is practical. We help clients understand what is required,
-                  organize what needs to be submitted, and keep the next action visible
-                  instead of letting compliance work become an open-ended backlog.
-                </p>
+                <h2>{content.company_profile.title}</h2>
+                {content.company_profile.paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
               </div>
 
               <div className="cx-about-stat">
                 <strong>Working style</strong>
-                <span>
-                  Structured preparation, document discipline, and clear next-step
-                  follow-through across registration and compliance workflows.
-                </span>
+                <span>{content.company_profile.working_style}</span>
               </div>
             </section>
 
@@ -580,7 +503,7 @@ export function AboutPage() {
               </div>
 
               <div className="cx-about-grid cx-about-grid--support">
-                {supportProfiles.map((profile) => (
+                {content.support_profiles.map((profile) => (
                   <article key={profile.title} className="cx-about-card">
                     <strong>{profile.title}</strong>
                     <p>{profile.description}</p>
@@ -600,7 +523,7 @@ export function AboutPage() {
               </div>
 
               <div className="cx-about-grid cx-about-grid--services">
-                {serviceScope.map((service) => (
+                {content.service_scope.map((service) => (
                   <article key={service.title} className="cx-about-card">
                     <strong>{service.title}</strong>
                     <p>{service.description}</p>
@@ -620,7 +543,7 @@ export function AboutPage() {
               </div>
 
               <div className="cx-about-process">
-                {operatingModel.map((item) => (
+                {content.operating_model.map((item) => (
                   <article key={item.step} className="cx-about-process-item">
                     <span className="cx-about-process-step">{item.step}</span>
                     <div className="cx-about-card__copy">
@@ -643,7 +566,7 @@ export function AboutPage() {
               </div>
 
               <div className="cx-about-grid cx-about-grid--expectations">
-                {clientExpectations.map((item) => (
+                {content.client_expectations.map((item) => (
                   <article key={item} className="cx-about-card">
                     <div className="cx-about-expectation">
                       <span>+</span>
@@ -655,18 +578,20 @@ export function AboutPage() {
             </section>
 
             <section className="cx-about-cta">
-              <h2>Start with the next practical step.</h2>
-              <p>
-                If you are preparing a registration, cleaning up compliance work, or
-                trying to move a licensing process forward, Exxonim can help you scope
-                what is required and organize the work properly.
-              </p>
+              <h2>{content.cta.title}</h2>
+              <p>{content.cta.description}</p>
               <div className="cx-about-actions">
-                <a className="cx-about-button cx-about-button--primary" href={routes.contact}>
-                  Contact Exxonim
+                <a
+                  className="cx-about-button cx-about-button--primary"
+                  href={content.cta.primary.href}
+                >
+                  {content.cta.primary.label}
                 </a>
-                <a className="cx-about-button cx-about-button--secondary" href={routes.services}>
-                  Explore services
+                <a
+                  className="cx-about-button cx-about-button--secondary"
+                  href={content.cta.secondary.href}
+                >
+                  {content.cta.secondary.label}
                 </a>
               </div>
             </section>

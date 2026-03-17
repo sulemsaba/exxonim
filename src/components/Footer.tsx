@@ -1,27 +1,9 @@
 import { useEffect, useRef } from "react";
-import type { BrandAssets, Theme } from "../types";
+import { useSiteSetting } from "../hooks/useSiteSetting";
 import { routes } from "../routes";
-
-interface FooterProps {
-  brand: BrandAssets;
-  theme: Theme;
-}
-
-const quickLinks = [
-  { label: "About", href: routes.about },
-  { label: "Services", href: routes.services },
-  { label: "Track Your Consultation", href: routes.tracking },
-  { label: "Help (FAQ)", href: routes.faq },
-  { label: "Blogs", href: routes.resources },
-  { label: "Contact", href: routes.contact },
-];
-
-const otherResources = [
-  { label: "Career", href: routes.career },
-  { label: "Support", href: routes.support },
-  { label: "Terms of Use", href: routes.terms },
-  { label: "Privacy Policy", href: routes.privacy },
-];
+import type { BrandAssets, CompanyInfo, Theme } from "../types";
+import { ErrorMessage } from "./ErrorMessage";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 const footerStyles = String.raw`
 .footer-shell{
@@ -401,7 +383,28 @@ function getTileColor(value: number, theme: Theme) {
   return "#0f5c63";
 }
 
-export function Footer({ brand, theme }: FooterProps) {
+export function Footer({ theme }: { theme: Theme }) {
+  const {
+    data: brandSetting,
+    isPending: brandPending,
+    error: brandError,
+  } = useSiteSetting<BrandAssets>("brand");
+  const {
+    data: footerSetting,
+    isPending: footerPending,
+    error: footerError,
+  } = useSiteSetting<{
+    quick_links: Array<{ label: string; href: string }>;
+    other_resources: Array<{ label: string; href: string }>;
+    tagline: string;
+    primary_cta: { label: string; href: string };
+    copyright: string;
+  }>("footer");
+  const {
+    data: companySetting,
+    isPending: companyPending,
+    error: companyError,
+  } = useSiteSetting<CompanyInfo>("company_info");
   const footerRef = useRef<HTMLElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const pointerRef = useRef({ x: -1000, y: -1000, active: false });
@@ -592,6 +595,24 @@ export function Footer({ brand, theme }: FooterProps) {
     };
   }, [theme]);
 
+  if (brandPending || footerPending || companyPending) {
+    return <LoadingSpinner compact label="Loading footer..." />;
+  }
+
+  if (brandError || footerError || companyError || !brandSetting || !footerSetting || !companySetting) {
+    return (
+      <ErrorMessage
+        compact={true}
+        title="Unable to load the footer."
+        detail="Check that the site settings API is available."
+      />
+    );
+  }
+
+  const brand = brandSetting.value;
+  const footer = footerSetting.value;
+  const company = companySetting.value;
+
   return (
     <>
       <style>{footerStyles}</style>
@@ -626,11 +647,11 @@ export function Footer({ brand, theme }: FooterProps) {
               </a>
 
               <p className="footer-shell__tagline">
-                Where Innovation Meets Efficiency.
+                {footer.tagline}
               </p>
 
-              <a className="footer-shell__cta" href={routes.tracking}>
-                Track Your Consultation
+              <a className="footer-shell__cta" href={footer.primary_cta.href}>
+                {footer.primary_cta.label}
               </a>
             </section>
 
@@ -638,7 +659,7 @@ export function Footer({ brand, theme }: FooterProps) {
               <h4 className="footer-shell__eyebrow">Quick Links</h4>
               <nav aria-label="Footer navigation">
                 <ul className="footer-shell__list">
-                  {quickLinks.map((link) => (
+                  {footer.quick_links.map((link) => (
                     <li key={`${link.label}-${link.href}`}>
                       <a href={link.href}>{link.label}</a>
                     </li>
@@ -650,7 +671,7 @@ export function Footer({ brand, theme }: FooterProps) {
             <section className="footer-shell__column">
               <h4 className="footer-shell__eyebrow">Other Resources</h4>
               <ul className="footer-shell__list">
-                {otherResources.map((link) => (
+                {footer.other_resources.map((link) => (
                   <li key={`${link.label}-${link.href}`}>
                     <a href={link.href}>{link.label}</a>
                   </li>
@@ -683,8 +704,7 @@ export function Footer({ brand, theme }: FooterProps) {
                   </svg>
 
                   <span>
-                    Mbezi Beach B, Africana, Bagamoyo Road, Block no H, House
-                    number 9, Dar es Salaam
+                    {company.address}
                   </span>
                 </li>
 
@@ -710,8 +730,11 @@ export function Footer({ brand, theme }: FooterProps) {
                   </svg>
 
                   <div className="footer-shell__contact-copy--stacked">
-                    <a href="mailto:info@exxonim.tz">info@exxonim.tz</a>
-                    <a href="mailto:md@exxonim.tz">md@exxonim.tz</a>
+                    {company.emails.map((email) => (
+                      <a key={email} href={`mailto:${email}`}>
+                        {email}
+                      </a>
+                    ))}
                   </div>
                 </li>
 
@@ -732,8 +755,11 @@ export function Footer({ brand, theme }: FooterProps) {
                   </svg>
 
                   <div className="footer-shell__contact-copy--stacked">
-                    <a href="tel:+255794689099">+255 794 689 099</a>
-                    <a href="tel:+255685525224">+255 685 525 224</a>
+                    {company.phones.map((phone) => (
+                      <a key={phone} href={`tel:${phone.replace(/\s+/g, "")}`}>
+                        {phone}
+                      </a>
+                    ))}
                   </div>
                 </li>
               </ul>
@@ -741,7 +767,7 @@ export function Footer({ brand, theme }: FooterProps) {
           </div>
 
           <div className="footer-shell__bottom">
-            <p>&copy; 2026 Exxonim. All rights reserved.</p>
+            <p>{footer.copyright}</p>
           </div>
         </div>
       </footer>

@@ -1,23 +1,12 @@
 import heroImagePrimary from "../../assets/clients/Freelance Creative Portfolio Website (1).png";
 import heroImageSecondary from "../../assets/clients/Freelance Creative Portfolio Website (1).png";
-import { routes } from "../routes";
+import type { HomeHeroContent } from "../types";
 
-const heroHighlights = [
-  {
-    title: "Setup",
-    detail: "Company registration, tax setup, and first-step filing preparation.",
-  },
-  {
-    title: "Licensing",
-    detail: "Permit coordination and regulator-facing submission support.",
-  },
-  {
-    title: "Follow-through",
-    detail: "Practical updates until approvals, renewals, or next actions are clear.",
-  },
-] as const;
+interface ReferenceHeroProps {
+  content: HomeHeroContent;
+}
 
-export function ReferenceHero() {
+export function ReferenceHero({ content }: ReferenceHeroProps) {
   return (
     <section className="reference-hero" aria-labelledby="reference-hero-title">
       <div className="container">
@@ -38,26 +27,20 @@ export function ReferenceHero() {
             <div className="reference-hero__scrim" aria-hidden="true"></div>
 
             <div className="reference-hero__content">
-              <p className="reference-hero__eyebrow">
-                Registration, licensing, and compliance support
-              </p>
+              <p className="reference-hero__eyebrow">{content.eyebrow}</p>
 
               <h1 id="reference-hero-title" className="reference-hero__title">
-                Get help with the filings that keep business moving.
+                {content.title}
               </h1>
 
-              <p className="reference-hero__lead">
-                Exxonim supports founders, NGOs, and institutions with
-                registration, tax setup, licensing, and regulator-facing
-                submissions across Tanzania.
-              </p>
+              <p className="reference-hero__lead">{content.description}</p>
 
               <div className="reference-hero__actions">
                 <a
                   className="reference-hero__button reference-hero__button--primary"
-                  href={routes.contact}
+                  href={content.cta.href}
                 >
-                  Request consultation
+                  {content.cta.label}
                   <span aria-hidden="true">-&gt;</span>
                 </a>
               </div>
@@ -65,7 +48,7 @@ export function ReferenceHero() {
           </div>
 
           <div className="reference-hero__stats" data-reveal>
-            {heroHighlights.map((item) => (
+            {content.highlights.map((item) => (
               <article key={item.title} className="reference-hero__stat">
                 <strong>{item.title}</strong>
                 <p>{item.detail}</p>

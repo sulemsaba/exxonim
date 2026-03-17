@@ -1,4 +1,8 @@
 import { routes } from "../routes";
+import { ErrorMessage } from "../components/ErrorMessage";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { usePage } from "../hooks/usePage";
+import type { ContentSection, InfoPageContent } from "../types";
 
 const infoPageStyles = String.raw`
   .info-page {
@@ -102,12 +106,6 @@ const infoPageStyles = String.raw`
   }
 `;
 
-interface ContentSection {
-  title: string;
-  paragraphs: string[];
-  bullets?: string[];
-}
-
 interface ContentPageProps {
   eyebrow: string;
   title: string;
@@ -188,42 +186,38 @@ function ContentPage({
   );
 }
 
+function useInfoPage(slug: string, loadingLabel: string) {
+  const { data: page, isPending, error } = usePage<InfoPageContent>(slug);
+
+  if (isPending) {
+    return <LoadingSpinner label={loadingLabel} />;
+  }
+
+  if (error || !page) {
+    return (
+      <ErrorMessage
+        title="Unable to load the page."
+        detail="Check that the page endpoint is available."
+      />
+    );
+  }
+
+  return page.content;
+}
+
 export function SupportPage() {
+  const content = useInfoPage("support", "Loading support page...");
+
+  if (!("hero" in content)) {
+    return content;
+  }
+
   return (
     <ContentPage
-      eyebrow="Support"
-      title="Support channels that keep follow-up clear."
-      description="Use the right channel for the type of request so registration, filing, and licensing questions reach Exxonim with enough context to move forward."
-      sections={[
-        {
-          title: "Best ways to reach Exxonim",
-          paragraphs: [
-            "For new work, the fastest route is usually a phone call or direct email with a short description of the service you need. For existing work, include the company name, filing type, and the last step already completed.",
-          ],
-          bullets: [
-            "Phone: +255 794 689 099 or +255 685 525 224",
-            "Email: info@exxonim.tz or md@exxonim.tz",
-            "Office: Mbezi Beach B, Africana, Bagamoyo Road, Dar es Salaam",
-          ],
-        },
-        {
-          title: "What to include in a follow-up",
-          paragraphs: [
-            "Support requests move faster when Exxonim can immediately identify the matter. Include the client name, the regulator or filing type involved, any reference you were given, and the document or action you need clarified.",
-          ],
-          bullets: [
-            "State whether the request is new work or an ongoing engagement",
-            "Mention the authority, filing, or license involved",
-            "Attach the latest notice, checklist, or submission evidence if relevant",
-          ],
-        },
-        {
-          title: "What Exxonim can help with",
-          paragraphs: [
-            "Support covers registration readiness, missing document review, filing sequence questions, licensing clarification, and practical follow-up on ongoing work. Matters that need a formal commercial scope may be moved into a new consultation.",
-          ],
-        },
-      ]}
+      eyebrow={content.hero.eyebrow}
+      title={content.hero.title}
+      description={content.hero.description}
+      sections={content.sections}
       primaryAction={{ href: routes.contact, label: "Contact Exxonim" }}
       secondaryAction={{ href: routes.faq, label: "Read the FAQ" }}
     />
@@ -231,37 +225,18 @@ export function SupportPage() {
 }
 
 export function TermsPage() {
+  const content = useInfoPage("terms", "Loading terms...");
+
+  if (!("hero" in content)) {
+    return content;
+  }
+
   return (
     <ContentPage
-      eyebrow="Terms"
-      title="Website terms of use."
-      description="These terms govern how visitors use the Exxonim website and its published materials. They do not replace any separate client engagement terms agreed for paid services."
-      sections={[
-        {
-          title: "Using this website",
-          paragraphs: [
-            "You may use the site to learn about Exxonim services, contact the company, and read published articles. You should not use the site in a way that interferes with its operation or misrepresents the source of its content.",
-          ],
-        },
-        {
-          title: "Informational content only",
-          paragraphs: [
-            "Articles and website copy are provided for general informational purposes. They are not a substitute for a scoped engagement, document review, or regulator-specific advice on your exact facts.",
-          ],
-        },
-        {
-          title: "Content ownership",
-          paragraphs: [
-            "Unless otherwise stated, the site design, branding, copy, and published materials belong to Exxonim. You may quote short excerpts with attribution, but you should not republish full materials as your own.",
-          ],
-        },
-        {
-          title: "External links and availability",
-          paragraphs: [
-            "The site may link to third-party services or references. Exxonim is not responsible for third-party content or availability. The website may be updated, changed, or temporarily unavailable without prior notice.",
-          ],
-        },
-      ]}
+      eyebrow={content.hero.eyebrow}
+      title={content.hero.title}
+      description={content.hero.description}
+      sections={content.sections}
       primaryAction={{ href: routes.contact, label: "Ask a question" }}
       secondaryAction={{ href: routes.privacy, label: "Privacy policy" }}
     />
@@ -269,37 +244,18 @@ export function TermsPage() {
 }
 
 export function PrivacyPage() {
+  const content = useInfoPage("privacy", "Loading privacy policy...");
+
+  if (!("hero" in content)) {
+    return content;
+  }
+
   return (
     <ContentPage
-      eyebrow="Privacy"
-      title="Website privacy policy."
-      description="This page explains the basic information Exxonim may receive through the website and how it is used for contact, support, and business communication."
-      sections={[
-        {
-          title: "Information you choose to share",
-          paragraphs: [
-            "If you contact Exxonim by phone, email, WhatsApp, or another linked channel, Exxonim may receive the information you provide, including your name, company details, contact information, and any documents or context you send.",
-          ],
-        },
-        {
-          title: "How the information is used",
-          paragraphs: [
-            "That information is used to respond to inquiries, understand the service requested, continue follow-up on ongoing work, and maintain normal business communication around Exxonim services.",
-          ],
-        },
-        {
-          title: "Sharing and retention",
-          paragraphs: [
-            "Exxonim does not publish private inquiry details on the website. Information may be retained in normal business records where needed to respond to requests, continue support, or maintain a history of communication.",
-          ],
-        },
-        {
-          title: "Questions about privacy",
-          paragraphs: [
-            "If you want to clarify what information you have shared through the site or how to contact Exxonim about privacy concerns, use the main support channels listed on the contact and support pages.",
-          ],
-        },
-      ]}
+      eyebrow={content.hero.eyebrow}
+      title={content.hero.title}
+      description={content.hero.description}
+      sections={content.sections}
       primaryAction={{ href: routes.support, label: "Support details" }}
       secondaryAction={{ href: routes.contact, label: "Contact Exxonim" }}
     />
@@ -307,24 +263,18 @@ export function PrivacyPage() {
 }
 
 export function NotFoundPage() {
+  const content = useInfoPage("404", "Loading page...");
+
+  if (!("hero" in content)) {
+    return content;
+  }
+
   return (
     <ContentPage
-      eyebrow="404"
-      title="That page is not available."
-      description="The address you requested does not match an active Exxonim page. Use one of the main routes below to continue."
-      sections={[
-        {
-          title: "Useful destinations",
-          paragraphs: [
-            "Return to the home page, browse services, or open the resources library to continue from a supported route.",
-          ],
-          bullets: [
-            "Home page and company overview",
-            "Services and registration support",
-            "Resources and practical articles",
-          ],
-        },
-      ]}
+      eyebrow={content.hero.eyebrow}
+      title={content.hero.title}
+      description={content.hero.description}
+      sections={content.sections}
       primaryAction={{ href: routes.home, label: "Go home" }}
       secondaryAction={{ href: routes.resources, label: "Browse resources" }}
     />

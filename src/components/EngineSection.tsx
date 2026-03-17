@@ -1,6 +1,7 @@
 import { routes } from "../routes";
+import type { ServicesCatalogContent } from "../types";
 
-const serviceGroups = [
+const defaultServiceGroups = [
   {
     title: "Registration and setup",
     description:
@@ -84,23 +85,25 @@ const serviceGroups = [
   },
 ];
 
-export function EngineSection() {
+interface EngineSectionProps {
+  content: ServicesCatalogContent;
+}
+
+export function EngineSection({ content }: EngineSectionProps) {
+  const serviceGroups = content.service_groups.length
+    ? content.service_groups
+    : defaultServiceGroups;
+
   return (
     <section className="service-catalog light-section" id="services">
       <div className="container">
         <div className="landing-section-heading" data-reveal>
           <p className="section-pill section-pill--light">
-            <span></span>Services
+            <span></span>
+            {content.eyebrow}
           </p>
-          <h2>
-            Practical support across registration, filing, licensing, and
-            business readiness.
-          </h2>
-          <p>
-            Each service line is structured to reduce back-and-forth, keep
-            documentation organized, and move your application or compliance
-            work toward a clear next step.
-          </p>
+          <h2>{content.title}</h2>
+          <p>{content.description}</p>
         </div>
 
         <div className="service-catalog__grid">

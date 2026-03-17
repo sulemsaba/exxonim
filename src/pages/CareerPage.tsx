@@ -1,33 +1,44 @@
 import { routes } from "../routes";
-
-const careerTracks = [
-  "Client service and filing coordination",
-  "Compliance and regulatory support",
-  "Research, documentation, and submission prep",
-  "Operations support for growing client portfolios",
-];
+import { ErrorMessage } from "../components/ErrorMessage";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { usePage } from "../hooks/usePage";
+import type { CareerPageContent } from "../types";
 
 export function CareerPage() {
+  const { data: page, isPending, error } = usePage<CareerPageContent>("career");
+
+  if (isPending) {
+    return <LoadingSpinner label="Loading career page..." />;
+  }
+
+  if (error || !page) {
+    return (
+      <ErrorMessage
+        title="Unable to load the career page."
+        detail="Check that the page endpoint is available."
+      />
+    );
+  }
+
+  const content = page.content;
+
   return (
     <section className="page-shell dark-grid-section">
       <div className="container page-hero" id="career" data-reveal>
         <div className="landing-section-heading">
           <p className="section-pill section-pill--dark">
-            <span></span>Career
+            <span></span>
+            {content.hero.eyebrow}
           </p>
-          <h1>Build practical work that helps businesses move forward.</h1>
-          <p>
-            Exxonim is growing around client service, compliance support, and
-            execution-heavy business operations. We look for people who are
-            organized, reliable, and comfortable owning details.
-          </p>
+          <h1>{content.hero.title}</h1>
+          <p>{content.hero.description}</p>
         </div>
 
         <div className="page-grid">
           <article className="page-card">
             <span className="page-card__eyebrow">Focus areas</span>
             <div className="page-list">
-              {careerTracks.map((track) => (
+              {content.focus_areas.map((track) => (
                 <div key={track} className="page-list__item">
                   <strong>{track}</strong>
                 </div>
@@ -37,17 +48,20 @@ export function CareerPage() {
 
           <article className="page-card">
             <span className="page-card__eyebrow">Current status</span>
-            <strong>Open to hearing from strong operators</strong>
-            <p>
-              Share your background, the type of work you handle well, and the
-              role you think you can grow into.
-            </p>
+            <strong>{content.status.label}</strong>
+            <p>{content.status.description}</p>
             <div className="page-actions">
-              <a className="landing-cta landing-cta--primary" href="mailto:info@exxonim.tz">
-                Send your profile
+              <a
+                className="landing-cta landing-cta--primary"
+                href={content.status.primary.href}
+              >
+                {content.status.primary.label}
               </a>
-              <a className="landing-cta landing-cta--secondary" href={routes.contact}>
-                Contact Exxonim
+              <a
+                className="landing-cta landing-cta--secondary"
+                href={content.status.secondary.href}
+              >
+                {content.status.secondary.label}
               </a>
             </div>
           </article>

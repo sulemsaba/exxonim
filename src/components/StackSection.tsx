@@ -3,13 +3,11 @@ import type { StackItem } from "../types";
 
 interface StackSectionProps {
   items: StackItem[];
+  defaultFeatureRows?: FeatureRow[];
+  featureVisualContentMap?: Record<string, FeatureVisualContent>;
 }
 
-type FeatureVisualKey =
-  | "registration"
-  | "tax"
-  | "institutional"
-  | "tracking";
+type FeatureVisualKey = string;
 
 type FeatureRow = {
   title: string;
@@ -1229,8 +1227,11 @@ function renderTrackingConsultationVisual() {
   );
 }
 
-function renderFeatureVisual(visualKey: FeatureVisualKey) {
-  const content = featureVisualContentMap[visualKey];
+function renderFeatureVisual(
+  visualKey: FeatureVisualKey,
+  featureVisuals: Record<string, FeatureVisualContent>
+) {
+  const content = featureVisuals[visualKey] ?? featureVisuals.tax;
 
   return (
     <div className="compose-visual">
@@ -1344,11 +1345,19 @@ function renderFeatureCard(item: ExtendedStackItem) {
   );
 }
 
-function FeatureAccordionCard({ item }: { item: ExtendedStackItem }) {
+function FeatureAccordionCard({
+  item,
+  fallbackFeatureRows,
+  featureVisuals,
+}: {
+  item: ExtendedStackItem;
+  fallbackFeatureRows: FeatureRow[];
+  featureVisuals: Record<string, FeatureVisualContent>;
+}) {
   const rows =
     item.featureRows && item.featureRows.length > 0
       ? item.featureRows
-      : defaultFeatureRows;
+      : fallbackFeatureRows;
   const accordionId = useId();
   const [selectedFeatureIndex, setSelectedFeatureIndex] = useState(0);
   const safeActiveFeatureIndex = Math.min(selectedFeatureIndex, rows.length - 1);
@@ -1358,7 +1367,7 @@ function FeatureAccordionCard({ item }: { item: ExtendedStackItem }) {
     <div className="feature-layout">
       <div className="feature-visual-stage">
         <div className="feature-visual-stage__inner">
-          {renderFeatureVisual(activeRow.visualKey)}
+          {renderFeatureVisual(activeRow.visualKey, featureVisuals)}
         </div>
       </div>
 
@@ -1423,9 +1432,18 @@ function FeatureAccordionCard({ item }: { item: ExtendedStackItem }) {
   );
 }
 
-export function StackSection({ items }: StackSectionProps) {
+export function StackSection({
+  items,
+  defaultFeatureRows: featureRowsProp,
+  featureVisualContentMap: featureVisualsProp,
+}: StackSectionProps) {
   const cardsRef = useRef<(HTMLElement | null)[]>([]);
   const rafRef = useRef<number | null>(null);
+  const defaultRows = featureRowsProp?.length ? featureRowsProp : defaultFeatureRows;
+  const featureVisuals =
+    featureVisualsProp && Object.keys(featureVisualsProp).length
+      ? featureVisualsProp
+      : featureVisualContentMap;
 
   useEffect(() => {
     const updateCards = () => {
@@ -1505,7 +1523,11 @@ export function StackSection({ items }: StackSectionProps) {
             >
               <div className="stack-inner-container">
                 {isMiddle ? (
-                  <FeatureAccordionCard item={item} />
+                  <FeatureAccordionCard
+                    item={item}
+                    fallbackFeatureRows={defaultRows}
+                    featureVisuals={featureVisuals}
+                  />
                 ) : (
                   renderStatementCard(item, index)
                 )}

@@ -5,141 +5,17 @@ import {
   useState,
   type RefObject,
 } from "react";
+import { ErrorMessage } from "./ErrorMessage";
+import { LoadingSpinner } from "./LoadingSpinner";
+import { usePricingPlans } from "../hooks/usePricingPlans";
+import { useTestimonials } from "../hooks/useTestimonials";
 import { routes } from "../routes";
+import type { PricingPlan, Testimonial } from "../types";
 import "./ServicePackagesSection.css";
-
-type Testimonial = {
-  eyebrow: string;
-  headline: string;
-  support: string;
-  quote: string;
-  name: string;
-  role: string;
-  initials: string;
-};
-
-type Feature = {
-  label: string;
-  included: boolean;
-};
-
-type PackagePlan = {
-  name: string;
-  badge?: string;
-  description: string;
-  notes: string;
-  recommended?: boolean;
-  features: Feature[];
-};
 
 type ServicePackagesSectionProps = {
   variant?: "home" | "page";
 };
-
-const TESTIMONIALS: Testimonial[] = [
-  {
-    eyebrow: "Build Trust",
-    headline: "Move With Clarity",
-    support:
-      "Registration, filing, and licensing work stay clearer when the next step is always visible.",
-    quote:
-      "We stopped guessing. The process felt clear and the documents stayed in order.",
-    name: "Amina Juma",
-    role: "Operations Manager",
-    initials: "AJ",
-  },
-  {
-    eyebrow: "Stay Ready",
-    headline: "Be Ready Faster",
-    support:
-      "Structured filing support keeps submissions cleaner, clearer, and easier to move forward.",
-    quote:
-      "Follow-up stayed serious and clear. We always knew the next step.",
-    name: "Neema Mushi",
-    role: "Business Founder",
-    initials: "NM",
-  },
-  {
-    eyebrow: "Reduce Delays",
-    headline: "Reduce Approval Delays",
-    support:
-      "Better preparation reduces back-and-forth before registration and licensing work slows down.",
-    quote:
-      "The work felt manageable because everything was prepared before submission.",
-    name: "Kelvin Paulo",
-    role: "Managing Director",
-    initials: "KP",
-  },
-  {
-    eyebrow: "Work Clearly",
-    headline: "Support You Can Trust",
-    support:
-      "Clear communication and document readiness keep support steady from intake to submission.",
-    quote:
-      "They gave us structure, clearer communication, and fewer corrections.",
-    name: "Rehema Bakari",
-    role: "Administrative Lead",
-    initials: "RB",
-  },
-];
-
-const PLANS: PackagePlan[] = [
-  {
-    name: "Mikumi",
-    badge: "Easy Plan",
-    description:
-      "A practical starting package for founders and small operators who want clean support across early business setup and core documentation.",
-    notes:
-      "Best for businesses that want to start correctly and reduce common setup mistakes.",
-    features: [
-      { label: "Company registration support", included: true },
-      { label: "Business name registration", included: true },
-      { label: "Document requirement checklist", included: true },
-      { label: "Basic filing guidance", included: true },
-      { label: "Trademark registration support", included: false },
-      { label: "Licensing follow-up support", included: false },
-      { label: "Business plan preparation", included: false },
-      { label: "Priority consultation support", included: false },
-    ],
-  },
-  {
-    name: "Ngorongoro",
-    badge: "Best Plan",
-    recommended: true,
-    description:
-      "A stronger package for businesses that need coordinated support across registration, compliance, licensing, and operational readiness.",
-    notes:
-      "Best for teams that want more complete support and clearer follow-through.",
-    features: [
-      { label: "Company registration support", included: true },
-      { label: "Business name registration", included: true },
-      { label: "Trademark registration support", included: true },
-      { label: "TIN and statutory filing support", included: true },
-      { label: "Business license application support", included: true },
-      { label: "OSHA / NSSF / WCF guidance", included: true },
-      { label: "Priority consultation support", included: true },
-      { label: "Business plan preparation", included: false },
-    ],
-  },
-  {
-    name: "Serengeti",
-    badge: "All Plan",
-    description:
-      "A broad support package for businesses that want complete help across setup, filings, approvals, institutional registrations, and growth readiness.",
-    notes:
-      "Best for businesses that want wider coverage across multiple service needs.",
-    features: [
-      { label: "Company registration support", included: true },
-      { label: "Business name registration", included: true },
-      { label: "Trademark registration support", included: true },
-      { label: "TIN and statutory filing support", included: true },
-      { label: "Business license application support", included: true },
-      { label: "CRB / ERB registration support", included: true },
-      { label: "OSHA / NSSF / WCF guidance", included: true },
-      { label: "Business plan preparation", included: true },
-    ],
-  },
-];
 
 function useInView<T extends Element>(
   ref: RefObject<T | null>,
@@ -180,18 +56,24 @@ function useDocumentVisible() {
 }
 
 const TestimonialCard = memo(function TestimonialCard({
+  testimonials,
   activeIndex,
   onSelect,
   onUserInteract,
   mobile = false,
 }: {
+  testimonials: Testimonial[];
   activeIndex: number;
   onSelect: (index: number) => void;
   onUserInteract: () => void;
   mobile?: boolean;
 }) {
-  const review = TESTIMONIALS[activeIndex];
+  const review = testimonials[activeIndex];
   const reviewPanelId = `sp-testimonial-panel-${mobile ? "mobile" : "desktop"}`;
+
+  if (!review) {
+    return null;
+  }
 
   return (
     <div className={`sp-testimonial ${mobile ? "sp-testimonial--mobile" : ""}`}>
@@ -227,7 +109,7 @@ const TestimonialCard = memo(function TestimonialCard({
       </div>
 
       <div className="sp-testimonial__dots" role="group" aria-label="Reviews">
-        {TESTIMONIALS.map((testimonial, index) => (
+        {testimonials.map((testimonial, index) => (
           <button
             key={index}
             type="button"
@@ -252,7 +134,7 @@ function PlanCardContent({
   plan,
   isDark,
 }: {
-  plan: PackagePlan;
+  plan: PricingPlan;
   isDark: boolean;
 }) {
   return (
@@ -325,7 +207,7 @@ const PlanCardDesktop = memo(function PlanCardDesktop({
   isLowered,
   onHoverChange,
 }: {
-  plan: PackagePlan;
+  plan: PricingPlan;
   slot: "left" | "center" | "right";
   isDark: boolean;
   isActive: boolean;
@@ -352,7 +234,7 @@ const PlanCardDesktop = memo(function PlanCardDesktop({
 const PlanCardMobile = memo(function PlanCardMobile({
   plan,
 }: {
-  plan: PackagePlan;
+  plan: PricingPlan;
 }) {
   const isDark = Boolean(plan.recommended);
 
@@ -370,15 +252,18 @@ const PlanCardMobile = memo(function PlanCardMobile({
   );
 });
 
-function DesktopLayout() {
-  const defaultActiveIndex = PLANS.findIndex((plan) => plan.recommended);
+function DesktopLayout({ plans }: { plans: PricingPlan[] }) {
+  const defaultActiveIndex = Math.max(
+    plans.findIndex((plan) => plan.recommended),
+    0
+  );
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const activeIndex = hoveredIndex ?? defaultActiveIndex;
 
   return (
     <div className="sp-desktopLayout">
       <div className="sp-desktopLayout__stage">
-        {PLANS.map((plan, index) => (
+        {plans.map((plan, index) => (
           <PlanCardDesktop
             key={plan.name}
             plan={plan}
@@ -401,10 +286,10 @@ function DesktopLayout() {
   );
 }
 
-function MobilePlanStack() {
+function MobilePlanStack({ plans }: { plans: PricingPlan[] }) {
   return (
     <div className="sp-mobilePlans">
-      {PLANS.map((plan) => (
+      {plans.map((plan) => (
         <PlanCardMobile key={plan.name} plan={plan} />
       ))}
     </div>
@@ -414,6 +299,16 @@ function MobilePlanStack() {
 export function ServicePackagesSection({
   variant = "home",
 }: ServicePackagesSectionProps) {
+  const {
+    data: testimonials = [],
+    isPending: testimonialsPending,
+    error: testimonialsError,
+  } = useTestimonials();
+  const {
+    data: plans = [],
+    isPending: plansPending,
+    error: plansError,
+  } = usePricingPlans();
   const sectionRef = useRef<HTMLElement | null>(null);
   const sectionInView = useInView(sectionRef, "0px", 0.18);
   const documentVisible = useDocumentVisible();
@@ -428,18 +323,31 @@ export function ServicePackagesSection({
   };
 
   useEffect(() => {
-    if (!sectionInView || !documentVisible) return;
+    if (!sectionInView || !documentVisible || testimonials.length === 0) return;
 
     const now = Date.now();
     const pauseRemaining = Math.max(0, manualPauseUntilRef.current - now);
     const delay = pauseRemaining > 0 ? pauseRemaining : 4800;
 
     const id = window.setTimeout(() => {
-      setActiveReview((prev) => (prev + 1) % TESTIMONIALS.length);
+      setActiveReview((prev) => (prev + 1) % testimonials.length);
     }, delay);
 
     return () => window.clearTimeout(id);
-  }, [activeReview, sectionInView, documentVisible, pauseNonce]);
+  }, [activeReview, documentVisible, pauseNonce, sectionInView, testimonials.length]);
+
+  if (testimonialsPending || plansPending) {
+    return <LoadingSpinner label="Loading package plans..." />;
+  }
+
+  if (testimonialsError || plansError || testimonials.length === 0 || plans.length === 0) {
+    return (
+      <ErrorMessage
+        title="Unable to load plans."
+        detail="Make sure the pricing and testimonial endpoints are available."
+      />
+    );
+  }
 
   return (
     <section
@@ -451,6 +359,7 @@ export function ServicePackagesSection({
         <div className="sp-shell">
           <div className="sp-shell__left">
             <TestimonialCard
+              testimonials={testimonials}
               activeIndex={activeReview}
               onSelect={setActiveReview}
               onUserInteract={pauseTestimonials}
@@ -458,7 +367,7 @@ export function ServicePackagesSection({
           </div>
 
           <div className="sp-shell__right">
-            <DesktopLayout />
+            <DesktopLayout plans={plans} />
           </div>
         </div>
       </div>
@@ -466,13 +375,14 @@ export function ServicePackagesSection({
       <div className="sp-section__mobile">
         <div className="sp-mobileShell">
           <TestimonialCard
+            testimonials={testimonials}
             activeIndex={activeReview}
             onSelect={setActiveReview}
             onUserInteract={pauseTestimonials}
             mobile={true}
           />
 
-          <MobilePlanStack />
+          <MobilePlanStack plans={plans} />
         </div>
       </div>
     </section>
