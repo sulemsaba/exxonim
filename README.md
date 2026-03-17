@@ -1,37 +1,110 @@
-# Exxonim Website
+# Exxonim Monorepo
 
-Static React/Vite marketing site for Exxonim. The build produces prerendered HTML for public routes, article detail pages, legacy blog aliases, a `404.html`, and search engine assets.
+Exxonim now uses a workspace split with two frontend apps and one shared package:
 
-## Stack
+- `apps/public`: public website with Vite client build, SSR entry, and prerender output
+- `apps/admin`: admin panel served from `/admin/`
+- `packages/shared`: shared API contracts, low-level HTTP helpers, auth session primitives, and generic utilities
 
-- React 18
-- TypeScript
-- Vite
-- Static prerender via `scripts/prerender.mjs`
+The public site and admin panel still target the same backend API. Content remains API-backed; the old static content files are no longer part of the architecture.
+
+## Workspace Layout
+
+```text
+apps/
+  public/
+  admin/
+packages/
+  shared/
+scripts/
+  build-deploy.mjs
+  preview-deploy.mjs
+```
 
 ## Local Development
 
+Install dependencies once at the repo root:
+
 ```bash
 npm install
-npm run dev
 ```
+
+Run the public site:
+
+```bash
+npm run dev:public
+```
+
+Run the admin app:
+
+```bash
+npm run dev:admin
+```
+
+Expected development URLs:
+
+- Public: `http://localhost:5173`
+- Admin: `http://localhost:5174`
+
+Each app has its own env example:
+
+- `apps/public/.env.example`
+- `apps/admin/.env.example`
+
+Both define `VITE_API_URL`.
 
 ## Quality Checks
 
+Typecheck every workspace:
+
 ```bash
 npm run typecheck
-npm run build
 ```
 
-`npm run build` does all of the following:
+Build the public app:
 
-1. Compiles TypeScript.
-2. Builds the client bundle.
-3. Builds the SSR entry used for prerendering.
-4. Generates static HTML into `dist/`.
-5. Emits `404.html`, `sitemap.xml`, and `robots.txt`.
+```bash
+npm run build:public
+```
 
-## Main Routes
+Build the admin app:
+
+```bash
+npm run build:admin
+```
+
+Assemble the production deploy artifact:
+
+```bash
+npm run build:deploy
+```
+
+This produces a root `dist/` directory where:
+
+- the public app is served from `/`
+- the admin app is mounted under `/admin/`
+
+## Preview
+
+Preview the public production build:
+
+```bash
+npm run preview:public
+```
+
+Preview the admin production build:
+
+```bash
+npm run preview:admin
+```
+
+Preview the assembled deploy artifact:
+
+```bash
+npm run preview:deploy
+```
+
+## Public Routes
 
 - `/`
 - `/about/`
@@ -45,18 +118,10 @@ npm run build
 - `/support/`
 - `/terms/`
 - `/privacy/`
-- `/404/`
-
-Legacy article aliases are also emitted under `/blog/:slug/` and canonicalize to `/resources/:slug/`.
 
 ## Deployment Notes
 
-- Deploy the generated `dist/` directory.
-- Make sure the host serves `404.html` for unknown static paths where supported.
-- Internal metadata and canonical tags assume the production origin is `https://exxonim.tz`.
-
-## Content Notes
-
-- Resource/article listing data lives in [src/content.ts](src/content.ts).
-- Article body copy lives in [src/blogArticleContent.ts](src/blogArticleContent.ts).
-- Route-aware SEO metadata lives in [src/seo.ts](src/seo.ts).
+- Deploy the generated root `dist/` directory.
+- The admin build uses `base: '/admin/'`, so admin assets resolve under `/admin/assets/...`.
+- The public build still generates `404.html`, `sitemap.xml`, and `robots.txt`.
+- If the backend runs cross-origin in development, allow both `http://localhost:5173` and `http://localhost:5174` in CORS.
