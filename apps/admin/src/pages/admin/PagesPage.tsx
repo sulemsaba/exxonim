@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AdminDeleteDialog } from "../../components/admin/AdminDeleteDialog";
 import { ErrorMessage } from "../../components/ErrorMessage";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
+import { useAuth } from "../../contexts/AuthContext";
 import { adminRoutes, type AdminRouteMatch } from "../../lib/adminRoutes";
 import {
   createAdminPage,
@@ -13,14 +14,17 @@ import {
   getAdminPages,
   updateAdminPage,
 } from "../../services/adminPageService";
-import type { ApiPage } from "../../types/api";
+import type { ApiContentStatus, ApiPage } from "../../types/api";
 import {
+  getContentStatus,
   getAdminErrorMessage,
   parseJsonValue,
   prettyJson,
   slugify,
   tryParseJsonValue,
 } from "../../utils/admin";
+
+const contentStatusSchema = z.enum(["draft", "published", "archived"]);
 
 const pageSchema = z.object({
   title: z.string().min(1, "Title is required."),
@@ -34,7 +38,8 @@ const pageSchema = z.object({
     }, "Content must be a valid JSON object."),
   meta_title: z.string().optional(),
   meta_description: z.string().optional(),
-  is_published: z.boolean(),
+  og_image_url: z.string().optional(),
+  status: contentStatusSchema,
 });
 
 type PageFormValues = z.infer<typeof pageSchema>;
@@ -42,6 +47,7 @@ type PageFormValues = z.infer<typeof pageSchema>;
 interface PagesPageProps {
   mode: AdminRouteMatch["mode"];
   entityId?: number;
+  pageSlug?: string;
 }
 
 const defaultValues: PageFormValues = {
@@ -50,7 +56,8 @@ const defaultValues: PageFormValues = {
   content_json: prettyJson({}),
   meta_title: "",
   meta_description: "",
-  is_published: false,
+  og_image_url: "",
+  status: "draft",
 };
 
 function formatTimestamp(value?: string | null) {
@@ -68,15 +75,39 @@ function toPayload(values: PageFormValues) {
     content: parseJsonValue<Record<string, unknown>>(values.content_json),
     meta_title: values.meta_title || null,
     meta_description: values.meta_description || null,
-    is_published: values.is_published,
+    og_image_url: values.og_image_url || null,
+    status: values.status,
   };
 }
 
-export function PagesPage({ mode, entityId }: PagesPageProps) {
+function formatShortcutTitle(slug: string) {
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function getStatusClassName(status: ApiContentStatus) {
+  if (status === "published") {
+    return "admin-status admin-status--published";
+  }
+
+  if (status === "archived") {
+    return "admin-status admin-status--danger";
+  }
+
+  return "admin-status admin-status--draft";
+}
+
+export function PagesPage({ mode, entityId, pageSlug }: PagesPageProps) {
   const queryClient = useQueryClient();
+  const { admin } = useAuth();
   const [slugDirty, setSlugDirty] = useState(false);
   const [formMessage, setFormMessage] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ApiPage | null>(null);
+  const adminRole = admin?.role ?? "admin";
+  const isShortcut = mode === "shortcut" && Boolean(pageSlug);
 
   const pagesQuery = useQuery({
     queryKey: ["admin", "pages"],
@@ -98,24 +129,44 @@ export function PagesPage({ mode, entityId }: PagesPageProps) {
   const selectedPage =
     mode === "edit"
       ? pagesQuery.data?.find((page) => page.id === entityId) ?? null
+      : isShortcut && pageSlug
+        ? pagesQuery.data?.find((page) => page.slug === pageSlug) ?? null
       : null;
+  const isExistingRecord = Boolean(selectedPage);
   const watchedTitle = watch("title");
+  const watchedStatus = watch("status");
 
   useEffect(() => {
+    if (isShortcut && pageSlug) {
+      setValue("slug", pageSlug, { shouldValidate: true });
+      return;
+    }
+
     if (!slugDirty) {
       setValue("slug", slugify(watchedTitle), { shouldValidate: true });
     }
-  }, [setValue, slugDirty, watchedTitle]);
+  }, [isShortcut, pageSlug, setValue, slugDirty, watchedTitle]);
 
   useEffect(() => {
-    if (mode === "edit" && selectedPage) {
+    if ((mode === "edit" || isShortcut) && selectedPage) {
       reset({
         title: selectedPage.title,
         slug: selectedPage.slug,
         content_json: prettyJson(selectedPage.content),
         meta_title: selectedPage.meta_title ?? "",
         meta_description: selectedPage.meta_description ?? "",
-        is_published: selectedPage.is_published,
+        og_image_url: selectedPage.og_image_url ?? "",
+        status: getContentStatus(selectedPage),
+      });
+      setSlugDirty(true);
+      return;
+    }
+
+    if (isShortcut && pageSlug) {
+      reset({
+        ...defaultValues,
+        title: formatShortcutTitle(pageSlug),
+        slug: pageSlug,
       });
       setSlugDirty(true);
       return;
@@ -123,7 +174,7 @@ export function PagesPage({ mode, entityId }: PagesPageProps) {
 
     reset(defaultValues);
     setSlugDirty(false);
-  }, [mode, reset, selectedPage]);
+  }, [isShortcut, mode, pageSlug, reset, selectedPage]);
 
   const createMutation = useMutation({
     mutationFn: createAdminPage,
@@ -132,7 +183,11 @@ export function PagesPage({ mode, entityId }: PagesPageProps) {
       await queryClient.invalidateQueries({ queryKey: ["pages", page.slug] });
 
       if (typeof window !== "undefined") {
-        window.location.assign(adminRoutes.pageEdit(page.id));
+        window.location.assign(
+          isShortcut && pageSlug
+            ? adminRoutes.pageShortcut(pageSlug as Parameters<typeof adminRoutes.pageShortcut>[0])
+            : adminRoutes.pageEdit(page.id)
+        );
       }
     },
     onError: (error) => {
@@ -188,7 +243,7 @@ export function PagesPage({ mode, entityId }: PagesPageProps) {
   async function onSubmit(values: PageFormValues) {
     setFormMessage(null);
 
-    if (mode === "edit" && selectedPage) {
+    if (selectedPage) {
       await updateMutation.mutateAsync({
         id: selectedPage.id,
         values,
@@ -268,27 +323,22 @@ export function PagesPage({ mode, entityId }: PagesPageProps) {
                         <td>
                           <strong>{page.title}</strong>
                           <p>{page.meta_description ?? "No meta description provided."}</p>
-                        </td>
-                        <td>{page.slug}</td>
-                        <td>
-                          <span
-                            className={
-                              page.is_published
-                                ? "admin-status admin-status--published"
-                                : "admin-status admin-status--draft"
-                            }
+                      </td>
+                      <td>{page.slug}</td>
+                      <td>
+                        <span className={getStatusClassName(getContentStatus(page))}>
+                          {getContentStatus(page)}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="admin-table__actions">
+                          <a
+                            className="admin-table__action"
+                            href={adminRoutes.pageEdit(page.id)}
                           >
-                            {page.is_published ? "Published" : "Draft"}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="admin-table__actions">
-                            <a
-                              className="admin-table__action"
-                              href={adminRoutes.pageEdit(page.id)}
-                            >
-                              Edit
-                            </a>
+                            Edit
+                          </a>
+                          {adminRole === "admin" ? (
                             <button
                               className="admin-table__action admin-table__action--danger"
                               type="button"
@@ -296,10 +346,11 @@ export function PagesPage({ mode, entityId }: PagesPageProps) {
                             >
                               Delete
                             </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          ) : null}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                   </tbody>
                 </table>
               </div>
@@ -334,8 +385,18 @@ export function PagesPage({ mode, entityId }: PagesPageProps) {
         <section className="admin-card">
           <div className="admin-card__header">
             <div>
-              <h2>{mode === "edit" ? "Edit page" : "Create page"}</h2>
-              <p>Page content is stored as raw JSON so public routes can render typed content from the API.</p>
+              <h2>
+                {isExistingRecord
+                  ? "Edit page"
+                  : isShortcut && pageSlug
+                    ? `${formatShortcutTitle(pageSlug)} page`
+                    : "Create page"}
+              </h2>
+              <p>
+                {isShortcut
+                  ? "This shortcut route edits page content only. The slug stays fixed so the public route remains stable."
+                  : "Page content is stored as raw JSON so public routes can render typed content from the API."}
+              </p>
             </div>
           </div>
           <div className="admin-card__body">
@@ -352,11 +413,17 @@ export function PagesPage({ mode, entityId }: PagesPageProps) {
                   <input
                     id="page-slug"
                     type="text"
+                    disabled={isShortcut}
                     {...register("slug", {
                       onChange: () => setSlugDirty(true),
                     })}
                   />
                   {errors.slug ? <p className="admin-form__error">{errors.slug.message}</p> : null}
+                  {isShortcut ? (
+                    <p className="admin-form__hint">
+                      Shortcut pages keep a fixed slug so the route mapping never drifts.
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="admin-form__field admin-form__field--full">
@@ -374,11 +441,28 @@ export function PagesPage({ mode, entityId }: PagesPageProps) {
                 </div>
 
                 <div className="admin-form__field">
-                  <span>Publication</span>
-                  <label className="admin-form__checkbox">
-                    <input type="checkbox" {...register("is_published")} />
-                    Make this page available on the public site
-                  </label>
+                  <label htmlFor="page-og-image">Open graph image URL</label>
+                  <input id="page-og-image" type="text" {...register("og_image_url")} />
+                </div>
+
+                <div className="admin-form__field">
+                  <label htmlFor="page-status">Status</label>
+                  <select
+                    id="page-status"
+                    {...register("status")}
+                    disabled={adminRole === "editor" && watchedStatus === "archived"}
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="archived" disabled={adminRole !== "admin"}>
+                      Archived
+                    </option>
+                  </select>
+                  {adminRole === "editor" && watchedStatus === "archived" ? (
+                    <p className="admin-form__hint">
+                      Archived pages can only be restored or changed by an admin.
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="admin-form__field admin-form__field--full">
@@ -396,7 +480,7 @@ export function PagesPage({ mode, entityId }: PagesPageProps) {
                 <a className="admin-form__cancel" href={adminRoutes.pages}>
                   Back to Pages
                 </a>
-                {mode === "edit" ? (
+                {isExistingRecord && adminRole === "admin" ? (
                   <button
                     className="admin-danger-button"
                     type="button"
@@ -412,7 +496,7 @@ export function PagesPage({ mode, entityId }: PagesPageProps) {
                 >
                   {createMutation.isPending || updateMutation.isPending
                     ? "Saving..."
-                    : mode === "edit"
+                    : isExistingRecord
                       ? "Update Page"
                       : "Create Page"}
                 </button>
@@ -425,12 +509,20 @@ export function PagesPage({ mode, entityId }: PagesPageProps) {
           <div className="admin-card__header">
             <div>
               <h2>Record details</h2>
-              <p>Keep route slugs stable once a public page is live, because frontend queries resolve content by slug.</p>
+              <p>
+                Keep route slugs stable once a public page is live, because frontend queries resolve content by slug.
+              </p>
             </div>
           </div>
           <div className="admin-card__body">
             <div className="admin-empty">
-              <strong>{mode === "edit" ? selectedPage?.title : "New page draft"}</strong>
+              <strong>
+                {isExistingRecord
+                  ? selectedPage?.title
+                  : isShortcut && pageSlug
+                    ? `${formatShortcutTitle(pageSlug)} draft`
+                    : "New page draft"}
+              </strong>
               <p>Created at: {formatTimestamp(selectedPage?.created_at)}</p>
               <p>Updated at: {formatTimestamp(selectedPage?.updated_at)}</p>
             </div>

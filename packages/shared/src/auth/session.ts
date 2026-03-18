@@ -8,11 +8,89 @@ export interface AuthSessionState {
 
 type AuthSessionListener = () => void;
 
-let authSessionState: AuthSessionState = {
-  admin: null,
-  accessToken: null,
-  refreshToken: null,
-};
+const AUTH_SESSION_STORAGE_KEY = "exxonim-admin-auth-session";
+
+function emptyAuthSession(): AuthSessionState {
+  return {
+    admin: null,
+    accessToken: null,
+    refreshToken: null,
+  };
+}
+
+function isBrowser() {
+  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+}
+
+function normalizeAuthSession(value: unknown): AuthSessionState {
+  if (!value || typeof value !== "object") {
+    return emptyAuthSession();
+  }
+
+  const candidate = value as Partial<AuthSessionState>;
+
+  return {
+    admin:
+      candidate.admin && typeof candidate.admin === "object"
+        ? (candidate.admin as ApiAdminUser)
+        : null,
+    accessToken:
+      typeof candidate.accessToken === "string" ? candidate.accessToken : null,
+    refreshToken:
+      typeof candidate.refreshToken === "string" ? candidate.refreshToken : null,
+  };
+}
+
+function readPersistedAuthSession() {
+  if (!isBrowser()) {
+    return emptyAuthSession();
+  }
+
+  try {
+    const rawValue = window.localStorage.getItem(AUTH_SESSION_STORAGE_KEY);
+    if (!rawValue) {
+      return emptyAuthSession();
+    }
+
+    return normalizeAuthSession(JSON.parse(rawValue));
+  } catch {
+    return emptyAuthSession();
+  }
+}
+
+function writePersistedAuthSession(state: AuthSessionState) {
+  if (!isBrowser()) {
+    return;
+  }
+
+  try {
+    if (!state.admin && !state.accessToken && !state.refreshToken) {
+      window.localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
+      return;
+    }
+
+    window.localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Ignore storage failures and keep the in-memory session usable.
+  }
+}
+
+let authSessionState: AuthSessionState = emptyAuthSession();
+let hasHydratedAuthSession = false;
+
+function ensureHydratedAuthSession() {
+  if (hasHydratedAuthSession) {
+    return;
+  }
+
+  authSessionState = readPersistedAuthSession();
+  hasHydratedAuthSession = true;
+}
+
+function getCurrentAuthSession() {
+  ensureHydratedAuthSession();
+  return authSessionState;
+}
 
 const listeners = new Set<AuthSessionListener>();
 
@@ -21,27 +99,25 @@ function emitChange() {
 }
 
 export function getAuthSession() {
-  return authSessionState;
+  return getCurrentAuthSession();
 }
 
 export function setAuthSession(nextState: AuthSessionState) {
+  ensureHydratedAuthSession();
   authSessionState = nextState;
+  writePersistedAuthSession(nextState);
   emitChange();
 }
 
 export function updateAuthSession(partialState: Partial<AuthSessionState>) {
   setAuthSession({
-    ...authSessionState,
+    ...getCurrentAuthSession(),
     ...partialState,
   });
 }
 
 export function clearAuthSession() {
-  setAuthSession({
-    admin: null,
-    accessToken: null,
-    refreshToken: null,
-  });
+  setAuthSession(emptyAuthSession());
 }
 
 export function subscribeAuthSession(listener: AuthSessionListener) {

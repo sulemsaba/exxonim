@@ -1,3 +1,5 @@
+import type { ApiContentStatus } from "./content";
+
 export interface ApiTestimonial {
   id: number;
   eyebrow?: string | null;
@@ -9,7 +11,8 @@ export interface ApiTestimonial {
   content: string;
   rating?: number | null;
   sort_order: number;
-  is_active: boolean;
+  status?: ApiContentStatus;
+  is_active?: boolean;
   created_at: string;
   updated_at: string;
 }

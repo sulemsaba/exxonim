@@ -1,5 +1,6 @@
 import api from "../api/axios";
-import type { ApiPage } from "../types/api";
+import type { ApiContentStatus, ApiPage } from "../types/api";
+import { normalizeContentRecord, statusToPublishedFlag } from "../utils/admin";
 
 export interface AdminPagePayload {
   title: string;
@@ -7,27 +8,38 @@ export interface AdminPagePayload {
   content: Record<string, unknown>;
   meta_title?: string | null;
   meta_description?: string | null;
-  is_published: boolean;
+  og_image_url?: string | null;
+  status: ApiContentStatus;
+}
+
+function toRequestPayload(payload: Partial<AdminPagePayload>) {
+  return {
+    ...payload,
+    is_published:
+      typeof payload.status === "string"
+        ? statusToPublishedFlag(payload.status)
+        : undefined,
+  };
 }
 
 export async function getAdminPages() {
   const response = await api.get<ApiPage[]>("/admin/pages");
-  return response.data;
+  return response.data.map((page) => normalizeContentRecord(page));
 }
 
 export async function getAdminPage(id: number) {
   const response = await api.get<ApiPage>(`/admin/pages/${id}`);
-  return response.data;
+  return normalizeContentRecord(response.data);
 }
 
 export async function createAdminPage(payload: AdminPagePayload) {
-  const response = await api.post<ApiPage>("/admin/pages", payload);
-  return response.data;
+  const response = await api.post<ApiPage>("/admin/pages", toRequestPayload(payload));
+  return normalizeContentRecord(response.data);
 }
 
 export async function updateAdminPage(id: number, payload: Partial<AdminPagePayload>) {
-  const response = await api.put<ApiPage>(`/admin/pages/${id}`, payload);
-  return response.data;
+  const response = await api.put<ApiPage>(`/admin/pages/${id}`, toRequestPayload(payload));
+  return normalizeContentRecord(response.data);
 }
 
 export async function deleteAdminPage(id: number) {

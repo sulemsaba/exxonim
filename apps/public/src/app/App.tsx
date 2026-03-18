@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { HomePage } from "../features/home";
 import {
   AboutPage,
@@ -7,6 +7,7 @@ import {
   FaqPage,
   NotFoundPage,
   PrivacyPage,
+  RequestConsultationPage,
   SupportPage,
   TermsPage,
   TrackConsultationPage,
@@ -14,6 +15,7 @@ import {
 import { ResourceArticlePage, ResourcesPage } from "../features/resources";
 import { ServicesPage } from "../features/services";
 import { Footer, Navigation } from "../features/site-shell";
+import { PageLoader } from "../components/PageLoader";
 import { useSiteSetting } from "../hooks/useSiteSetting";
 import { useRevealOnScroll } from "../hooks/useRevealOnScroll";
 import { useStackCardDepth } from "../hooks/useStackCardDepth";
@@ -28,6 +30,7 @@ interface AppProps {
 export default function App({ initialPathname }: AppProps) {
   const { theme, toggleTheme } = useTheme();
   const { data: companySetting } = useSiteSetting<CompanyInfo>("company_info");
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const pathname =
     typeof window === "undefined"
       ? normalizePathname(initialPathname)
@@ -37,6 +40,7 @@ export default function App({ initialPathname }: AppProps) {
   useStackCardDepth();
 
   useEffect(() => {
+    setIsPageLoading(false);
     document.documentElement.classList.add("js");
   }, []);
 
@@ -141,6 +145,8 @@ export default function App({ initialPathname }: AppProps) {
     <FaqPage />
   ) : pathname === normalizePathname(routes.services) ? (
     <ServicesPage />
+  ) : pathname === normalizePathname(routes.requestConsultation) ? (
+    <RequestConsultationPage />
   ) : pathname === normalizePathname(routes.tracking) ? (
     <TrackConsultationPage />
   ) : pathname === normalizePathname(routes.resources) ? (
@@ -163,6 +169,8 @@ export default function App({ initialPathname }: AppProps) {
 
   return (
     <div className="site-shell">
+      <PageLoader isLoading={isPageLoading} delay={300} />
+      
       <div className="cinematic-bg" aria-hidden="true">
         <div className="cinematic-bg__orb cinematic-bg__orb--one"></div>
         <div className="cinematic-bg__orb cinematic-bg__orb--two"></div>

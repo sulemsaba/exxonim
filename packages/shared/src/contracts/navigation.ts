@@ -1,3 +1,5 @@
+import type { ApiContentStatus } from "./content";
+
 export interface ApiNavigationItem {
   id: number;
   title: string;
@@ -5,7 +7,8 @@ export interface ApiNavigationItem {
   description?: string | null;
   kind: string;
   order: number;
-  is_active: boolean;
+  status?: ApiContentStatus;
+  is_active?: boolean;
   parent_id?: number | null;
   created_at: string;
   updated_at: string;

@@ -1,3 +1,5 @@
+import type { ApiContentStatus } from "./content";
+
 export interface ApiPricingPlan {
   id: number;
   name: string;
@@ -11,7 +13,8 @@ export interface ApiPricingPlan {
   }>;
   recommended: boolean;
   sort_order: number;
-  is_active: boolean;
+  status?: ApiContentStatus;
+  is_active?: boolean;
   created_at: string;
   updated_at: string;
 }

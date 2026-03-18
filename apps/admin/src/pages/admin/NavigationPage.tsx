@@ -12,8 +12,14 @@ import {
   getAdminNavigation,
   updateAdminNavigationItem,
 } from "../../services/adminNavigationService";
-import { flattenNavigationItems, getAdminErrorMessage } from "../../utils/admin";
+import {
+  flattenNavigationItems,
+  getContentStatus,
+  getAdminErrorMessage,
+} from "../../utils/admin";
 import type { ApiNavigationItem } from "../../types/api";
+
+const contentStatusSchema = z.enum(["draft", "published", "archived"]);
 
 const navigationSchema = z.object({
   title: z.string().min(1, "Title is required."),
@@ -25,7 +31,7 @@ const navigationSchema = z.object({
     .string()
     .optional()
     .refine((value) => !value || Number.isInteger(Number(value)), "Order must be an integer."),
-  is_active: z.boolean(),
+  status: contentStatusSchema,
 });
 
 type NavigationFormValues = z.infer<typeof navigationSchema>;
@@ -37,7 +43,7 @@ const defaultValues: NavigationFormValues = {
   kind: "link",
   parent_id: "",
   order: "0",
-  is_active: true,
+  status: "published",
 };
 
 function toPayload(values: NavigationFormValues) {
@@ -48,7 +54,7 @@ function toPayload(values: NavigationFormValues) {
     kind: values.kind,
     parent_id: values.parent_id ? Number(values.parent_id) : null,
     order: values.order ? Number(values.order) : 0,
-    is_active: values.is_active,
+    status: values.status,
   };
 }
 
@@ -213,7 +219,7 @@ export function NavigationPage() {
         kind: selectedItem.kind,
         parent_id: selectedItem.parent_id ? String(selectedItem.parent_id) : "",
         order: String(selectedItem.order),
-        is_active: selectedItem.is_active,
+        status: getContentStatus(selectedItem),
       });
       return;
     }
@@ -341,11 +347,12 @@ export function NavigationPage() {
                 </div>
 
                 <div className="admin-form__field">
-                  <span>Active</span>
-                  <label className="admin-form__checkbox">
-                    <input type="checkbox" {...register("is_active")} />
-                    Show this item in navigation
-                  </label>
+                  <label htmlFor="nav-status">Status</label>
+                  <select id="nav-status" {...register("status")}>
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="archived">Archived</option>
+                  </select>
                 </div>
 
                 <div className="admin-form__field admin-form__field--full">

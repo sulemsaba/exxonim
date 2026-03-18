@@ -12,8 +12,10 @@ import {
   getAdminTestimonials,
   updateAdminTestimonial,
 } from "../../services/adminTestimonialService";
-import { getAdminErrorMessage } from "../../utils/admin";
-import type { ApiTestimonial } from "../../types/api";
+import { getContentStatus, getAdminErrorMessage } from "../../utils/admin";
+import type { ApiContentStatus, ApiTestimonial } from "../../types/api";
+
+const contentStatusSchema = z.enum(["draft", "published", "archived"]);
 
 const testimonialSchema = z.object({
   eyebrow: z.string().optional(),
@@ -31,7 +33,7 @@ const testimonialSchema = z.object({
     .string()
     .optional()
     .refine((value) => !value || Number.isInteger(Number(value)), "Sort order must be an integer."),
-  is_active: z.boolean(),
+  status: contentStatusSchema,
 });
 
 type TestimonialFormValues = z.infer<typeof testimonialSchema>;
@@ -46,7 +48,7 @@ const defaultValues: TestimonialFormValues = {
   content: "",
   rating: "5",
   sort_order: "0",
-  is_active: true,
+  status: "published",
 };
 
 function toPayload(values: TestimonialFormValues) {
@@ -60,8 +62,20 @@ function toPayload(values: TestimonialFormValues) {
     content: values.content,
     rating: values.rating ? Number(values.rating) : null,
     sort_order: values.sort_order ? Number(values.sort_order) : 0,
-    is_active: values.is_active,
+    status: values.status,
   };
+}
+
+function getStatusClassName(status: ApiContentStatus) {
+  if (status === "published") {
+    return "admin-status admin-status--published";
+  }
+
+  if (status === "archived") {
+    return "admin-status admin-status--danger";
+  }
+
+  return "admin-status admin-status--draft";
 }
 
 export function TestimonialsPage() {
@@ -150,7 +164,7 @@ export function TestimonialsPage() {
             ? ""
             : String(selectedTestimonial.rating),
         sort_order: String(selectedTestimonial.sort_order),
-        is_active: selectedTestimonial.is_active,
+        status: getContentStatus(selectedTestimonial),
       });
       return;
     }
@@ -231,14 +245,8 @@ export function TestimonialsPage() {
                         <p>{testimonial.content}</p>
                       </td>
                       <td>
-                        <span
-                          className={
-                            testimonial.is_active
-                              ? "admin-status admin-status--active"
-                              : "admin-status admin-status--inactive"
-                          }
-                        >
-                          {testimonial.is_active ? "Active" : "Inactive"}
+                        <span className={getStatusClassName(getContentStatus(testimonial))}>
+                          {getContentStatus(testimonial)}
                         </span>
                       </td>
                       <td>
@@ -325,11 +333,12 @@ export function TestimonialsPage() {
                 </div>
 
                 <div className="admin-form__field">
-                  <span>Active</span>
-                  <label className="admin-form__checkbox">
-                    <input type="checkbox" {...register("is_active")} />
-                    Show this testimonial on the site
-                  </label>
+                  <label htmlFor="testimonial-status">Status</label>
+                  <select id="testimonial-status" {...register("status")}>
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="archived">Archived</option>
+                  </select>
                 </div>
 
                 <div className="admin-form__field admin-form__field--full">

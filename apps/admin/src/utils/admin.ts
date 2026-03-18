@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { ApiContentStatus } from "../types/api";
 
 export function slugify(value: string) {
   return value
@@ -72,4 +73,53 @@ export function flattenNavigationItems<T extends { id: number; title: string; ch
     { ...item, depth },
     ...flattenNavigationItems(item.children, depth + 1),
   ]);
+}
+
+export function getContentStatus(value: {
+  status?: ApiContentStatus | null;
+  is_published?: boolean | null;
+  is_active?: boolean | null;
+}) {
+  if (value.status) {
+    return value.status;
+  }
+
+  if (typeof value.is_published === "boolean") {
+    return value.is_published ? "published" : "draft";
+  }
+
+  if (typeof value.is_active === "boolean") {
+    return value.is_active ? "published" : "archived";
+  }
+
+  return "draft" as const;
+}
+
+export function isContentPublished(value: {
+  status?: ApiContentStatus | null;
+  is_published?: boolean | null;
+  is_active?: boolean | null;
+}) {
+  return getContentStatus(value) === "published";
+}
+
+export function statusToPublishedFlag(status: ApiContentStatus) {
+  return status === "published";
+}
+
+export function statusToActiveFlag(status: ApiContentStatus) {
+  return status === "published";
+}
+
+export function normalizeContentRecord<
+  TValue extends {
+    status?: ApiContentStatus | null;
+    is_published?: boolean | null;
+    is_active?: boolean | null;
+  },
+>(value: TValue): TValue & { status: ApiContentStatus } {
+  return {
+    ...value,
+    status: getContentStatus(value),
+  };
 }

@@ -8,6 +8,16 @@ export async function getPosts() {
   return response.data.map(mapBlogPost);
 }
 
+export async function getFeaturedPosts(limit: number = 3) {
+  const response = await api.get<ApiBlogPost[]>("/blog/posts", {
+    params: {
+      featured_on_home: true,
+      limit,
+    },
+  });
+  return response.data.map(mapBlogPost);
+}
+
 export async function getPostBySlug(slug: string) {
   const response = await api.get<ApiBlogPost>(`/blog/posts/${slug}`);
   return mapBlogPost(response.data);

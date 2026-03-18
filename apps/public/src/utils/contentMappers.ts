@@ -84,7 +84,7 @@ export function mapPage<TContent>(page: ApiPage<TContent>): PageRecord<TContent>
     content: page.content,
     metaTitle: page.meta_title ?? undefined,
     metaDescription: page.meta_description ?? undefined,
-    isPublished: page.is_published,
+    isPublished: page.status === "published" || page.is_published === true,
     createdAt: page.created_at,
     updatedAt: page.updated_at,
   };
@@ -98,7 +98,7 @@ export function mapNavigationItem(item: ApiNavigationItem): NavigationItem {
     description: item.description ?? undefined,
     kind: item.kind,
     order: item.order,
-    isActive: item.is_active,
+    isActive: item.status === "published" || item.is_active === true,
     parentId: item.parent_id ?? null,
     createdAt: item.created_at,
     updatedAt: item.updated_at,

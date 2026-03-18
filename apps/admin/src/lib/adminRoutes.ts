@@ -2,15 +2,28 @@ import { normalizePathname, routes } from "../app/routes";
 
 export type AdminSection =
   | "dashboard"
+  | "consultations"
   | "blog-posts"
   | "blog-categories"
   | "blog-authors"
+  | "page-home"
+  | "page-services"
+  | "page-about"
+  | "page-faq"
+  | "page-contact"
+  | "page-careers"
   | "pages"
+  | "jobs"
+  | "brand-settings"
+  | "contact-settings"
   | "navigation"
   | "pricing"
   | "testimonials"
-  | "site-settings"
-  | "media";
+  | "footer-settings"
+  | "seo-settings"
+  | "access-roles";
+
+export type AdminRouteMode = "index" | "new" | "edit" | "shortcut";
 
 export interface AdminBreadcrumb {
   label: string;
@@ -22,20 +35,50 @@ export interface AdminNavItem {
   label: string;
   href: string;
   description: string;
+  icon:
+    | "dashboard"
+    | "consultations"
+    | "posts"
+    | "categories"
+    | "authors"
+    | "page"
+    | "services"
+    | "about"
+    | "faq"
+    | "contact"
+    | "careers"
+    | "all-pages"
+    | "jobs"
+    | "brand"
+    | "map"
+    | "navigation"
+    | "pricing"
+    | "testimonials"
+    | "footer"
+    | "seo"
+    | "roles";
+}
+
+export interface AdminNavGroup {
+  label: string;
+  items: AdminNavItem[];
 }
 
 export interface AdminRouteMatch {
   section: AdminSection;
-  mode: "index" | "new" | "edit";
-  entityId?: number;
+  mode: AdminRouteMode;
   pathname: string;
   title: string;
   description: string;
   breadcrumbs: AdminBreadcrumb[];
+  entityId?: number;
+  entitySlug?: string;
+  pageSlug?: string;
 }
 
 export const adminRoutes = {
   dashboard: routes.admin,
+  consultations: "/admin/consultations/",
   blogPosts: "/admin/blog/posts/",
   blogPostsNew: "/admin/blog/posts/new/",
   blogPostEdit: (id: number) => `/admin/blog/posts/${id}/edit/`,
@@ -44,75 +87,236 @@ export const adminRoutes = {
   pages: "/admin/pages/",
   pagesNew: "/admin/pages/new/",
   pageEdit: (id: number) => `/admin/pages/${id}/edit/`,
+  pageShortcut: (slug: AdminPageShortcutSlug) => `/admin/pages/${slug}/`,
+  jobs: "/admin/jobs/",
+  jobsNew: "/admin/jobs/new/",
+  jobEdit: (slug: string) => `/admin/jobs/${slug}/`,
+  settingsBrand: "/admin/settings/brand/",
+  settingsContact: "/admin/settings/contact/",
+  settingsFooter: "/admin/settings/footer/",
+  settingsSeo: "/admin/settings/seo/",
   navigation: "/admin/navigation/",
   pricing: "/admin/pricing/",
   testimonials: "/admin/testimonials/",
-  siteSettings: "/admin/site-settings/",
-  media: "/admin/media/",
+  accessRoles: "/admin/access/roles/",
+  legacySiteSettings: "/admin/site-settings/",
+  legacyMedia: "/admin/media/",
 } as const;
 
-export const adminNavItems: AdminNavItem[] = [
+const pageShortcuts = {
+  home: {
+    section: "page-home",
+    title: "Homepage",
+    description: "Edit homepage copy, content blocks, and publishing settings.",
+  },
+  services: {
+    section: "page-services",
+    title: "Services Page",
+    description: "Edit the public services page content and SEO metadata.",
+  },
+  about: {
+    section: "page-about",
+    title: "About Page",
+    description: "Maintain company story, narrative sections, and metadata.",
+  },
+  faq: {
+    section: "page-faq",
+    title: "FAQ Page",
+    description: "Manage FAQ page content while keeping the route stable.",
+  },
+  contact: {
+    section: "page-contact",
+    title: "Contact Page",
+    description: "Edit contact page copy only. Global phones, maps, and offices live in Contact & Map settings.",
+  },
+  careers: {
+    section: "page-careers",
+    title: "Careers Page",
+    description: "Edit the Careers page copy only. Job records live in Job Listings.",
+  },
+} as const satisfies Record<
+  string,
+  { section: AdminSection; title: string; description: string }
+>;
+
+export type AdminPageShortcutSlug = keyof typeof pageShortcuts;
+
+export const adminNavGroups: AdminNavGroup[] = [
   {
-    section: "dashboard",
-    label: "Dashboard",
-    href: adminRoutes.dashboard,
-    description: "Overview and workspace entry point.",
+    label: "Operations",
+    items: [
+      {
+        section: "dashboard",
+        label: "Dashboard",
+        href: adminRoutes.dashboard,
+        description: "Overview, alerts, and workspace pulse.",
+        icon: "dashboard",
+      },
+      {
+        section: "consultations",
+        label: "Consultations",
+        href: adminRoutes.consultations,
+        description: "Track requests, updates, and assignments.",
+        icon: "consultations",
+      },
+    ],
   },
   {
-    section: "blog-posts",
-    label: "Blog Posts",
-    href: adminRoutes.blogPosts,
-    description: "Create, edit, publish, and remove articles.",
+    label: "Content",
+    items: [
+      {
+        section: "blog-posts",
+        label: "Blog Posts",
+        href: adminRoutes.blogPosts,
+        description: "Create, edit, publish, and review articles.",
+        icon: "posts",
+      },
+      {
+        section: "blog-categories",
+        label: "Categories",
+        href: adminRoutes.blogCategories,
+        description: "Organize posts with taxonomy controls.",
+        icon: "categories",
+      },
+      {
+        section: "blog-authors",
+        label: "Authors",
+        href: adminRoutes.blogAuthors,
+        description: "Manage visible author identities.",
+        icon: "authors",
+      },
+    ],
   },
   {
-    section: "blog-categories",
-    label: "Blog Categories",
-    href: adminRoutes.blogCategories,
-    description: "Organize blog content.",
+    label: "Public Pages",
+    items: [
+      {
+        section: "page-home",
+        label: "Homepage",
+        href: adminRoutes.pageShortcut("home"),
+        description: "Shortcut to the homepage record.",
+        icon: "page",
+      },
+      {
+        section: "page-services",
+        label: "Services",
+        href: adminRoutes.pageShortcut("services"),
+        description: "Shortcut to the services page record.",
+        icon: "services",
+      },
+      {
+        section: "page-about",
+        label: "About",
+        href: adminRoutes.pageShortcut("about"),
+        description: "Shortcut to the about page record.",
+        icon: "about",
+      },
+      {
+        section: "page-faq",
+        label: "FAQ",
+        href: adminRoutes.pageShortcut("faq"),
+        description: "Shortcut to the FAQ page record.",
+        icon: "faq",
+      },
+      {
+        section: "page-contact",
+        label: "Contact",
+        href: adminRoutes.pageShortcut("contact"),
+        description: "Edit contact page content only.",
+        icon: "contact",
+      },
+      {
+        section: "page-careers",
+        label: "Careers Page",
+        href: adminRoutes.pageShortcut("careers"),
+        description: "Edit careers page content only.",
+        icon: "careers",
+      },
+      {
+        section: "pages",
+        label: "All Pages",
+        href: adminRoutes.pages,
+        description: "Generic page manager and long-form page inventory.",
+        icon: "all-pages",
+      },
+    ],
   },
   {
-    section: "blog-authors",
-    label: "Blog Authors",
-    href: adminRoutes.blogAuthors,
-    description: "Manage author identities.",
+    label: "Hiring",
+    items: [
+      {
+        section: "jobs",
+        label: "Job Listings",
+        href: adminRoutes.jobs,
+        description: "Create, publish, and archive open roles.",
+        icon: "jobs",
+      },
+    ],
   },
   {
-    section: "pages",
-    label: "Pages",
-    href: adminRoutes.pages,
-    description: "Edit long-form public pages.",
-  },
-  {
-    section: "navigation",
-    label: "Navigation",
-    href: adminRoutes.navigation,
-    description: "Manage menu structure and order.",
-  },
-  {
-    section: "pricing",
-    label: "Pricing",
-    href: adminRoutes.pricing,
-    description: "Maintain active service plans.",
-  },
-  {
-    section: "testimonials",
-    label: "Testimonials",
-    href: adminRoutes.testimonials,
-    description: "Update social proof content.",
-  },
-  {
-    section: "site-settings",
-    label: "Site Settings",
-    href: adminRoutes.siteSettings,
-    description: "Adjust global company and footer data.",
-  },
-  {
-    section: "media",
-    label: "Media",
-    href: adminRoutes.media,
-    description: "Upload and reuse images.",
+    label: "Configuration",
+    items: [
+      {
+        section: "brand-settings",
+        label: "Brand & Company",
+        href: adminRoutes.settingsBrand,
+        description: "Brand assets plus company identity.",
+        icon: "brand",
+      },
+      {
+        section: "contact-settings",
+        label: "Contact & Map",
+        href: adminRoutes.settingsContact,
+        description: "Global phones, map data, offices, and socials.",
+        icon: "map",
+      },
+      {
+        section: "navigation",
+        label: "Navigation",
+        href: adminRoutes.navigation,
+        description: "Manage header and footer navigation structure.",
+        icon: "navigation",
+      },
+      {
+        section: "pricing",
+        label: "Pricing Plans",
+        href: adminRoutes.pricing,
+        description: "Maintain service plan inventory.",
+        icon: "pricing",
+      },
+      {
+        section: "testimonials",
+        label: "Testimonials",
+        href: adminRoutes.testimonials,
+        description: "Update customer proof and speaker metadata.",
+        icon: "testimonials",
+      },
+      {
+        section: "footer-settings",
+        label: "Footer Content",
+        href: adminRoutes.settingsFooter,
+        description: "Edit footer links, CTA, and legal copy.",
+        icon: "footer",
+      },
+      {
+        section: "seo-settings",
+        label: "SEO Defaults",
+        href: adminRoutes.settingsSeo,
+        description: "Manage site-wide SEO fallback values.",
+        icon: "seo",
+      },
+      {
+        section: "access-roles",
+        label: "Access Roles",
+        href: adminRoutes.accessRoles,
+        description: "Manage admin users and editor permissions.",
+        icon: "roles",
+      },
+    ],
   },
 ];
+
+export const adminNavItems = adminNavGroups.flatMap((group) => group.items);
 
 function matchNumericId(segment: string | undefined) {
   if (!segment) {
@@ -126,11 +330,11 @@ function matchNumericId(segment: string | undefined) {
 function buildMatch(
   pathname: string,
   section: AdminSection,
-  mode: AdminRouteMatch["mode"],
+  mode: AdminRouteMode,
   title: string,
   description: string,
   breadcrumbs: AdminBreadcrumb[],
-  entityId?: number
+  extra: Partial<Pick<AdminRouteMatch, "entityId" | "entitySlug" | "pageSlug">> = {}
 ): AdminRouteMatch {
   return {
     section,
@@ -139,8 +343,21 @@ function buildMatch(
     description,
     breadcrumbs,
     pathname,
-    entityId,
+    ...extra,
   };
+}
+
+function directMatch(
+  pathname: string,
+  section: AdminSection,
+  title: string,
+  description: string,
+  href: string
+) {
+  return buildMatch(pathname, section, "index", title, description, [
+    { label: "Dashboard", href: adminRoutes.dashboard },
+    { label: title, href },
+  ]);
 }
 
 export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch | null {
@@ -157,13 +374,34 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
       "dashboard",
       "index",
       "Dashboard",
-      "Operational overview and quick access to content resources.",
-      [{ label: "Dashboard" }]
+      "SystemOS overview for consultations, content, settings, and hiring.",
+      [{ label: "Dashboard", href: adminRoutes.dashboard }]
     );
   }
 
   if (segments[1] === "login") {
     return null;
+  }
+
+  if (segments[1] === "media") {
+    return buildMatch(
+      normalizedPathname,
+      "dashboard",
+      "index",
+      "Dashboard",
+      "Media Library was removed from the current admin experience.",
+      [{ label: "Dashboard", href: adminRoutes.dashboard }]
+    );
+  }
+
+  if (segments[1] === "site-settings") {
+    return directMatch(
+      normalizedPathname,
+      "brand-settings",
+      "Brand & Company",
+      "Brand assets plus company identity.",
+      adminRoutes.settingsBrand
+    );
   }
 
   if (segments[1] === "blog" && segments[2] === "posts") {
@@ -173,7 +411,7 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
         "blog-posts",
         "new",
         "New Blog Post",
-        "Create a new article and publish it when ready.",
+        "Create a new article draft with structured SEO fields and publishing status.",
         [
           { label: "Dashboard", href: adminRoutes.dashboard },
           { label: "Blog Posts", href: adminRoutes.blogPosts },
@@ -189,54 +427,52 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
         "blog-posts",
         "edit",
         "Edit Blog Post",
-        "Update article content and publication settings.",
+        "Update article content, SEO fields, related links, and publishing status.",
         [
           { label: "Dashboard", href: adminRoutes.dashboard },
           { label: "Blog Posts", href: adminRoutes.blogPosts },
           { label: `Post #${postId}` },
         ],
-        postId
+        { entityId: postId }
       );
     }
 
-    return buildMatch(
+    return directMatch(
       normalizedPathname,
       "blog-posts",
-      "index",
       "Blog Posts",
-      "Review, publish, update, and delete articles.",
-      [
-        { label: "Dashboard", href: adminRoutes.dashboard },
-        { label: "Blog Posts" },
-      ]
+      "Review the content pipeline, publishing status, and SEO health.",
+      adminRoutes.blogPosts
     );
   }
 
   if (segments[1] === "blog" && segments[2] === "categories") {
-    return buildMatch(
+    return directMatch(
       normalizedPathname,
       "blog-categories",
-      "index",
-      "Blog Categories",
-      "Manage categories used by posts.",
-      [
-        { label: "Dashboard", href: adminRoutes.dashboard },
-        { label: "Blog Categories" },
-      ]
+      "Categories",
+      "Manage blog taxonomy and category metadata.",
+      adminRoutes.blogCategories
     );
   }
 
   if (segments[1] === "blog" && segments[2] === "authors") {
-    return buildMatch(
+    return directMatch(
       normalizedPathname,
       "blog-authors",
-      "index",
-      "Blog Authors",
-      "Maintain the author directory shown on articles.",
-      [
-        { label: "Dashboard", href: adminRoutes.dashboard },
-        { label: "Blog Authors" },
-      ]
+      "Authors",
+      "Maintain author identity, profile details, and bylines.",
+      adminRoutes.blogAuthors
+    );
+  }
+
+  if (segments[1] === "consultations") {
+    return directMatch(
+      normalizedPathname,
+      "consultations",
+      "Consultations",
+      "Manage incoming requests, assignments, status updates, and customer notifications.",
+      adminRoutes.consultations
     );
   }
 
@@ -247,10 +483,10 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
         "pages",
         "new",
         "New Page",
-        "Create a new structured page backed by JSON content.",
+        "Create a new public page record with slug and SEO fields.",
         [
           { label: "Dashboard", href: adminRoutes.dashboard },
-          { label: "Pages", href: adminRoutes.pages },
+          { label: "All Pages", href: adminRoutes.pages },
           { label: "New Page" },
         ]
       );
@@ -263,72 +499,161 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
         "pages",
         "edit",
         "Edit Page",
-        "Update content, metadata, and publication state.",
+        "Update long-form page content, metadata, and publishing status.",
         [
           { label: "Dashboard", href: adminRoutes.dashboard },
-          { label: "Pages", href: adminRoutes.pages },
+          { label: "All Pages", href: adminRoutes.pages },
           { label: `Page #${pageId}` },
         ],
-        pageId
+        { entityId: pageId }
       );
     }
 
-    return buildMatch(
+    const shortcut = segments[2] as AdminPageShortcutSlug | undefined;
+    if (shortcut && shortcut in pageShortcuts) {
+      const config = pageShortcuts[shortcut];
+      return buildMatch(
+        normalizedPathname,
+        config.section,
+        "shortcut",
+        config.title,
+        config.description,
+        [
+          { label: "Dashboard", href: adminRoutes.dashboard },
+          { label: "Public Pages", href: adminRoutes.pages },
+          { label: config.title, href: adminRoutes.pageShortcut(shortcut) },
+        ],
+        { pageSlug: shortcut }
+      );
+    }
+
+    return directMatch(
       normalizedPathname,
       "pages",
-      "index",
-      "Pages",
-      "Manage static and informational public pages.",
-      [
-        { label: "Dashboard", href: adminRoutes.dashboard },
-        { label: "Pages" },
-      ]
+      "All Pages",
+      "Generic page manager for public content records and free-form routes.",
+      adminRoutes.pages
     );
   }
 
-  const directSectionMap: Record<
-    string,
-    { section: AdminSection; title: string; description: string }
-  > = {
-    navigation: {
-      section: "navigation",
-      title: "Navigation",
-      description: "Edit menu structure, ordering, and parent relationships.",
-    },
-    pricing: {
-      section: "pricing",
-      title: "Pricing Plans",
-      description: "Maintain the active pricing catalog.",
-    },
-    testimonials: {
-      section: "testimonials",
-      title: "Testimonials",
-      description: "Update proof points and testimonial rotation.",
-    },
-    "site-settings": {
-      section: "site-settings",
-      title: "Site Settings",
-      description: "Edit global JSON settings consumed across the public site.",
-    },
-    media: {
-      section: "media",
-      title: "Media Library",
-      description: "Upload images and manage reusable media assets.",
-    },
-  };
+  if (segments[1] === "jobs") {
+    if (segments[2] === "new") {
+      return buildMatch(
+        normalizedPathname,
+        "jobs",
+        "new",
+        "New Job Listing",
+        "Create a new role with slug, publishing status, and hiring details.",
+        [
+          { label: "Dashboard", href: adminRoutes.dashboard },
+          { label: "Job Listings", href: adminRoutes.jobs },
+          { label: "New Job" },
+        ]
+      );
+    }
 
-  const directMatch = directSectionMap[segments[1]];
-  if (directMatch) {
-    return buildMatch(
+    if (segments[2]) {
+      return buildMatch(
+        normalizedPathname,
+        "jobs",
+        "edit",
+        "Edit Job Listing",
+        "Update role details, slug, publishing state, and hiring metadata.",
+        [
+          { label: "Dashboard", href: adminRoutes.dashboard },
+          { label: "Job Listings", href: adminRoutes.jobs },
+          { label: segments[2] },
+        ],
+        { entitySlug: segments[2] }
+      );
+    }
+
+    return directMatch(
       normalizedPathname,
-      directMatch.section,
-      "index",
-      directMatch.title,
-      directMatch.description,
-      [
-        { label: "Dashboard", href: adminRoutes.dashboard },
-        { label: directMatch.title },
-      ]
+      "jobs",
+      "Job Listings",
+      "Create, publish, and archive open roles while keeping careers page content separate.",
+      adminRoutes.jobs
+    );
+  }
+
+  if (segments[1] === "settings" && segments[2] === "brand") {
+    return directMatch(
+      normalizedPathname,
+      "brand-settings",
+      "Brand & Company",
+      "Manage visual identity, company short name, and company identity fields.",
+      adminRoutes.settingsBrand
+    );
+  }
+
+  if (segments[1] === "settings" && segments[2] === "contact") {
+    return directMatch(
+      normalizedPathname,
+      "contact-settings",
+      "Contact & Map",
+      "Manage phones, emails, WhatsApp, offices, maps, office hours, and social links.",
+      adminRoutes.settingsContact
+    );
+  }
+
+  if (segments[1] === "settings" && segments[2] === "footer") {
+    return directMatch(
+      normalizedPathname,
+      "footer-settings",
+      "Footer Content",
+      "Edit footer links, CTA, tagline, and copyright.",
+      adminRoutes.settingsFooter
+    );
+  }
+
+  if (segments[1] === "settings" && segments[2] === "seo") {
+    return directMatch(
+      normalizedPathname,
+      "seo-settings",
+      "SEO Defaults",
+      "Manage canonical base URL and site-wide SEO fallback values.",
+      adminRoutes.settingsSeo
+    );
+  }
+
+  if (segments[1] === "navigation") {
+    return directMatch(
+      normalizedPathname,
+      "navigation",
+      "Navigation",
+      "Manage header and footer navigation structure and status.",
+      adminRoutes.navigation
+    );
+  }
+
+  if (segments[1] === "pricing") {
+    return directMatch(
+      normalizedPathname,
+      "pricing",
+      "Pricing Plans",
+      "Maintain pricing plan content and publishing state.",
+      adminRoutes.pricing
+    );
+  }
+
+  if (segments[1] === "testimonials") {
+    return directMatch(
+      normalizedPathname,
+      "testimonials",
+      "Testimonials",
+      "Manage social proof copy, speaker details, and publishing state.",
+      adminRoutes.testimonials
+    );
+  }
+
+  if (segments[1] === "access" && segments[2] === "roles") {
+    return directMatch(
+      normalizedPathname,
+      "access-roles",
+      "Access Roles",
+      "Manage admin users, editor permissions, and activation status.",
+      adminRoutes.accessRoles
     );
   }
 

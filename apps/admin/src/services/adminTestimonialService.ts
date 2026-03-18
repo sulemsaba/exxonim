@@ -1,5 +1,6 @@
 import api from "../api/axios";
-import type { ApiTestimonial } from "../types/api";
+import type { ApiContentStatus, ApiTestimonial } from "../types/api";
+import { normalizeContentRecord, statusToActiveFlag } from "../utils/admin";
 
 export interface AdminTestimonialPayload {
   eyebrow?: string | null;
@@ -11,25 +12,41 @@ export interface AdminTestimonialPayload {
   content: string;
   rating?: number | null;
   sort_order: number;
-  is_active: boolean;
+  status: ApiContentStatus;
+}
+
+function toRequestPayload(payload: Partial<AdminTestimonialPayload>) {
+  return {
+    ...payload,
+    is_active:
+      typeof payload.status === "string"
+        ? statusToActiveFlag(payload.status)
+        : undefined,
+  };
 }
 
 export async function getAdminTestimonials() {
   const response = await api.get<ApiTestimonial[]>("/admin/testimonials");
-  return response.data;
+  return response.data.map((testimonial) => normalizeContentRecord(testimonial));
 }
 
 export async function createAdminTestimonial(payload: AdminTestimonialPayload) {
-  const response = await api.post<ApiTestimonial>("/admin/testimonials", payload);
-  return response.data;
+  const response = await api.post<ApiTestimonial>(
+    "/admin/testimonials",
+    toRequestPayload(payload)
+  );
+  return normalizeContentRecord(response.data);
 }
 
 export async function updateAdminTestimonial(
   id: number,
   payload: Partial<AdminTestimonialPayload>
 ) {
-  const response = await api.put<ApiTestimonial>(`/admin/testimonials/${id}`, payload);
-  return response.data;
+  const response = await api.put<ApiTestimonial>(
+    `/admin/testimonials/${id}`,
+    toRequestPayload(payload)
+  );
+  return normalizeContentRecord(response.data);
 }
 
 export async function deleteAdminTestimonial(id: number) {

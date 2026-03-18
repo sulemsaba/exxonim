@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AdminDeleteDialog } from "../../components/admin/AdminDeleteDialog";
 import { ErrorMessage } from "../../components/ErrorMessage";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
+import { useAuth } from "../../contexts/AuthContext";
 import { adminRoutes, type AdminRouteMatch } from "../../lib/adminRoutes";
 import {
   createAdminPost,
@@ -15,9 +16,10 @@ import {
   getAdminPosts,
   updateAdminPost,
 } from "../../services/adminBlogService";
-import type { ApiBlogPost } from "../../types/api";
+import type { ApiBlogPost, ApiContentStatus } from "../../types/api";
 import {
   fromDatetimeLocalValue,
+  getContentStatus,
   getAdminErrorMessage,
   parseJsonValue,
   prettyJson,
@@ -25,6 +27,8 @@ import {
   toDatetimeLocalValue,
   tryParseJsonValue,
 } from "../../utils/admin";
+
+const contentStatusSchema = z.enum(["draft", "published", "archived"]);
 
 const blogPostSchema = z.object({
   title: z.string().min(1, "Title is required."),
@@ -54,8 +58,9 @@ const blogPostSchema = z.object({
   related_slugs_text: z.string().optional(),
   meta_title: z.string().optional(),
   meta_description: z.string().optional(),
+  og_image_url: z.string().optional(),
   published_at: z.string().optional(),
-  is_published: z.boolean(),
+  status: contentStatusSchema,
 });
 
 type BlogPostFormValues = z.infer<typeof blogPostSchema>;
@@ -87,8 +92,9 @@ const defaultValues: BlogPostFormValues = {
   related_slugs_text: "",
   meta_title: "",
   meta_description: "",
+  og_image_url: "",
   published_at: "",
-  is_published: false,
+  status: "draft",
 };
 
 function parseSlugList(value?: string) {
@@ -119,8 +125,9 @@ function toPayload(values: BlogPostFormValues) {
     related_slugs: parseSlugList(values.related_slugs_text),
     meta_title: values.meta_title || null,
     meta_description: values.meta_description || null,
+    og_image_url: values.og_image_url || null,
     published_at: fromDatetimeLocalValue(values.published_at),
-    is_published: values.is_published,
+    status: values.status,
   };
 }
 
@@ -132,11 +139,25 @@ function formatTimestamp(value?: string | null) {
   return new Date(value).toLocaleString();
 }
 
+function getStatusClassName(status: ApiContentStatus) {
+  if (status === "published") {
+    return "admin-status admin-status--published";
+  }
+
+  if (status === "archived") {
+    return "admin-status admin-status--danger";
+  }
+
+  return "admin-status admin-status--draft";
+}
+
 export function BlogPostsPage({ mode, entityId }: BlogPostsPageProps) {
   const queryClient = useQueryClient();
+  const { admin } = useAuth();
   const [slugDirty, setSlugDirty] = useState(false);
   const [formMessage, setFormMessage] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ApiBlogPost | null>(null);
+  const adminRole = admin?.role ?? "admin";
 
   const postsQuery = useQuery({
     queryKey: ["admin", "blog", "posts"],
@@ -196,8 +217,9 @@ export function BlogPostsPage({ mode, entityId }: BlogPostsPageProps) {
         related_slugs_text: (selectedPost.related_slugs ?? []).join(", "),
         meta_title: selectedPost.meta_title ?? "",
         meta_description: selectedPost.meta_description ?? "",
+        og_image_url: selectedPost.og_image_url ?? "",
         published_at: toDatetimeLocalValue(selectedPost.published_at),
-        is_published: selectedPost.is_published,
+        status: getContentStatus(selectedPost),
       });
       setSlugDirty(true);
       return;
@@ -365,14 +387,8 @@ export function BlogPostsPage({ mode, entityId }: BlogPostsPageProps) {
                         </td>
                         <td>{post.category?.name ?? "Unassigned"}</td>
                         <td>
-                          <span
-                            className={
-                              post.is_published
-                                ? "admin-status admin-status--published"
-                                : "admin-status admin-status--draft"
-                            }
-                          >
-                            {post.is_published ? "Published" : "Draft"}
+                          <span className={getStatusClassName(getContentStatus(post))}>
+                            {getContentStatus(post)}
                           </span>
                         </td>
                         <td>
@@ -383,13 +399,15 @@ export function BlogPostsPage({ mode, entityId }: BlogPostsPageProps) {
                             >
                               Edit
                             </a>
-                            <button
-                              className="admin-table__action admin-table__action--danger"
-                              type="button"
-                              onClick={() => setDeleteTarget(post)}
-                            >
-                              Delete
-                            </button>
+                            {adminRole === "admin" ? (
+                              <button
+                                className="admin-table__action admin-table__action--danger"
+                                type="button"
+                                onClick={() => setDeleteTarget(post)}
+                              >
+                                Delete
+                              </button>
+                            ) : null}
                           </div>
                         </td>
                       </tr>
@@ -520,11 +538,23 @@ export function BlogPostsPage({ mode, entityId }: BlogPostsPageProps) {
                 </div>
 
                 <div className="admin-form__field">
-                  <span>Publication</span>
-                  <label className="admin-form__checkbox">
-                    <input type="checkbox" {...register("is_published")} />
-                    Mark this article as published
-                  </label>
+                  <label htmlFor="post-status">Status</label>
+                  <select
+                    id="post-status"
+                    {...register("status")}
+                    disabled={adminRole === "editor" && watch("status") === "archived"}
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="archived" disabled={adminRole !== "admin"}>
+                      Archived
+                    </option>
+                  </select>
+                  {adminRole === "editor" && watch("status") === "archived" ? (
+                    <p className="admin-form__hint">
+                      Archived posts can only be restored or changed by an admin.
+                    </p>
+                  ) : null}
                   <label className="admin-form__checkbox">
                     <input type="checkbox" {...register("featured_on_home")} />
                     Feature this article on the homepage
@@ -543,6 +573,11 @@ export function BlogPostsPage({ mode, entityId }: BlogPostsPageProps) {
                     rows={4}
                     {...register("meta_description")}
                   />
+                </div>
+
+                <div className="admin-form__field admin-form__field--full">
+                  <label htmlFor="post-og-image">Open graph image URL</label>
+                  <input id="post-og-image" type="text" {...register("og_image_url")} />
                 </div>
 
                 <div className="admin-form__field admin-form__field--full">
@@ -569,7 +604,7 @@ export function BlogPostsPage({ mode, entityId }: BlogPostsPageProps) {
                 <a className="admin-form__cancel" href={adminRoutes.blogPosts}>
                   Back to Posts
                 </a>
-                {mode === "edit" ? (
+                {mode === "edit" && adminRole === "admin" ? (
                   <button
                     className="admin-danger-button"
                     type="button"

@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url";
 
 const rootDir = dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig({
-  base: "/admin/",
+export default defineConfig(({ command }) => ({
+  base: command === "serve" ? "/" : "/admin/",
   plugins: [react()],
   resolve: {
     alias: {
@@ -25,4 +25,4 @@ export default defineConfig({
     host: true,
     allowedHosts: true,
   },
-});
+}));

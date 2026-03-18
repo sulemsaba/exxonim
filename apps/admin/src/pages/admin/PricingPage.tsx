@@ -13,12 +13,15 @@ import {
   updateAdminPricingPlan,
 } from "../../services/adminPricingService";
 import {
+  getContentStatus,
   getAdminErrorMessage,
   parseJsonValue,
   prettyJson,
   tryParseJsonValue,
 } from "../../utils/admin";
-import type { ApiPricingPlan } from "../../types/api";
+import type { ApiContentStatus, ApiPricingPlan } from "../../types/api";
+
+const contentStatusSchema = z.enum(["draft", "published", "archived"]);
 
 const pricingSchema = z.object({
   name: z.string().min(1, "Name is required."),
@@ -41,7 +44,7 @@ const pricingSchema = z.object({
     .string()
     .optional()
     .refine((value) => !value || Number.isInteger(Number(value)), "Sort order must be an integer."),
-  is_active: z.boolean(),
+  status: contentStatusSchema,
 });
 
 type PricingFormValues = z.infer<typeof pricingSchema>;
@@ -55,7 +58,7 @@ const defaultValues: PricingFormValues = {
   features_json: prettyJson([]),
   recommended: false,
   sort_order: "0",
-  is_active: true,
+  status: "published",
 };
 
 function toPayload(values: PricingFormValues) {
@@ -70,8 +73,20 @@ function toPayload(values: PricingFormValues) {
     ),
     recommended: values.recommended,
     sort_order: values.sort_order ? Number(values.sort_order) : 0,
-    is_active: values.is_active,
+    status: values.status,
   };
+}
+
+function getStatusClassName(status: ApiContentStatus) {
+  if (status === "published") {
+    return "admin-status admin-status--published";
+  }
+
+  if (status === "archived") {
+    return "admin-status admin-status--danger";
+  }
+
+  return "admin-status admin-status--draft";
 }
 
 export function PricingPage() {
@@ -159,7 +174,7 @@ export function PricingPage() {
         features_json: prettyJson(selectedPlan.features ?? []),
         recommended: selectedPlan.recommended,
         sort_order: String(selectedPlan.sort_order),
-        is_active: selectedPlan.is_active,
+        status: getContentStatus(selectedPlan),
       });
       return;
     }
@@ -237,14 +252,8 @@ export function PricingPage() {
                       </td>
                       <td>{plan.price ?? "No price"}</td>
                       <td>
-                        <span
-                          className={
-                            plan.is_active
-                              ? "admin-status admin-status--active"
-                              : "admin-status admin-status--inactive"
-                          }
-                        >
-                          {plan.is_active ? "Active" : "Inactive"}
+                        <span className={getStatusClassName(getContentStatus(plan))}>
+                          {getContentStatus(plan)}
                         </span>
                       </td>
                       <td>
@@ -350,11 +359,12 @@ export function PricingPage() {
                 </div>
 
                 <div className="admin-form__field">
-                  <span>Active</span>
-                  <label className="admin-form__checkbox">
-                    <input type="checkbox" {...register("is_active")} />
-                    Display this plan on the site
-                  </label>
+                  <label htmlFor="pricing-status">Status</label>
+                  <select id="pricing-status" {...register("status")}>
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="archived">Archived</option>
+                  </select>
                 </div>
               </div>
 

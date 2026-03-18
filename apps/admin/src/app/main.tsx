@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import { AppProviders } from "./providers/AppProviders";
 import "../styles.css";
+import "../styles/admin-system.css";
 
 function bootstrapDocumentShell() {
   try {

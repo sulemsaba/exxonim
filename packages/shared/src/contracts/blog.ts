@@ -1,3 +1,5 @@
+import type { ApiContentStatus } from "./content";
+
 export interface ApiBlogAuthor {
   id: number;
   slug: string;
@@ -36,8 +38,10 @@ export interface ApiBlogPost {
   related_slugs: string[];
   meta_title?: string | null;
   meta_description?: string | null;
+  og_image_url?: string | null;
   published_at?: string | null;
-  is_published: boolean;
+  status?: ApiContentStatus;
+  is_published?: boolean;
   created_at: string;
   updated_at: string;
   category?: ApiBlogCategory | null;

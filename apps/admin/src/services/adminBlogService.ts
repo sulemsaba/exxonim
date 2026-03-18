@@ -1,5 +1,11 @@
 import api from "../api/axios";
-import type { ApiBlogAuthor, ApiBlogCategory, ApiBlogPost } from "../types/api";
+import type {
+  ApiBlogAuthor,
+  ApiBlogCategory,
+  ApiBlogPost,
+  ApiContentStatus,
+} from "../types/api";
+import { normalizeContentRecord, statusToPublishedFlag } from "../utils/admin";
 
 export interface AdminBlogPostPayload {
   title: string;
@@ -17,8 +23,9 @@ export interface AdminBlogPostPayload {
   related_slugs: string[];
   meta_title?: string | null;
   meta_description?: string | null;
+  og_image_url?: string | null;
   published_at?: string | null;
-  is_published: boolean;
+  status: ApiContentStatus;
 }
 
 export interface AdminBlogCategoryPayload {
@@ -34,24 +41,40 @@ export interface AdminBlogAuthorPayload {
   avatar_src?: string | null;
 }
 
+function toRequestPayload(payload: Partial<AdminBlogPostPayload>) {
+  return {
+    ...payload,
+    is_published:
+      typeof payload.status === "string"
+        ? statusToPublishedFlag(payload.status)
+        : undefined,
+  };
+}
+
 export async function getAdminPosts() {
   const response = await api.get<ApiBlogPost[]>("/admin/blog/posts");
-  return response.data;
+  return response.data.map((post) => normalizeContentRecord(post));
 }
 
 export async function getAdminPost(id: number) {
   const response = await api.get<ApiBlogPost>(`/admin/blog/posts/${id}`);
-  return response.data;
+  return normalizeContentRecord(response.data);
 }
 
 export async function createAdminPost(payload: AdminBlogPostPayload) {
-  const response = await api.post<ApiBlogPost>("/admin/blog/posts", payload);
-  return response.data;
+  const response = await api.post<ApiBlogPost>(
+    "/admin/blog/posts",
+    toRequestPayload(payload)
+  );
+  return normalizeContentRecord(response.data);
 }
 
 export async function updateAdminPost(id: number, payload: Partial<AdminBlogPostPayload>) {
-  const response = await api.put<ApiBlogPost>(`/admin/blog/posts/${id}`, payload);
-  return response.data;
+  const response = await api.put<ApiBlogPost>(
+    `/admin/blog/posts/${id}`,
+    toRequestPayload(payload)
+  );
+  return normalizeContentRecord(response.data);
 }
 
 export async function deleteAdminPost(id: number) {

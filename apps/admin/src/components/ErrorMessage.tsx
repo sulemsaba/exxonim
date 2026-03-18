@@ -16,16 +16,18 @@ export function ErrorMessage({
           display: grid;
           gap: 0.55rem;
           padding: ${compact ? "1rem" : "1.25rem"};
-          border: 1px solid var(--color-border-soft);
-          border-radius: 1rem;
-          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(168, 35, 58, 0.14);
+          border-radius: 1.15rem;
+          background: rgba(255, 247, 248, 0.9);
           color: var(--color-text);
+          box-shadow: 0 14px 30px rgba(140, 35, 56, 0.06);
         }
 
         .error-message__title {
           margin: 0;
           font-size: ${compact ? "0.95rem" : "1rem"};
           font-weight: 700;
+          color: #8c2338;
         }
 
         .error-message__detail {

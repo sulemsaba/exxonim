@@ -52,6 +52,14 @@ const pageSeoMap: Record<string, Omit<PageSeo, "canonicalPath">> = {
     type: "website",
     robots: "index,follow",
   },
+  [normalizePathname(routes.requestConsultation)]: {
+    title: "Request Consultation | Exxonim",
+    description:
+      "Submit your consultation request to Exxonim and receive a secure tracking ID for follow-up.",
+    image: defaultImage,
+    type: "website",
+    robots: "index,follow",
+  },
   [normalizePathname(routes.tracking)]: {
     title: "Consultation Follow-Through | Exxonim",
     description:

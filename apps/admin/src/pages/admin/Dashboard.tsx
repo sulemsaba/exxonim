@@ -1,172 +1,263 @@
 import { useQuery } from "@tanstack/react-query";
+import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
 import { ErrorMessage } from "../../components/ErrorMessage";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
-import { getAdminAuthors, getAdminCategories, getAdminPosts } from "../../services/adminBlogService";
-import { getAdminMedia } from "../../services/adminMediaService";
-import { getAdminNavigation } from "../../services/adminNavigationService";
-import { getAdminPages } from "../../services/adminPageService";
-import { getAdminPricingPlans } from "../../services/adminPricingService";
-import { getAdminSiteSettings } from "../../services/adminSiteSettingsService";
-import { getAdminTestimonials } from "../../services/adminTestimonialService";
+import { getAdminDashboardSummary } from "../../services/adminDashboardService";
 
-export function AdminDashboardPage() {
-  const postsQuery = useQuery({
-    queryKey: ["admin", "blog", "posts"],
-    queryFn: getAdminPosts,
-  });
-  const pagesQuery = useQuery({
-    queryKey: ["admin", "pages"],
-    queryFn: getAdminPages,
-  });
-  const navigationQuery = useQuery({
-    queryKey: ["admin", "navigation"],
-    queryFn: getAdminNavigation,
-  });
-  const pricingQuery = useQuery({
-    queryKey: ["admin", "pricing"],
-    queryFn: getAdminPricingPlans,
-  });
-  const testimonialsQuery = useQuery({
-    queryKey: ["admin", "testimonials"],
-    queryFn: getAdminTestimonials,
-  });
-  const settingsQuery = useQuery({
-    queryKey: ["admin", "site-settings"],
-    queryFn: getAdminSiteSettings,
-  });
-  const mediaQuery = useQuery({
-    queryKey: ["admin", "media"],
-    queryFn: getAdminMedia,
-  });
-  const categoriesQuery = useQuery({
-    queryKey: ["admin", "blog", "categories"],
-    queryFn: getAdminCategories,
-  });
-  const authorsQuery = useQuery({
-    queryKey: ["admin", "blog", "authors"],
-    queryFn: getAdminAuthors,
-  });
-
-  if (
-    postsQuery.isPending ||
-    pagesQuery.isPending ||
-    navigationQuery.isPending ||
-    pricingQuery.isPending ||
-    testimonialsQuery.isPending ||
-    settingsQuery.isPending ||
-    mediaQuery.isPending ||
-    categoriesQuery.isPending ||
-    authorsQuery.isPending
-  ) {
-    return <LoadingSpinner label="Loading admin overview..." />;
+function alertClassFor(severity: "info" | "warning" | "error") {
+  if (severity === "error") {
+    return "adminx-alert adminx-alert--error";
   }
 
-  if (
-    postsQuery.error ||
-    pagesQuery.error ||
-    navigationQuery.error ||
-    pricingQuery.error ||
-    testimonialsQuery.error ||
-    settingsQuery.error ||
-    mediaQuery.error ||
-    categoriesQuery.error ||
-    authorsQuery.error
-  ) {
+  if (severity === "warning") {
+    return "adminx-alert adminx-alert--warning";
+  }
+
+  return "adminx-alert adminx-alert--info";
+}
+
+export function AdminDashboardPage() {
+  const summaryQuery = useQuery({
+    queryKey: ["admin", "dashboard", "summary"],
+    queryFn: getAdminDashboardSummary,
+  });
+
+  if (summaryQuery.isPending) {
+    return <LoadingSpinner label="Loading dashboard..." />;
+  }
+
+  if (summaryQuery.error || !summaryQuery.data) {
     return (
       <ErrorMessage
-        title="Unable to load the admin overview."
+        title="Unable to load the admin dashboard."
         detail="Check that the admin API is reachable and try again."
       />
     );
   }
 
-  const posts = postsQuery.data ?? [];
-  const publishedPosts = posts.filter((post) => post.is_published).length;
-  const pages = pagesQuery.data ?? [];
-  const publishedPages = pages.filter((page) => page.is_published).length;
-  const navigationCount = navigationQuery.data?.length ?? 0;
-  const pricingCount = pricingQuery.data?.length ?? 0;
-  const testimonialCount = testimonialsQuery.data?.length ?? 0;
-  const settingsCount = settingsQuery.data?.length ?? 0;
-  const mediaCount = mediaQuery.data?.length ?? 0;
-  const categoryCount = categoriesQuery.data?.length ?? 0;
-  const authorCount = authorsQuery.data?.length ?? 0;
+  const summary = summaryQuery.data;
+  const maxChartValue = Math.max(
+    1,
+    ...summary.consultation_inflow.map((item) => item.count)
+  );
 
   return (
-    <div className="admin-list-grid">
-      <section className="admin-card">
-        <div className="admin-card__header">
-          <div>
-            <h2>Workspace summary</h2>
-            <p>Current content volume across the editable resources.</p>
+    <div className="adminx-page-body">
+      <div className="adminx-alert-stack">
+        {summary.alerts.length > 0 ? (
+          summary.alerts.map((alert) => (
+            <div key={alert.id} className={alertClassFor(alert.severity)}>
+              <div>
+                <strong>{alert.title}</strong>
+                <p>{alert.message}</p>
+              </div>
+              {alert.href ? (
+                <a className="admin-secondary-button" href={alert.href}>
+                  Open
+                </a>
+              ) : null}
+            </div>
+          ))
+        ) : (
+          <div className="adminx-alert adminx-alert--info">
+            <div>
+              <strong>No urgent alerts</strong>
+              <p>The dashboard is clear right now.</p>
+            </div>
           </div>
-        </div>
-        <div className="admin-card__body">
-          <div className="admin-metric-grid">
-            <article className="admin-metric">
-              <strong>Blog Posts</strong>
-              <span>{posts.length}</span>
-              <p>{publishedPosts} published</p>
-            </article>
-            <article className="admin-metric">
-              <strong>Pages</strong>
-              <span>{pages.length}</span>
-              <p>{publishedPages} published</p>
-            </article>
-            <article className="admin-metric">
-              <strong>Navigation Roots</strong>
-              <span>{navigationCount}</span>
-              <p>Top-level menu groups</p>
-            </article>
-            <article className="admin-metric">
-              <strong>Categories</strong>
-              <span>{categoryCount}</span>
-              <p>Available post categories</p>
-            </article>
-            <article className="admin-metric">
-              <strong>Authors</strong>
-              <span>{authorCount}</span>
-              <p>Configured author profiles</p>
-            </article>
-            <article className="admin-metric">
-              <strong>Pricing Plans</strong>
-              <span>{pricingCount}</span>
-              <p>Plans currently stored</p>
-            </article>
-            <article className="admin-metric">
-              <strong>Testimonials</strong>
-              <span>{testimonialCount}</span>
-              <p>Managed proof points</p>
-            </article>
-            <article className="admin-metric">
-              <strong>Site Settings</strong>
-              <span>{settingsCount}</span>
-              <p>Global JSON settings</p>
-            </article>
-            <article className="admin-metric">
-              <strong>Media Assets</strong>
-              <span>{mediaCount}</span>
-              <p>Available uploaded or linked files</p>
-            </article>
-          </div>
-        </div>
+        )}
+      </div>
+
+      <section className="adminx-card-grid">
+        {summary.metrics.map((metric) => (
+          <article key={metric.key} className="adminx-stat-card">
+            <span className="adminx-stat-card__label">{metric.label}</span>
+            <span className="adminx-stat-card__value">{metric.value}</span>
+            <span className="adminx-stat-card__helper">{metric.helper ?? "No helper text"}</span>
+            {metric.href ? (
+              <a className="admin-secondary-button" href={metric.href}>
+                Open
+              </a>
+            ) : null}
+          </article>
+        ))}
       </section>
+
+      <div className="admin-grid">
+        <section className="admin-card">
+          <div className="admin-card__header">
+            <div>
+              <h2>Consultation Inflow</h2>
+              <p>Daily request volume over the last 14 days.</p>
+            </div>
+          </div>
+          <div className="admin-card__body">
+            {summary.consultation_inflow.length ? (
+              <div className="adminx-chart" aria-label="Consultation inflow chart">
+                {summary.consultation_inflow.map((point) => (
+                  <div key={point.label} className="adminx-chart__bar">
+                    <div
+                      className="adminx-chart__bar-fill"
+                      style={{ height: `${Math.max((point.count / maxChartValue) * 180, 12)}px` }}
+                      title={`${point.count} consultations`}
+                    ></div>
+                    <span className="adminx-chart__label">{point.label}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <AdminEmptyState
+                title="No inflow data"
+                description="Consultation volume will appear here once requests start arriving."
+              />
+            )}
+          </div>
+        </section>
+
+        <section className="admin-card">
+          <div className="admin-card__header">
+            <div>
+              <h2>Activity Feed</h2>
+              <p>Publishing, settings, SEO, and workflow events.</p>
+            </div>
+          </div>
+          <div className="admin-card__body">
+            {summary.recent_activity.length ? (
+              <div className="adminx-activity-list">
+                {summary.recent_activity.map((item) => (
+                  <article key={item.id} className="adminx-activity-item">
+                    <span className="adminx-activity-item__title">
+                      {item.actor_name} {item.action_type.replace(/_/g, " ")}
+                    </span>
+                    <span className="adminx-activity-item__meta">
+                      {item.target_label}
+                      {item.detail ? ` · ${item.detail}` : ""}
+                    </span>
+                    <span className="adminx-activity-item__meta">
+                      {new Date(item.created_at).toLocaleString()}
+                    </span>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <AdminEmptyState
+                title="No recent activity"
+                description="Publishing, consultation, and settings events will appear here."
+              />
+            )}
+          </div>
+        </section>
+      </div>
+
+      <div className="adminx-card-grid adminx-card-grid--two">
+        <section className="admin-card">
+          <div className="admin-card__header">
+            <div>
+              <h2>Recent Consultations</h2>
+              <p>Newest requests across the operations queue.</p>
+            </div>
+          </div>
+          <div className="admin-card__body">
+            {summary.recent_consultations.length ? (
+              <div className="adminx-activity-list">
+                {summary.recent_consultations.map((item) => (
+                  <article key={item.id} className="adminx-activity-item">
+                    <span className="adminx-activity-item__title">{item.client_name}</span>
+                    <span className="adminx-activity-item__meta">
+                      {item.tracking_id} · {item.subject}
+                    </span>
+                    <span className="adminx-activity-item__meta">
+                      {item.status}
+                      {item.assignee_name ? ` · ${item.assignee_name}` : ""}
+                    </span>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <AdminEmptyState
+                title="No consultations"
+                description="Consultation records will appear here as soon as new requests are created."
+              />
+            )}
+          </div>
+        </section>
+
+        <section className="admin-card">
+          <div className="admin-card__header">
+            <div>
+              <h2>Content Pipeline</h2>
+              <p>Posts and pages waiting for better SEO or publication.</p>
+            </div>
+          </div>
+          <div className="admin-card__body">
+            {summary.content_pipeline.length ? (
+              <div className="adminx-activity-list">
+                {summary.content_pipeline.map((item) => (
+                  <article key={item.id} className="adminx-activity-item">
+                    <span className="adminx-activity-item__title">{item.title}</span>
+                    <span className="adminx-activity-item__meta">
+                      /{item.kind === "blog_post" ? "blog" : "pages"}/{item.slug} · {item.status}
+                    </span>
+                    <span className="adminx-activity-item__meta">
+                      SEO: {item.seo_health} · Completion: {item.completion_percent}%
+                    </span>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <AdminEmptyState
+                title="No content items"
+                description="Draft posts and pages with SEO gaps will appear here."
+              />
+            )}
+          </div>
+        </section>
+      </div>
 
       <section className="admin-card">
         <div className="admin-card__header">
           <div>
-            <h2>Phase 4 focus</h2>
-            <p>The admin surface is live. Each sidebar section now manages a real API-backed resource.</p>
+            <h2>Open Job Listings</h2>
+            <p>Published roles visible from the hiring workspace.</p>
           </div>
         </div>
         <div className="admin-card__body">
-          <div className="admin-empty">
-            <strong>Use the sidebar to move between resource managers.</strong>
-            <p>
-              Blog posts and pages use dedicated create/edit routes. The other sections use
-              split-view list and form workspaces for faster editing.
-            </p>
-          </div>
+          {summary.open_jobs.length ? (
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Role</th>
+                    <th>Department</th>
+                    <th>Type</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {summary.open_jobs.map((job) => (
+                    <tr key={job.id}>
+                      <td>
+                        <strong>{job.title}</strong>
+                        <p>{job.slug}</p>
+                      </td>
+                      <td>{job.department}</td>
+                      <td>{job.employment_type}</td>
+                      <td>{job.location}</td>
+                      <td>
+                        <span className="admin-status admin-status--published">{job.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <AdminEmptyState
+              title="No active job listings"
+              description="Create a new job from the hiring workspace to populate this table."
+            />
+          )}
         </div>
       </section>
     </div>

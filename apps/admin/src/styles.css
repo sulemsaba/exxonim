@@ -1,27 +1,28 @@
 ﻿
-@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap");
 
 :root {
-  --font-display: "EB Garamond", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Garamond, "Times New Roman", serif;
-  --color-page: #eef0ec;
-  --color-page-strong: #e2e6e1;
-  --color-surface: #f7f7f4;
-  --color-surface-soft: #f2f4f1;
-  --color-surface-elevated: rgba(248, 249, 246, 0.88);
-  --color-text: #102529;
-  --color-text-muted: rgba(16, 37, 41, 0.72);
-  --color-text-soft: rgba(16, 37, 41, 0.56);
+  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-ui: "Manrope", "Segoe UI", sans-serif;
+  --color-page: #f5f6f1;
+  --color-page-strong: #ebefe7;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f7faf6;
+  --color-surface-elevated: rgba(255, 255, 255, 0.9);
+  --color-text: #153235;
+  --color-text-muted: rgba(21, 50, 53, 0.72);
+  --color-text-soft: rgba(21, 50, 53, 0.56);
   --color-accent: #0f5c63;
-  --color-accent-hover: #0b4b51;
-  --color-accent-secondary: #7fbcc1;
+  --color-accent-hover: #0a4950;
+  --color-accent-secondary: #73c7bb;
   --color-accent-soft: rgba(15, 92, 99, 0.12);
   --color-accent-soft-strong: rgba(15, 92, 99, 0.22);
   --color-accent-contrast: #f7fbfb;
   --color-border-soft: rgba(15, 92, 99, 0.12);
-  --color-border-strong: rgba(15, 92, 99, 0.22);
+  --color-border-strong: rgba(15, 92, 99, 0.18);
   --color-overlay: rgba(8, 24, 27, 0.54);
-  --shadow-panel: 0 24px 60px rgba(8, 31, 35, 0.1);
-  --shadow-panel-strong: 0 30px 72px rgba(8, 31, 35, 0.14);
+  --shadow-panel: 0 22px 54px rgba(12, 40, 37, 0.08);
+  --shadow-panel-strong: 0 34px 84px rgba(12, 40, 37, 0.12);
   --glow-accent: rgba(127, 188, 193, 0.16);
   --primary: var(--color-accent);
   --primary-strong: var(--color-accent-hover);
@@ -51,17 +52,17 @@
   --mouse-x: 50vw;
   --mouse-y: 50vh;
   --scroll-y: 0px;
-  --cinematic-bg-start: rgba(127, 188, 193, 0.08);
+  --cinematic-bg-start: rgba(115, 199, 187, 0.08);
   --cinematic-bg-end: var(--color-page);
   --cinematic-orb-one: rgba(15, 92, 99, 0.08);
-  --cinematic-orb-two: rgba(127, 188, 193, 0.16);
+  --cinematic-orb-two: rgba(255, 216, 164, 0.18);
   --cinematic-glow-bright: rgba(8, 24, 27, 0.34);
   --cinematic-glow-deep: rgba(15, 92, 99, 0.16);
   --cinematic-glow-opacity: 0.64;
   --cinematic-glow-blend: multiply;
-  --cinematic-card-bg: rgba(248, 249, 246, 0.72);
-  --cinematic-card-border: rgba(255, 255, 255, 0.54);
-  --cinematic-card-shadow: 0 24px 60px rgba(8, 31, 35, 0.12);
+  --cinematic-card-bg: rgba(255, 255, 255, 0.74);
+  --cinematic-card-border: rgba(255, 255, 255, 0.62);
+  --cinematic-card-shadow: 0 24px 60px rgba(12, 40, 37, 0.1);
   --cinematic-card-hover-border: rgba(15, 92, 99, 0.28);
 }
 
@@ -80,7 +81,7 @@ html[data-theme="dark"] {
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-ui);
   color: var(--color-text);
   background: var(--color-page);
 }
