@@ -74,7 +74,7 @@ export function HomePage() {
 
   // Use new unified API data if available, fallback to old structure
   const heroContent = page?.content.hero;
-  const blogPosts = homeData?.blogPosts || [];
+  const blogPosts = homeData?.data?.blogPosts || [];
   const insightsContent = page?.content.insights_section;
 
   if (!heroContent) {

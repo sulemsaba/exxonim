@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "../api/axios";
 import { mapBlogPost } from "../utils/contentMappers";
-import { getFeaturedPosts } from "../services/blogService";
+import { getFeaturedPosts } from "./blogService";
 import type { BlogPost } from "../types";
 import type { ApiBlogPost } from "../types/api";
 
