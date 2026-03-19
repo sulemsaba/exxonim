@@ -1,7 +1,10 @@
 import { AdminLayout } from "../../components/admin/AdminLayout";
 import { ErrorMessage } from "../../components/ErrorMessage";
 import { useAuth } from "../../contexts/AuthContext";
-import type { AdminRouteMatch } from "../../lib/adminRoutes";
+import {
+  isAdminSectionRestrictedForEditor,
+  type AdminRouteMatch,
+} from "../../lib/adminRoutes";
 import {
   BlogAuthorsPage,
   BlogCategoriesPage,
@@ -29,18 +32,8 @@ interface AdminAppProps {
 export function AdminApp({ match, theme, onToggleTheme }: AdminAppProps) {
   const { admin } = useAuth();
   const adminRole = admin?.role ?? "admin";
-  const editorRestrictedSections = new Set([
-    "brand-settings",
-    "contact-settings",
-    "navigation",
-    "pricing",
-    "testimonials",
-    "footer-settings",
-    "seo-settings",
-    "access-roles",
-  ]);
 
-  if (adminRole === "editor" && editorRestrictedSections.has(match.section)) {
+  if (adminRole === "editor" && isAdminSectionRestrictedForEditor(match.section)) {
     return (
       <AdminLayout
         activeSection={match.section}

@@ -4,6 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AdminDeleteDialog } from "../../components/admin/AdminDeleteDialog";
+import { AdminSectionCard } from "../../components/admin/AdminSectionCard";
+import { AdminStatusBadge } from "../../components/admin/AdminStatusBadge";
+import { AdminToolbar } from "../../components/admin/AdminToolbar";
 import { ErrorMessage } from "../../components/ErrorMessage";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import { useAuth } from "../../contexts/AuthContext";
@@ -14,7 +17,7 @@ import {
   getAdminPages,
   updateAdminPage,
 } from "../../services/adminPageService";
-import type { ApiContentStatus, ApiPage } from "../../types/api";
+import type { ApiPage } from "../../types/api";
 import {
   getContentStatus,
   getAdminErrorMessage,
@@ -81,23 +84,15 @@ function toPayload(values: PageFormValues) {
 }
 
 function formatShortcutTitle(slug: string) {
+  if (slug === "careers") {
+    return "Career";
+  }
+
   return slug
     .split("-")
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
-}
-
-function getStatusClassName(status: ApiContentStatus) {
-  if (status === "published") {
-    return "admin-status admin-status--published";
-  }
-
-  if (status === "archived") {
-    return "admin-status admin-status--danger";
-  }
-
-  return "admin-status admin-status--draft";
 }
 
 export function PagesPage({ mode, entityId, pageSlug }: PagesPageProps) {
@@ -289,79 +284,76 @@ export function PagesPage({ mode, entityId, pageSlug }: PagesPageProps) {
   if (mode === "index") {
     return (
       <>
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>Pages</h2>
-              <p>Manage published page records that power the public route content.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            <div className="admin-toolbar">
-              <span className="admin-toolbar__meta">
-                {pagesQuery.data.length} pages stored
-              </span>
+        <AdminSectionCard
+          title="Pages"
+          description="Manage published page records that power the public route content."
+        >
+          <AdminToolbar
+            meta={`${pagesQuery.data.length} pages stored`}
+            actions={
               <a className="admin-action-button" href={adminRoutes.pagesNew}>
                 New Page
               </a>
-            </div>
+            }
+          />
 
-            {pagesQuery.data.length ? (
-              <div className="admin-table-wrap">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Page</th>
-                      <th>Slug</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pagesQuery.data.map((page) => (
+          {pagesQuery.data.length ? (
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Page</th>
+                    <th>Slug</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagesQuery.data.map((page) => {
+                    const status = getContentStatus(page);
+
+                    return (
                       <tr key={page.id}>
                         <td>
                           <strong>{page.title}</strong>
                           <p>{page.meta_description ?? "No meta description provided."}</p>
-                      </td>
-                      <td>{page.slug}</td>
-                      <td>
-                        <span className={getStatusClassName(getContentStatus(page))}>
-                          {getContentStatus(page)}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="admin-table__actions">
-                          <a
-                            className="admin-table__action"
-                            href={adminRoutes.pageEdit(page.id)}
-                          >
-                            Edit
-                          </a>
-                          {adminRole === "admin" ? (
-                            <button
-                              className="admin-table__action admin-table__action--danger"
-                              type="button"
-                              onClick={() => setDeleteTarget(page)}
+                        </td>
+                        <td>{page.slug}</td>
+                        <td>
+                          <AdminStatusBadge label={status} />
+                        </td>
+                        <td>
+                          <div className="admin-table__actions">
+                            <a
+                              className="admin-table__action"
+                              href={adminRoutes.pageEdit(page.id)}
                             >
-                              Delete
-                            </button>
-                          ) : null}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="admin-empty">
-                <strong>No pages yet.</strong>
-                <p>Create the first page record to populate the frontend route content API.</p>
-              </div>
-            )}
-          </div>
-        </section>
+                              Edit
+                            </a>
+                            {adminRole === "admin" ? (
+                              <button
+                                className="admin-table__action admin-table__action--danger"
+                                type="button"
+                                onClick={() => setDeleteTarget(page)}
+                              >
+                                Delete
+                              </button>
+                            ) : null}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="admin-empty">
+              <strong>No pages yet.</strong>
+              <p>Create the first page record to populate the frontend route content API.</p>
+            </div>
+          )}
+        </AdminSectionCard>
 
         <AdminDeleteDialog
           open={Boolean(deleteTarget)}
@@ -382,31 +374,27 @@ export function PagesPage({ mode, entityId, pageSlug }: PagesPageProps) {
   return (
     <>
       <div className="admin-grid">
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>
-                {isExistingRecord
-                  ? "Edit page"
-                  : isShortcut && pageSlug
-                    ? `${formatShortcutTitle(pageSlug)} page`
-                    : "Create page"}
-              </h2>
-              <p>
-                {isShortcut
-                  ? "This shortcut route edits page content only. The slug stays fixed so the public route remains stable."
-                  : "Page content is stored as raw JSON so public routes can render typed content from the API."}
-              </p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
-              <div className="admin-form__grid">
-                <div className="admin-form__field">
-                  <label htmlFor="page-title">Title</label>
-                  <input id="page-title" type="text" {...register("title")} />
-                  {errors.title ? <p className="admin-form__error">{errors.title.message}</p> : null}
-                </div>
+        <AdminSectionCard
+          title={
+            isExistingRecord
+              ? "Edit page"
+              : isShortcut && pageSlug
+                ? `${formatShortcutTitle(pageSlug)} page`
+                : "Create page"
+          }
+          description={
+            isShortcut
+              ? "This shortcut route edits page content only. The slug stays fixed so the public route remains stable."
+              : "Page content is stored as raw JSON so public routes can render typed content from the API."
+          }
+        >
+          <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
+            <div className="admin-form__grid">
+              <div className="admin-form__field">
+                <label htmlFor="page-title">Title</label>
+                <input id="page-title" type="text" {...register("title")} />
+                {errors.title ? <p className="admin-form__error">{errors.title.message}</p> : null}
+              </div>
 
                 <div className="admin-form__field">
                   <label htmlFor="page-slug">Slug</label>
@@ -474,60 +462,52 @@ export function PagesPage({ mode, entityId, pageSlug }: PagesPageProps) {
                 </div>
               </div>
 
-              {formMessage ? <p className="admin-form__hint">{formMessage}</p> : null}
+            {formMessage ? <p className="admin-form__hint">{formMessage}</p> : null}
 
-              <div className="admin-form__actions">
-                <a className="admin-form__cancel" href={adminRoutes.pages}>
-                  Back to Pages
-                </a>
-                {isExistingRecord && adminRole === "admin" ? (
-                  <button
-                    className="admin-danger-button"
-                    type="button"
-                    onClick={() => setDeleteTarget(selectedPage)}
-                  >
-                    Delete Page
-                  </button>
-                ) : null}
+            <div className="admin-form__actions">
+              <a className="admin-form__cancel" href={adminRoutes.pages}>
+                Back to Pages
+              </a>
+              {isExistingRecord && adminRole === "admin" ? (
                 <button
-                  className="admin-form__submit"
-                  type="submit"
-                  disabled={createMutation.isPending || updateMutation.isPending}
+                  className="admin-danger-button"
+                  type="button"
+                  onClick={() => setDeleteTarget(selectedPage)}
                 >
-                  {createMutation.isPending || updateMutation.isPending
-                    ? "Saving..."
-                    : isExistingRecord
-                      ? "Update Page"
-                      : "Create Page"}
+                  Delete Page
                 </button>
-              </div>
-            </form>
-          </div>
-        </section>
+              ) : null}
+              <button
+                className="admin-form__submit"
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
+                {createMutation.isPending || updateMutation.isPending
+                  ? "Saving..."
+                  : isExistingRecord
+                    ? "Update Page"
+                    : "Create Page"}
+              </button>
+            </div>
+          </form>
+        </AdminSectionCard>
 
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>Record details</h2>
-              <p>
-                Keep route slugs stable once a public page is live, because frontend queries resolve content by slug.
-              </p>
-            </div>
+        <AdminSectionCard
+          title="Record details"
+          description="Keep route slugs stable once a public page is live, because frontend queries resolve content by slug."
+        >
+          <div className="admin-empty">
+            <strong>
+              {isExistingRecord
+                ? selectedPage?.title
+                : isShortcut && pageSlug
+                  ? `${formatShortcutTitle(pageSlug)} draft`
+                  : "New page draft"}
+            </strong>
+            <p>Created at: {formatTimestamp(selectedPage?.created_at)}</p>
+            <p>Updated at: {formatTimestamp(selectedPage?.updated_at)}</p>
           </div>
-          <div className="admin-card__body">
-            <div className="admin-empty">
-              <strong>
-                {isExistingRecord
-                  ? selectedPage?.title
-                  : isShortcut && pageSlug
-                    ? `${formatShortcutTitle(pageSlug)} draft`
-                    : "New page draft"}
-              </strong>
-              <p>Created at: {formatTimestamp(selectedPage?.created_at)}</p>
-              <p>Updated at: {formatTimestamp(selectedPage?.updated_at)}</p>
-            </div>
-          </div>
-        </section>
+        </AdminSectionCard>
       </div>
 
       <AdminDeleteDialog

@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { apiRoutes } from "@exxonim/shared/api/routes";
 import type { ApiCareerJob, ApiContentStatus } from "../types/api";
 import { normalizeContentRecord, statusToPublishedFlag } from "../utils/admin";
 
@@ -31,26 +32,31 @@ function toRequestPayload(payload: Partial<AdminJobPayload>) {
 }
 
 export async function getAdminJobs() {
-  const response = await api.get<ApiCareerJob[]>("/admin/jobs");
+  const response = await api.get<ApiCareerJob[]>(apiRoutes.admin.jobs.list);
   return response.data.map((job) => normalizeContentRecord(job));
 }
 
 export async function getAdminJob(slug: string) {
-  const response = await api.get<ApiCareerJob>(`/admin/jobs/${slug}`);
+  const response = await api.get<ApiCareerJob>(apiRoutes.admin.jobs.detail(slug));
   return normalizeContentRecord(response.data);
 }
 
 export async function createAdminJob(payload: AdminJobPayload) {
-  const response = await api.post<ApiCareerJob>("/admin/jobs", toRequestPayload(payload));
+  const response = await api.post<ApiCareerJob>(
+    apiRoutes.admin.jobs.list,
+    toRequestPayload(payload)
+  );
   return normalizeContentRecord(response.data);
 }
 
 export async function updateAdminJob(slug: string, payload: Partial<AdminJobPayload>) {
-  const response = await api.put<ApiCareerJob>(`/admin/jobs/${slug}`, toRequestPayload(payload));
+  const response = await api.put<ApiCareerJob>(
+    apiRoutes.admin.jobs.detail(slug),
+    toRequestPayload(payload)
+  );
   return normalizeContentRecord(response.data);
 }
 
 export async function deleteAdminJob(slug: string) {
-  await api.delete(`/admin/jobs/${slug}`);
+  await api.delete(apiRoutes.admin.jobs.detail(slug));
 }
-

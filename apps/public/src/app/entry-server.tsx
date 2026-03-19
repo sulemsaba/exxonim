@@ -2,7 +2,8 @@ import { renderToString } from "react-dom/server";
 import App from "./App";
 import { AppProviders } from "./providers/AppProviders";
 import { routes } from "./routes";
-import { getPageSeo, siteOrigin } from "./seo";
+import { siteOrigin } from "./seo";
+import { getBlogPrerenderRoutes, resolveServerSeo } from "./serverSeo";
 
 export function render(url = "/") {
   return renderToString(
@@ -12,17 +13,23 @@ export function render(url = "/") {
   );
 }
 
-export function renderPage(url = "/") {
+export async function renderPage(url = "/") {
   return {
     appHtml: render(url),
-    seo: getPageSeo(url),
+    seo: await resolveServerSeo(url),
   };
 }
 
-export function getPrerenderRoutes() {
-  return [...new Set(Object.values(routes))].filter(
-    (route) => route !== routes.admin && route !== routes.adminLogin
+export async function getPrerenderRoutes() {
+  const staticRoutes = [...new Set(Object.values(routes))].filter(
+    (route) =>
+      route !== routes.admin &&
+      route !== routes.adminLogin &&
+      route !== routes.notFound
   );
+  const blogRoutes = await getBlogPrerenderRoutes();
+
+  return [...new Set([...staticRoutes, ...blogRoutes])];
 }
 
 export { siteOrigin };

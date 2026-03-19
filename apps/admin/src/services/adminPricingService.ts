@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { apiRoutes } from "@exxonim/shared/api/routes";
 import type { ApiContentStatus, ApiPricingPlan } from "../types/api";
 import { normalizeContentRecord, statusToActiveFlag } from "../utils/admin";
 
@@ -25,13 +26,13 @@ function toRequestPayload(payload: Partial<AdminPricingPayload>) {
 }
 
 export async function getAdminPricingPlans() {
-  const response = await api.get<ApiPricingPlan[]>("/admin/pricing/plans");
+  const response = await api.get<ApiPricingPlan[]>(apiRoutes.admin.pricing.list);
   return response.data.map((plan) => normalizeContentRecord(plan));
 }
 
 export async function createAdminPricingPlan(payload: AdminPricingPayload) {
   const response = await api.post<ApiPricingPlan>(
-    "/admin/pricing/plans",
+    apiRoutes.admin.pricing.list,
     toRequestPayload(payload)
   );
   return normalizeContentRecord(response.data);
@@ -42,12 +43,12 @@ export async function updateAdminPricingPlan(
   payload: Partial<AdminPricingPayload>
 ) {
   const response = await api.put<ApiPricingPlan>(
-    `/admin/pricing/plans/${id}`,
+    apiRoutes.admin.pricing.detail(id),
     toRequestPayload(payload)
   );
   return normalizeContentRecord(response.data);
 }
 
 export async function deleteAdminPricingPlan(id: number) {
-  await api.delete(`/admin/pricing/plans/${id}`);
+  await api.delete(apiRoutes.admin.pricing.detail(id));
 }

@@ -2,10 +2,12 @@ import { routes } from "../routes";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { usePage } from "../hooks/usePage";
+import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
 import type { CareerPageContent } from "../types";
 
 export function CareerPage() {
   const { data: page, isPending, error } = usePage<CareerPageContent>("career");
+  useResolvedPageSeo(page, routes.career);
 
   if (isPending) {
     return <LoadingSpinner label="Loading career page..." />;

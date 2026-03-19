@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { apiRoutes } from "@exxonim/shared/api/routes";
 import type {
   ApiActivityEvent,
   ApiAdminDashboardSummary,
@@ -59,7 +60,9 @@ function buildFallbackEvents(): ApiActivityEvent[] {
 
 export async function getAdminDashboardSummary() {
   try {
-    const response = await api.get<ApiAdminDashboardSummary>("/admin/dashboard/summary");
+    const response = await api.get<ApiAdminDashboardSummary>(
+      apiRoutes.admin.dashboard.summary
+    );
     return response.data;
   } catch {
     const [posts, pages, consultationsResponse, seoDefaults, jobs] = await Promise.all([

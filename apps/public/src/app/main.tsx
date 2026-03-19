@@ -1,7 +1,6 @@
 import { createRoot, hydrateRoot } from "react-dom/client";
 import App from "./App";
 import { AppProviders } from "./providers/AppProviders";
-import { applyPageSeo } from "./seo";
 import "../styles.css";
 
 function bootstrapDocumentShell(pathname: string) {
@@ -56,8 +55,6 @@ function bootstrapDocumentShell(pathname: string) {
     link.setAttribute("fetchpriority", "high");
     link.setAttribute("data-exxonim", "logo-preload");
   });
-
-  applyPageSeo(pathname);
 }
 
 bootstrapDocumentShell(window.location.pathname);

@@ -1,4 +1,8 @@
 import type { ApiContentStatus } from "./content";
+import type {
+  ApiPaginatedResponse,
+  ApiPaginationParams,
+} from "./pagination";
 
 export interface ApiBlogAuthor {
   id: number;
@@ -6,6 +10,7 @@ export interface ApiBlogAuthor {
   name: string;
   role?: string | null;
   avatar_src?: string | null;
+  bio?: string | null;
 }
 
 export interface ApiBlogCategory {
@@ -47,3 +52,20 @@ export interface ApiBlogPost {
   category?: ApiBlogCategory | null;
   author?: ApiBlogAuthor | null;
 }
+
+export interface ApiAdminBlogPostListParams extends ApiPaginationParams {
+  status?: ApiContentStatus;
+  category_id?: number;
+  author_id?: number;
+  featured_on_home?: boolean;
+  search?: string;
+}
+
+export interface ApiPublicBlogPostListParams extends ApiPaginationParams {
+  category?: string;
+  featured?: boolean;
+  search?: string;
+}
+
+export type ApiAdminBlogPostListResponse = ApiPaginatedResponse<ApiBlogPost>;
+export type ApiPublicBlogPostListResponse = ApiPaginatedResponse<ApiBlogPost>;

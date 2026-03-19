@@ -1,55 +1,13 @@
 import { routes } from "../routes";
 import type { TrackingSectionContent } from "../types";
 
-const defaultCheckpoints = [
-  {
-    title: "Intake confirmed",
-    detail: "Requirements captured and service scope agreed.",
-    status: "complete",
-  },
-  {
-    title: "Documents reviewed",
-    detail: "Application pack checked before submission.",
-    status: "complete",
-  },
-  {
-    title: "Authority follow-up",
-    detail: "Submission is active and status is being monitored.",
-    status: "active",
-  },
-  {
-    title: "Final release",
-    detail: "Approval, certificate, or filing confirmation is delivered.",
-    status: "upcoming",
-  },
-] as const;
-
-const defaultCaseExamples = [
-  {
-    title: "Fast-moving company setup",
-    detail: "New ventures that need a clean start across registration and tax setup.",
-  },
-  {
-    title: "Regulated approval support",
-    detail: "Operators preparing documentation for sector-specific licensing.",
-  },
-  {
-    title: "Backlog cleanup",
-    detail: "Businesses catching up on statutory returns and employer registrations.",
-  },
-];
-
 interface ResultsSectionProps {
   content: TrackingSectionContent;
 }
 
 export function ResultsSection({ content }: ResultsSectionProps) {
-  const checkpoints = content.checkpoints.length
-    ? content.checkpoints
-    : defaultCheckpoints;
-  const caseExamples = content.case_examples.length
-    ? content.case_examples
-    : defaultCaseExamples;
+  const checkpoints = content.checkpoints;
+  const caseExamples = content.case_examples;
   const workflowSteps = content.workflow_steps;
 
   return (
@@ -72,17 +30,13 @@ export function ResultsSection({ content }: ResultsSectionProps) {
           <article className="tracking-card tracking-card--primary" data-reveal>
             <div className="tracking-card__top">
               <div>
-                <span className="tracking-card__eyebrow">Consultation follow-through</span>
-                <strong>Typical workflow view</strong>
+                <span className="tracking-card__eyebrow">Workflow overview</span>
+                <strong>Current process view</strong>
               </div>
               <span className="tracking-card__badge">Example process</span>
             </div>
 
-            <p className="tracking-card__copy">
-              This snapshot shows the usual progress across intake, document
-              review, submission, and authority follow-up. Live updates for
-              client work are shared directly by Exxonim during the engagement.
-            </p>
+            <p className="tracking-card__copy">{content.description}</p>
 
             <div className="tracking-progress">
               {checkpoints.map((checkpoint) => (
@@ -100,11 +54,14 @@ export function ResultsSection({ content }: ResultsSectionProps) {
             </div>
 
             <div className="tracking-card__actions">
-              <a className="landing-cta landing-cta--primary" href={routes.contact}>
+              <a
+                className="landing-cta landing-cta--primary"
+                href={routes.requestConsultation}
+              >
                 Start a new request
               </a>
-              <a className="landing-cta landing-cta--secondary" href="tel:+255794689099">
-                Call Exxonim
+              <a className="landing-cta landing-cta--secondary" href={routes.tracking}>
+                Track consultation
               </a>
             </div>
           </article>

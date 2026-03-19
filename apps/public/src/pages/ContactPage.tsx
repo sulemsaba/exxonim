@@ -1,10 +1,13 @@
 import { ErrorMessage } from "../components/ErrorMessage";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { usePage } from "../hooks/usePage";
+import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
+import { routes } from "../routes";
 import type { ContactPageContent } from "../types";
 
 export function ContactPage() {
   const { data: page, isPending, error } = usePage<ContactPageContent>("contact");
+  useResolvedPageSeo(page, routes.contact);
 
   if (isPending) {
     return <LoadingSpinner label="Loading contact page..." />;

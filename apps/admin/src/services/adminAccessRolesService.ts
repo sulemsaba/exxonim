@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { apiRoutes } from "@exxonim/shared/api/routes";
 import type { ApiAdminManagedUser, ApiAdminRole } from "../types/api";
 
 export interface AdminUsersListParams {
@@ -16,36 +17,44 @@ export interface AdminManagedUserPayload {
 }
 
 export async function getAdminUsers(params: AdminUsersListParams = {}) {
-  const response = await api.get<ApiAdminManagedUser[]>("/admin/users", {
+  const response = await api.get<ApiAdminManagedUser[]>(apiRoutes.admin.access.users, {
     params,
   });
   return response.data;
 }
 
 export async function createAdminUser(payload: AdminManagedUserPayload) {
-  const response = await api.post<ApiAdminManagedUser>("/admin/users", payload);
+  const response = await api.post<ApiAdminManagedUser>(apiRoutes.admin.access.users, payload);
   return response.data;
 }
 
 export async function updateAdminUser(id: number, payload: Partial<AdminManagedUserPayload>) {
-  const response = await api.put<ApiAdminManagedUser>(`/admin/users/${id}`, payload);
+  const response = await api.put<ApiAdminManagedUser>(
+    apiRoutes.admin.access.userDetail(id),
+    payload
+  );
   return response.data;
 }
 
 export async function updateAdminUserRole(id: number, role: ApiAdminRole) {
-  const response = await api.put<ApiAdminManagedUser>(`/admin/users/${id}/role`, { role });
+  const response = await api.put<ApiAdminManagedUser>(
+    apiRoutes.admin.access.userRole(id),
+    { role }
+  );
   return response.data;
 }
 
 export async function updateAdminUserStatus(id: number, isActive: boolean) {
-  const response = await api.put<ApiAdminManagedUser>(`/admin/users/${id}/status`, {
-    is_active: isActive,
-  });
+  const response = await api.put<ApiAdminManagedUser>(
+    apiRoutes.admin.access.userStatus(id),
+    {
+      is_active: isActive,
+    }
+  );
   return response.data;
 }
 
 export async function getAdminRoles() {
-  const response = await api.get<ApiAdminRole[]>("/admin/roles");
+  const response = await api.get<ApiAdminRole[]>(apiRoutes.admin.access.roles);
   return response.data;
 }
-

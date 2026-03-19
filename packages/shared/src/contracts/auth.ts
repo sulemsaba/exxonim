@@ -22,3 +22,7 @@ export interface ApiAdminAccessTokenResponse {
   access_token: string;
   token_type: string;
 }
+
+export interface ApiAdminMeResponse {
+  admin: ApiAdminUser;
+}

@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AdminDeleteDialog } from "../../components/admin/AdminDeleteDialog";
+import { AdminSectionCard } from "../../components/admin/AdminSectionCard";
+import { AdminToolbar } from "../../components/admin/AdminToolbar";
 import { ErrorMessage } from "../../components/ErrorMessage";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import {
@@ -154,18 +156,13 @@ export function BlogCategoriesPage() {
   return (
     <>
       <div className="admin-grid">
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>Category list</h2>
-              <p>These categories are available for blog post classification.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            <div className="admin-toolbar">
-              <span className="admin-toolbar__meta">
-                {categoriesQuery.data.length} categories stored
-              </span>
+        <AdminSectionCard
+          title="Category list"
+          description="These categories are available for blog post classification."
+        >
+          <AdminToolbar
+            meta={`${categoriesQuery.data.length} categories stored`}
+            actions={
               <button
                 className="admin-action-button"
                 type="button"
@@ -178,131 +175,126 @@ export function BlogCategoriesPage() {
               >
                 New Category
               </button>
-            </div>
+            }
+          />
 
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Slug</th>
-                    <th>Description</th>
-                    <th>Actions</th>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Slug</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categoriesQuery.data.map((category) => (
+                  <tr key={category.id}>
+                    <td>
+                      <strong>{category.name}</strong>
+                    </td>
+                    <td>{category.slug}</td>
+                    <td>
+                      <p>{category.description ?? "No description provided."}</p>
+                    </td>
+                    <td>
+                      <div className="admin-table__actions">
+                        <button
+                          className="admin-table__action"
+                          type="button"
+                          onClick={() => {
+                            setSelectedId(category.id);
+                            setFormMessage(null);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="admin-table__action admin-table__action--danger"
+                          type="button"
+                          onClick={() => setDeleteTarget(category)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {categoriesQuery.data.map((category) => (
-                    <tr key={category.id}>
-                      <td>
-                        <strong>{category.name}</strong>
-                      </td>
-                      <td>{category.slug}</td>
-                      <td>
-                        <p>{category.description ?? "No description provided."}</p>
-                      </td>
-                      <td>
-                        <div className="admin-table__actions">
-                          <button
-                            className="admin-table__action"
-                            type="button"
-                            onClick={() => {
-                              setSelectedId(category.id);
-                              setFormMessage(null);
-                            }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="admin-table__action admin-table__action--danger"
-                            type="button"
-                            onClick={() => setDeleteTarget(category)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </section>
+        </AdminSectionCard>
 
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>{selectedCategory ? "Edit category" : "Create category"}</h2>
-              <p>Use descriptive labels and stable slugs that will not break links.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
-              <div className="admin-form__grid">
-                <div className="admin-form__field">
-                  <label htmlFor="category-name">Name</label>
-                  <input id="category-name" type="text" {...register("name")} />
-                  {errors.name ? (
-                    <p className="admin-form__error">{errors.name.message}</p>
-                  ) : null}
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="category-slug">Slug</label>
-                  <input
-                    id="category-slug"
-                    type="text"
-                    {...register("slug", {
-                      onChange: () => setSlugDirty(true),
-                    })}
-                  />
-                  {errors.slug ? (
-                    <p className="admin-form__error">{errors.slug.message}</p>
-                  ) : null}
-                </div>
-
-                <div className="admin-form__field admin-form__field--full">
-                  <label htmlFor="category-description">Description</label>
-                  <textarea
-                    id="category-description"
-                    rows={5}
-                    {...register("description")}
-                  />
-                </div>
-              </div>
-
-              {formMessage ? <p className="admin-form__hint">{formMessage}</p> : null}
-
-              <div className="admin-form__actions">
-                {selectedCategory ? (
-                  <button
-                    className="admin-form__cancel"
-                    type="button"
-                    onClick={() => {
-                      setSelectedId(null);
-                      setSlugDirty(false);
-                      setFormMessage(null);
-                      reset(defaultValues);
-                    }}
-                  >
-                    Clear
-                  </button>
+        <AdminSectionCard
+          title={selectedCategory ? "Edit category" : "Create category"}
+          description="Use descriptive labels and stable slugs that will not break links."
+        >
+          <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
+            <div className="admin-form__grid">
+              <div className="admin-form__field">
+                <label htmlFor="category-name">Name</label>
+                <input id="category-name" type="text" {...register("name")} />
+                {errors.name ? (
+                  <p className="admin-form__error">{errors.name.message}</p>
                 ) : null}
-                <button
-                  className="admin-form__submit"
-                  type="submit"
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                >
-                  {createMutation.isPending || updateMutation.isPending
-                    ? "Saving..."
-                    : selectedCategory
-                      ? "Update Category"
-                      : "Create Category"}
-                </button>
               </div>
-            </form>
-          </div>
-        </section>
+
+              <div className="admin-form__field">
+                <label htmlFor="category-slug">Slug</label>
+                <input
+                  id="category-slug"
+                  type="text"
+                  {...register("slug", {
+                    onChange: () => setSlugDirty(true),
+                  })}
+                />
+                {errors.slug ? (
+                  <p className="admin-form__error">{errors.slug.message}</p>
+                ) : null}
+              </div>
+
+              <div className="admin-form__field admin-form__field--full">
+                <label htmlFor="category-description">Description</label>
+                <textarea
+                  id="category-description"
+                  rows={5}
+                  {...register("description")}
+                />
+              </div>
+            </div>
+
+            {formMessage ? <p className="admin-form__hint">{formMessage}</p> : null}
+
+            <div className="admin-form__actions">
+              {selectedCategory ? (
+                <button
+                  className="admin-form__cancel"
+                  type="button"
+                  onClick={() => {
+                    setSelectedId(null);
+                    setSlugDirty(false);
+                    setFormMessage(null);
+                    reset(defaultValues);
+                  }}
+                >
+                  Clear
+                </button>
+              ) : null}
+              <button
+                className="admin-form__submit"
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
+                {createMutation.isPending || updateMutation.isPending
+                  ? "Saving..."
+                  : selectedCategory
+                    ? "Update Category"
+                    : "Create Category"}
+              </button>
+            </div>
+          </form>
+        </AdminSectionCard>
       </div>
 
       <AdminDeleteDialog

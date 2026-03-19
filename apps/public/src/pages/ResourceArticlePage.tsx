@@ -1,11 +1,11 @@
-import { useEffect } from "react";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useBlogPost } from "../hooks/useBlogPost";
 import { useBlogPosts } from "../hooks/useBlogPosts";
+import { usePage } from "../hooks/usePage";
+import { useResolvedBlogSeo } from "../hooks/useResolvedSeo";
 import { resourcePost, routes } from "../routes";
-import { applyResolvedSeo, siteOrigin } from "../seo";
-import type { BlogPost } from "../types";
+import type { BlogPost, ResourcesPageContent } from "../types";
 import { getRelatedBlogPosts } from "../utils/blog";
 
 const resourceArticlePageStyles = String.raw`
@@ -313,21 +313,8 @@ interface ResourceArticlePageProps {
 export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
   const { data: post, isPending, error } = useBlogPost(slug);
   const { data: posts = [] } = useBlogPosts();
-
-  useEffect(() => {
-    if (!post) {
-      return;
-    }
-
-    applyResolvedSeo({
-      title: post.metaTitle ?? `${post.title} | Exxonim Resources`,
-      description: post.metaDescription ?? post.excerpt,
-      canonicalPath: resourcePost(post.slug),
-      image: post.coverImageSrc ?? `${siteOrigin}/exxonim-logo.webp`,
-      type: "article",
-      robots: "index,follow",
-    });
-  }, [post]);
+  const { data: resourcesPage } = usePage<ResourcesPageContent>("resources");
+  useResolvedBlogSeo(post);
 
   if (isPending) {
     return <LoadingSpinner label="Loading article..." />;
@@ -342,29 +329,24 @@ export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
     );
   }
 
-  const article = post.content ?? {
-    introduction: post.excerpt,
-    highlights: [
-      "Confirm the core facts before the filing or follow-up starts.",
-      "Keep supporting records aligned with the exact submission step.",
-      "Make the next action visible before the process goes quiet.",
-    ],
-    sections: [
-      {
-        heading: "Why this matters",
-        paragraphs: [post.excerpt],
-      },
-      {
-        heading: "How Exxonim approaches it",
-        paragraphs: [
-          "Exxonim keeps registration, licensing, and compliance work moving by making the requirement clear, organizing the supporting records, and tying follow-up to the next specific action instead of a vague status update.",
-        ],
-      },
-    ],
-  };
-  const categoryLabel = post.category?.label ?? "Insight";
-  const authorName = post.author?.name ?? "Exxonim Team";
+  if (!post.content || post.content.sections.length === 0) {
+    return (
+      <ErrorMessage
+        title="Article content is unavailable."
+        detail="This article is missing its published body content."
+      />
+    );
+  }
+
+  const article = post.content;
+  const categoryLabel = post.category?.label;
+  const articleSidebar = resourcesPage?.content.article_sidebar;
   const relatedPosts = getRelatedBlogPosts(post, posts);
+  const metaParts = [formatBlogDate(post.publishedAt)];
+
+  if (post.readTimeMinutes) {
+    metaParts.push(`${post.readTimeMinutes} min read`);
+  }
 
   return (
     <>
@@ -378,9 +360,12 @@ export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
 
           <article className="resource-article-card">
             <div className="resource-article-meta">
-              <span className="resource-article-pill">{categoryLabel}</span>
-              <span>{formatBlogDate(post.publishedAt)}</span>
-              {post.readTimeMinutes ? <span>{post.readTimeMinutes} min read</span> : null}
+              {categoryLabel ? (
+                <span className="resource-article-pill">{categoryLabel}</span>
+              ) : null}
+              {metaParts.map((part) => (
+                <span key={part}>{part}</span>
+              ))}
             </div>
 
             <header className="resource-article-header">
@@ -388,21 +373,25 @@ export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
               <p className="resource-article-intro">{article.introduction}</p>
             </header>
 
-            <div className="resource-article-author" aria-label="Article author">
-              <span className="resource-article-author-badge" aria-hidden="true">
-                {getAuthorInitials(authorName)}
-              </span>
-              <div>
-                <strong>{authorName}</strong>
-                <div>{post.author?.role ?? "Exxonim Team"}</div>
+            {post.author ? (
+              <div className="resource-article-author" aria-label="Article author">
+                <span className="resource-article-author-badge" aria-hidden="true">
+                  {getAuthorInitials(post.author.name)}
+                </span>
+                <div>
+                  <strong>{post.author.name}</strong>
+                  {post.author.role ? <div>{post.author.role}</div> : null}
+                </div>
               </div>
-            </div>
+            ) : null}
 
             <div className="resource-article-cover">
               {post.coverImageSrc ? (
                 <img src={post.coverImageSrc} alt={post.coverAlt ?? post.title} />
               ) : (
-                <div className="resource-article-cover-fallback">{post.mediaLabel}</div>
+                <div className="resource-article-cover-fallback">
+                  {post.mediaLabel || post.title}
+                </div>
               )}
             </div>
 
@@ -418,21 +407,31 @@ export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
                 ))}
               </div>
 
-              <aside className="resource-article-sidebar">
-                <h2>Key takeaways</h2>
-                <ul className="resource-article-highlights">
-                  {article.highlights.map((highlight) => (
-                    <li key={highlight}>{highlight}</li>
-                  ))}
-                </ul>
-                <p className="resource-article-sidebar-copy">
-                  Need help applying this in practice? Exxonim can help you prepare
-                  the next filing step before submission and follow-up work starts.
-                </p>
-                <a className="landing-cta landing-cta--primary" href={routes.contact}>
-                  Contact Exxonim
-                </a>
-              </aside>
+              {article.highlights.length > 0 || articleSidebar ? (
+                <aside className="resource-article-sidebar">
+                  <h2>{articleSidebar?.title ?? "Highlights"}</h2>
+                  {article.highlights.length > 0 ? (
+                    <ul className="resource-article-highlights">
+                      {article.highlights.map((highlight) => (
+                        <li key={highlight}>{highlight}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {articleSidebar?.description ? (
+                    <p className="resource-article-sidebar-copy">
+                      {articleSidebar.description}
+                    </p>
+                  ) : null}
+                  {articleSidebar?.primary_cta ? (
+                    <a
+                      className="landing-cta landing-cta--primary"
+                      href={articleSidebar.primary_cta.href}
+                    >
+                      {articleSidebar.primary_cta.label}
+                    </a>
+                  ) : null}
+                </aside>
+              ) : null}
             </div>
           </article>
 
@@ -446,9 +445,11 @@ export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
                     className="resource-article-related-card"
                     href={resourcePost(relatedPost.slug)}
                   >
-                    <span className="page-card__eyebrow">
-                      {relatedPost.category?.label ?? "Insight"}
-                    </span>
+                    {relatedPost.category?.label ? (
+                      <span className="page-card__eyebrow">
+                        {relatedPost.category.label}
+                      </span>
+                    ) : null}
                     <strong>{relatedPost.title}</strong>
                     <p>{relatedPost.excerpt}</p>
                   </a>

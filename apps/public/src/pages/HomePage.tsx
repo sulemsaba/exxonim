@@ -8,6 +8,8 @@ import { ServicePackagesSection } from "../components/ServicePlansSection";
 import { StackSection } from "../components/StackSection";
 import { useBlogPosts } from "../hooks/useBlogPosts";
 import { usePage } from "../hooks/usePage";
+import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
+import { routes } from "../routes";
 import { getHomeBlogPosts } from "../utils/blog";
 import type { HomePageContent } from "../types";
 
@@ -23,6 +25,8 @@ export function HomePage() {
     isPending: postsPending,
     error: postsError,
   } = useBlogPosts();
+
+  useResolvedPageSeo(page, routes.home);
 
   const scrollRail = (direction: number) => {
     const rail = railRef.current;
@@ -48,36 +52,24 @@ export function HomePage() {
     return <LoadingSpinner label="Loading homepage..." />;
   }
 
-  // Hero always shows with default content if API fails
-  // Only show error if something critical fails
+  if (pageError || !page) {
+    return (
+      <ErrorMessage
+        title="Unable to load the homepage."
+        detail="Check that the page endpoint is available."
+      />
+    );
+  }
 
   const homePosts = getHomeBlogPosts(posts);
 
-  // Default hero content - always displays
-  const defaultHeroContent = {
-    eyebrow: "Welcome",
-    title: "Your Digital Partner",
-    description: "Building innovative solutions for modern businesses",
-    cta: {
-      label: "Get Started",
-      href: "/request-consultation",
-    },
-    highlights: [
-      { title: "100+", detail: "Projects Completed" },
-      { title: "50+", detail: "Happy Clients" },
-      { title: "10+", detail: "Years Experience" },
-    ],
-  };
-
-  const heroContent = page?.content?.hero || defaultHeroContent;
-
   return (
     <>
-      <ReferenceHero content={heroContent} />
-      {page?.content?.provider_section && (
+      <ReferenceHero content={page.content.hero} />
+      {page.content.provider_section && (
         <ProviderSection content={page.content.provider_section} />
       )}
-      {page?.content?.stack_section && (
+      {page.content.stack_section && (
         <StackSection
           items={page.content.stack_section.items}
           defaultFeatureRows={page.content.stack_section.default_feature_rows}
@@ -85,7 +77,7 @@ export function HomePage() {
         />
       )}
       <ServicePackagesSection />
-      {page?.content?.insights_section && (
+      {page.content.insights_section && !postsError && homePosts.length > 0 ? (
         <InsightsSection
           content={page.content.insights_section}
           posts={homePosts}
@@ -93,7 +85,7 @@ export function HomePage() {
           onPrev={() => scrollRail(-1)}
           onNext={() => scrollRail(1)}
         />
-      )}
+      ) : null}
     </>
   );
 }

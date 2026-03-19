@@ -95,6 +95,7 @@ export interface BlogAuthor {
   name: string;
   role?: string;
   avatarSrc?: string;
+  bio?: string;
 }
 
 export interface BlogArticleSection {
@@ -207,6 +208,7 @@ export interface PageRecord<TContent = Record<string, unknown>> {
   content: TContent;
   metaTitle?: string;
   metaDescription?: string;
+  ogImageUrl?: string;
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
@@ -267,21 +269,38 @@ export interface AboutPageContent {
     eyebrow: string;
     title: string;
     paragraphs: string[];
+    working_style_label?: string;
     working_style: string;
+  };
+  support_profiles_section?: {
+    title: string;
+    description: string;
   };
   support_profiles: Array<{
     title: string;
     description: string;
   }>;
+  service_scope_section?: {
+    title: string;
+    description: string;
+  };
   service_scope: Array<{
     title: string;
     description: string;
   }>;
+  operating_model_section?: {
+    title: string;
+    description: string;
+  };
   operating_model: Array<{
     step: string;
     title: string;
     description: string;
   }>;
+  client_expectations_section?: {
+    title: string;
+    description: string;
+  };
   client_expectations: string[];
   cta: {
     title: string;
@@ -375,6 +394,19 @@ export interface TrackingSectionContent {
   workflow_steps: TrackingWorkflowStep[];
 }
 
+export interface RequestConsultationPageContent {
+  hero: {
+    eyebrow: string;
+    title: string;
+    description: string;
+  };
+  summary: {
+    title: string;
+    description: string;
+    bullets: string[];
+  };
+}
+
 export interface ServicesPageContent {
   overview: ServicesOverviewContent;
   catalog: ServicesCatalogContent;
@@ -383,10 +415,19 @@ export interface ServicesPageContent {
 
 export interface ResourcesPageContent {
   hero_title: string;
+  trending_label?: string;
   top_media: {
     hero: string;
     banner: string;
     trending: string[];
+  };
+  article_sidebar?: {
+    title: string;
+    description: string;
+    primary_cta?: {
+      label: string;
+      href: string;
+    };
   };
   empty_state: {
     title: string;
@@ -401,4 +442,10 @@ export interface InfoPageContent {
     description: string;
   };
   sections: ContentSection[];
+  next_step?: {
+    title: string;
+    description: string;
+    primary_action?: { href: string; label: string };
+    secondary_action?: { href: string; label: string };
+  };
 }

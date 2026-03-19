@@ -112,35 +112,3 @@ export function ReferenceHero({ content }: ReferenceHeroProps) {
     </>
   );
 }
-
-              <h1 id="reference-hero-title" className="reference-hero__title">
-                {content.title}
-              </h1>
-
-              <p className="reference-hero__lead">{content.description}</p>
-
-              <div className="reference-hero__actions">
-                <a
-                  className="reference-hero__button reference-hero__button--primary"
-                  href={content.cta.href}
-                >
-                  {content.cta.label}
-                  <span aria-hidden="true">-&gt;</span>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="reference-hero__stats" data-reveal>
-            {content.highlights.map((item) => (
-              <article key={item.title} className="reference-hero__stat">
-                <strong>{item.title}</strong>
-                <p>{item.detail}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}

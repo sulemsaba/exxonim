@@ -1,58 +1,6 @@
 import { routes } from "../routes";
 import type { ServicesOverviewContent } from "../types";
 
-const defaultServiceSignals = [
-  {
-    value: "5",
-    label: "service lanes",
-    detail: "Structured around registrations, compliance, licensing, institutions, and business support.",
-  },
-  {
-    value: "Next",
-    label: "step clarity",
-    detail: "Every engagement is organized around the next action, not vague status updates.",
-  },
-  {
-    value: "End",
-    label: "to end follow-up",
-    detail: "We help from scoping and document prep through submission and authority follow-through.",
-  },
-] as const;
-
-const defaultServiceFlow = [
-  {
-    step: "01",
-    title: "Scope the exact requirement",
-    detail:
-      "We identify the filing, registration, permit, or approval path before the work starts so documents are prepared against the real requirement.",
-  },
-  {
-    step: "02",
-    title: "Prepare the document path",
-    detail:
-      "Ownership details, supporting records, and business information are reviewed against what the process actually asks for.",
-  },
-  {
-    step: "03",
-    title: "Submit and follow through",
-    detail:
-      "Once the pack is active, Exxonim helps coordinate the outstanding step instead of leaving the process open-ended.",
-  },
-  {
-    step: "04",
-    title: "Keep the next move practical",
-    detail:
-      "Where there is backlog, risk, or missing information, we work from the immediate next action so momentum returns fast.",
-  },
-] as const;
-
-const defaultServicePromises = [
-  "Clearer requirements before submission starts",
-  "Better organized documents across recurring filings",
-  "Support that holds up under authority review",
-  "A cleaner path for approvals, renewals, and handover",
-] as const;
-
 const servicesOverviewStyles = String.raw`
   .services-overview {
     --services-text: var(--color-text);
@@ -472,16 +420,10 @@ interface ServicesOverviewSectionProps {
 export function ServicesOverviewSection({
   content,
 }: ServicesOverviewSectionProps) {
-  const serviceSignals = content.service_signals.length
-    ? content.service_signals
-    : defaultServiceSignals;
+  const serviceSignals = content.service_signals;
   const serviceNavGroups = content.service_nav_groups;
-  const serviceFlow = content.service_flow.length
-    ? content.service_flow
-    : defaultServiceFlow;
-  const servicePromises = content.service_promises.length
-    ? content.service_promises
-    : defaultServicePromises;
+  const serviceFlow = content.service_flow;
+  const servicePromises = content.service_promises;
 
   return (
     <>

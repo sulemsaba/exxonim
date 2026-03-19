@@ -5,10 +5,13 @@ import { ResultsSection } from "../components/ResultsSection";
 import { ServicePackagesSection } from "../components/ServicePlansSection";
 import { ServicesOverviewSection } from "../components/ServicesOverviewSection";
 import { usePage } from "../hooks/usePage";
+import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
+import { routes } from "../routes";
 import type { ServicesPageContent } from "../types";
 
 export function ServicesPage() {
   const { data: page, isPending, error } = usePage<ServicesPageContent>("services");
+  useResolvedPageSeo(page, routes.services);
 
   if (isPending) {
     return <LoadingSpinner label="Loading services..." />;

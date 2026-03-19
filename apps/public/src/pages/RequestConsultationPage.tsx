@@ -1,5 +1,11 @@
 import { useState, type FormEvent } from "react";
+import { ErrorMessage } from "../components/ErrorMessage";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { usePage } from "../hooks/usePage";
+import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
+import { routes } from "../routes";
 import { createPublicConsultation } from "../services/consultationService";
+import type { RequestConsultationPageContent } from "../types";
 
 const requestConsultationStyles = String.raw`
   .consultation-request {
@@ -201,6 +207,9 @@ function createIdempotencyKey() {
 }
 
 export function RequestConsultationPage() {
+  const { data: page, isPending, error } =
+    usePage<RequestConsultationPageContent>("request-consultation");
+  useResolvedPageSeo(page, routes.requestConsultation);
   const [form, setForm] = useState({
     full_name: "",
     email: "",
@@ -245,6 +254,19 @@ export function RequestConsultationPage() {
     }
   }
 
+  if (isPending) {
+    return <LoadingSpinner label="Loading consultation request..." />;
+  }
+
+  if (error || !page) {
+    return (
+      <ErrorMessage
+        title="Unable to load the consultation request page."
+        detail="Check that the page endpoint is available."
+      />
+    );
+  }
+
   return (
     <>
       <style>{requestConsultationStyles}</style>
@@ -255,13 +277,10 @@ export function RequestConsultationPage() {
               <div className="consultation-request__header">
                 <p className="section-pill">
                   <span></span>
-                  Consultation Request
+                  {page.content.hero.eyebrow}
                 </p>
-                <h1>Start the conversation with the details that matter.</h1>
-                <p>
-                  Share the core problem, your contact details, and any company context.
-                  You will receive a tracking ID immediately.
-                </p>
+                <h1>{page.content.hero.title}</h1>
+                <p>{page.content.hero.description}</p>
               </div>
 
               {successState ? (
@@ -281,7 +300,7 @@ export function RequestConsultationPage() {
                         Open Tracking Portal
                       </a>
                     ) : (
-                      <a className="consultation-request__link" href="/track-consultation/">
+                      <a className="consultation-request__link" href={routes.tracking}>
                         Track Consultation
                       </a>
                     )}
@@ -350,7 +369,7 @@ export function RequestConsultationPage() {
                     </div>
 
                     <div className="consultation-request__field consultation-request__field--full">
-                      <label htmlFor="consultation-message">How can Exxonim help?</label>
+                      <label htmlFor="consultation-message">Request details</label>
                       <textarea
                         id="consultation-message"
                         value={form.message}
@@ -389,16 +408,12 @@ export function RequestConsultationPage() {
             </div>
 
             <aside className="consultation-request__summary">
-              <h2>What happens next</h2>
-              <p>
-                Every request gets a tracking ID, a secure portal link, and a timeline that
-                updates when the consultation status changes.
-              </p>
+              <h2>{page.content.summary.title}</h2>
+              <p>{page.content.summary.description}</p>
               <ul>
-                <li>Immediate confirmation and tracking ID.</li>
-                <li>Secure magic-link access to the consultation portal.</li>
-                <li>Status updates and public notes as the case moves forward.</li>
-                <li>Manual follow-up from the assigned consultant when needed.</li>
+                {page.content.summary.bullets.map((bullet) => (
+                  <li key={bullet}>{bullet}</li>
+                ))}
               </ul>
             </aside>
           </div>

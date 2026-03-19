@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
+import { AdminSectionCard } from "../../components/admin/AdminSectionCard";
+import { AdminStatusBadge } from "../../components/admin/AdminStatusBadge";
 import { ErrorMessage } from "../../components/ErrorMessage";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import { getAdminDashboardSummary } from "../../services/adminDashboardService";
@@ -36,10 +38,7 @@ export function AdminDashboardPage() {
   }
 
   const summary = summaryQuery.data;
-  const maxChartValue = Math.max(
-    1,
-    ...summary.consultation_inflow.map((item) => item.count)
-  );
+  const maxChartValue = Math.max(1, ...summary.consultation_inflow.map((item) => item.count));
 
   return (
     <div className="adminx-page-body">
@@ -84,182 +83,157 @@ export function AdminDashboardPage() {
       </section>
 
       <div className="admin-grid">
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>Consultation Inflow</h2>
-              <p>Daily request volume over the last 14 days.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            {summary.consultation_inflow.length ? (
-              <div className="adminx-chart" aria-label="Consultation inflow chart">
-                {summary.consultation_inflow.map((point) => (
-                  <div key={point.label} className="adminx-chart__bar">
-                    <div
-                      className="adminx-chart__bar-fill"
-                      style={{ height: `${Math.max((point.count / maxChartValue) * 180, 12)}px` }}
-                      title={`${point.count} consultations`}
-                    ></div>
-                    <span className="adminx-chart__label">{point.label}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <AdminEmptyState
-                title="No inflow data"
-                description="Consultation volume will appear here once requests start arriving."
-              />
-            )}
-          </div>
-        </section>
-
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>Activity Feed</h2>
-              <p>Publishing, settings, SEO, and workflow events.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            {summary.recent_activity.length ? (
-              <div className="adminx-activity-list">
-                {summary.recent_activity.map((item) => (
-                  <article key={item.id} className="adminx-activity-item">
-                    <span className="adminx-activity-item__title">
-                      {item.actor_name} {item.action_type.replace(/_/g, " ")}
-                    </span>
-                    <span className="adminx-activity-item__meta">
-                      {item.target_label}
-                      {item.detail ? ` · ${item.detail}` : ""}
-                    </span>
-                    <span className="adminx-activity-item__meta">
-                      {new Date(item.created_at).toLocaleString()}
-                    </span>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <AdminEmptyState
-                title="No recent activity"
-                description="Publishing, consultation, and settings events will appear here."
-              />
-            )}
-          </div>
-        </section>
-      </div>
-
-      <div className="adminx-card-grid adminx-card-grid--two">
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>Recent Consultations</h2>
-              <p>Newest requests across the operations queue.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            {summary.recent_consultations.length ? (
-              <div className="adminx-activity-list">
-                {summary.recent_consultations.map((item) => (
-                  <article key={item.id} className="adminx-activity-item">
-                    <span className="adminx-activity-item__title">{item.client_name}</span>
-                    <span className="adminx-activity-item__meta">
-                      {item.tracking_id} · {item.subject}
-                    </span>
-                    <span className="adminx-activity-item__meta">
-                      {item.status}
-                      {item.assignee_name ? ` · ${item.assignee_name}` : ""}
-                    </span>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <AdminEmptyState
-                title="No consultations"
-                description="Consultation records will appear here as soon as new requests are created."
-              />
-            )}
-          </div>
-        </section>
-
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>Content Pipeline</h2>
-              <p>Posts and pages waiting for better SEO or publication.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            {summary.content_pipeline.length ? (
-              <div className="adminx-activity-list">
-                {summary.content_pipeline.map((item) => (
-                  <article key={item.id} className="adminx-activity-item">
-                    <span className="adminx-activity-item__title">{item.title}</span>
-                    <span className="adminx-activity-item__meta">
-                      /{item.kind === "blog_post" ? "blog" : "pages"}/{item.slug} · {item.status}
-                    </span>
-                    <span className="adminx-activity-item__meta">
-                      SEO: {item.seo_health} · Completion: {item.completion_percent}%
-                    </span>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <AdminEmptyState
-                title="No content items"
-                description="Draft posts and pages with SEO gaps will appear here."
-              />
-            )}
-          </div>
-        </section>
-      </div>
-
-      <section className="admin-card">
-        <div className="admin-card__header">
-          <div>
-            <h2>Open Job Listings</h2>
-            <p>Published roles visible from the hiring workspace.</p>
-          </div>
-        </div>
-        <div className="admin-card__body">
-          {summary.open_jobs.length ? (
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Role</th>
-                    <th>Department</th>
-                    <th>Type</th>
-                    <th>Location</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {summary.open_jobs.map((job) => (
-                    <tr key={job.id}>
-                      <td>
-                        <strong>{job.title}</strong>
-                        <p>{job.slug}</p>
-                      </td>
-                      <td>{job.department}</td>
-                      <td>{job.employment_type}</td>
-                      <td>{job.location}</td>
-                      <td>
-                        <span className="admin-status admin-status--published">{job.status}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <AdminSectionCard
+          title="Consultation Inflow"
+          description="Daily request volume over the last 14 days."
+        >
+          {summary.consultation_inflow.length ? (
+            <div className="adminx-chart" aria-label="Consultation inflow chart">
+              {summary.consultation_inflow.map((point) => (
+                <div key={point.label} className="adminx-chart__bar">
+                  <div
+                    className="adminx-chart__bar-fill"
+                    style={{ height: `${Math.max((point.count / maxChartValue) * 180, 12)}px` }}
+                    title={`${point.count} consultations`}
+                  ></div>
+                  <span className="adminx-chart__label">{point.label}</span>
+                </div>
+              ))}
             </div>
           ) : (
             <AdminEmptyState
-              title="No active job listings"
-              description="Create a new job from the hiring workspace to populate this table."
+              title="No inflow data"
+              description="Consultation volume will appear here once requests start arriving."
             />
           )}
-        </div>
-      </section>
+        </AdminSectionCard>
+
+        <AdminSectionCard
+          title="Activity Feed"
+          description="Publishing, settings, SEO, and workflow events."
+        >
+          {summary.recent_activity.length ? (
+            <div className="adminx-activity-list">
+              {summary.recent_activity.map((item) => (
+                <article key={item.id} className="adminx-activity-item">
+                  <span className="adminx-activity-item__title">
+                    {item.actor_name} {item.action_type.replace(/_/g, " ")}
+                  </span>
+                  <span className="adminx-activity-item__meta">
+                    {item.target_label}
+                    {item.detail ? ` | ${item.detail}` : ""}
+                  </span>
+                  <span className="adminx-activity-item__meta">
+                    {new Date(item.created_at).toLocaleString()}
+                  </span>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <AdminEmptyState
+              title="No recent activity"
+              description="Publishing, consultation, and settings events will appear here."
+            />
+          )}
+        </AdminSectionCard>
+      </div>
+
+      <div className="adminx-card-grid adminx-card-grid--two">
+        <AdminSectionCard
+          title="Recent Consultations"
+          description="Newest requests across the operations queue."
+        >
+          {summary.recent_consultations.length ? (
+            <div className="adminx-activity-list">
+              {summary.recent_consultations.map((item) => (
+                <article key={item.id} className="adminx-activity-item">
+                  <span className="adminx-activity-item__title">{item.client_name}</span>
+                  <span className="adminx-activity-item__meta">
+                    {item.tracking_id} | {item.subject}
+                  </span>
+                  <span className="adminx-activity-item__meta">
+                    {item.status}
+                    {item.assignee_name ? ` | ${item.assignee_name}` : ""}
+                  </span>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <AdminEmptyState
+              title="No consultations"
+              description="Consultation records will appear here as soon as new requests are created."
+            />
+          )}
+        </AdminSectionCard>
+
+        <AdminSectionCard
+          title="Content Pipeline"
+          description="Posts and pages waiting for better SEO or publication."
+        >
+          {summary.content_pipeline.length ? (
+            <div className="adminx-activity-list">
+              {summary.content_pipeline.map((item) => (
+                <article key={item.id} className="adminx-activity-item">
+                  <span className="adminx-activity-item__title">{item.title}</span>
+                  <span className="adminx-activity-item__meta">
+                    /{item.kind === "blog_post" ? "blog" : "pages"}/{item.slug} | {item.status}
+                  </span>
+                  <span className="adminx-activity-item__meta">
+                    SEO: {item.seo_health} | Completion: {item.completion_percent}%
+                  </span>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <AdminEmptyState
+              title="No content items"
+              description="Draft posts and pages with SEO gaps will appear here."
+            />
+          )}
+        </AdminSectionCard>
+      </div>
+
+      <AdminSectionCard
+        title="Open Job Listings"
+        description="Published roles visible from the hiring workspace."
+      >
+        {summary.open_jobs.length ? (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Role</th>
+                  <th>Department</th>
+                  <th>Type</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.open_jobs.map((job) => (
+                  <tr key={job.id}>
+                    <td>
+                      <strong>{job.title}</strong>
+                      <p>{job.slug}</p>
+                    </td>
+                    <td>{job.department}</td>
+                    <td>{job.employment_type}</td>
+                    <td>{job.location}</td>
+                    <td>
+                      <AdminStatusBadge label={job.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <AdminEmptyState
+            title="No active job listings"
+            description="Create a new job from the hiring workspace to populate this table."
+          />
+        )}
+      </AdminSectionCard>
     </div>
   );
 }

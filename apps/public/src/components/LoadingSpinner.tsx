@@ -1,12 +1,16 @@
 interface LoadingSpinnerProps {
   label?: string;
   compact?: boolean;
+  minHeight?: string;
 }
 
 export function LoadingSpinner({
   label = "Loading content...",
   compact = false,
+  minHeight,
 }: LoadingSpinnerProps) {
+  const reservedHeight = minHeight ?? (compact ? undefined : "clamp(18rem, 42vh, 28rem)");
+
   return (
     <>
       <style>{`
@@ -15,6 +19,7 @@ export function LoadingSpinner({
           place-items: center;
           gap: 0.9rem;
           padding: ${compact ? "1rem" : "3rem 1.25rem"};
+          min-height: ${reservedHeight ?? "auto"};
           color: var(--color-text-muted);
           text-align: center;
         }

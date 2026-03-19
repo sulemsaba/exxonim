@@ -57,10 +57,10 @@ function withSeo(templateHtml, seo) {
   return nextHtml;
 }
 
-const prerenderRoutes = getPrerenderRoutes();
+const prerenderRoutes = await getPrerenderRoutes();
 
 for (const route of prerenderRoutes) {
-  const { appHtml, seo } = renderPage(route);
+  const { appHtml, seo } = await renderPage(route);
   const output = withSeo(
     template.replace('<div id="root"></div>', `<div id="root">${appHtml}</div>`),
     seo
@@ -74,7 +74,7 @@ for (const route of prerenderRoutes) {
   await writeFile(targetPath, output, "utf8");
 }
 
-const { appHtml: notFoundHtml, seo: notFoundSeo } = renderPage("/404/");
+const { appHtml: notFoundHtml, seo: notFoundSeo } = await renderPage("/404/");
 const notFoundOutput = withSeo(
   template.replace('<div id="root"></div>', `<div id="root">${notFoundHtml}</div>`),
   notFoundSeo

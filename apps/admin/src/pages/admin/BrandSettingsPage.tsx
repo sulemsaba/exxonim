@@ -24,8 +24,8 @@ export function BrandSettingsPage() {
     lightLogoSrc: "",
     darkLogoSrc: "",
     faviconUrl: "",
-    brandPrimary: "#3a6600",
-    brandSecondary: "#0d8a64",
+    brandPrimary: "#0f5c63",
+    brandSecondary: "#73c7bb",
   });
 
   const brandQuery = useQuery({
@@ -53,8 +53,8 @@ export function BrandSettingsPage() {
       lightLogoSrc: brandQuery.data?.value.lightLogoSrc ?? "",
       darkLogoSrc: brandQuery.data?.value.darkLogoSrc ?? "",
       faviconUrl: brandQuery.data?.value.faviconUrl ?? "",
-      brandPrimary: brandQuery.data?.value.brandColors.primary ?? "#3a6600",
-      brandSecondary: brandQuery.data?.value.brandColors.secondary ?? "#0d8a64",
+      brandPrimary: brandQuery.data?.value.brandColors?.primary ?? "#0f5c63",
+      brandSecondary: brandQuery.data?.value.brandColors?.secondary ?? "#73c7bb",
     });
   }, [brandQuery.data, companyQuery.data]);
 

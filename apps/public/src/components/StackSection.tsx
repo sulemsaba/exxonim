@@ -62,7 +62,7 @@ const featureVisualContentMap: Record<FeatureVisualKey, FeatureVisualContent> = 
   registration: {
     workstreamValue: "Registration and setup",
     counterpartLabel: "Client",
-    counterpartValue: "Exxonim Consultation",
+    counterpartValue: "Client coordination",
     focusValue: "Company, NGO, business name, and trademark setup",
     summaryTitle: "Clear setup steps, fewer avoidable corrections.",
     summaryBody:
@@ -71,7 +71,7 @@ const featureVisualContentMap: Record<FeatureVisualKey, FeatureVisualContent> = 
   tax: {
     workstreamValue: "Compliance and approvals",
     counterpartLabel: "Client",
-    counterpartValue: "Exxonim Consultation",
+    counterpartValue: "Client coordination",
     focusValue: "TIN, licensing, returns, and approvals",
     summaryTitle: "Clear next steps, fewer avoidable delays.",
     summaryBody:
@@ -995,7 +995,7 @@ function renderStudyVisual(index: number) {
         <div className="study-visual-track">
           <div className="study-card study-card--light">
             <div className="study-topline" />
-            <div className="study-brand">Exxonim</div>
+            <div className="study-brand">Reference</div>
             <div className="study-small">Registration Overview</div>
             <div className="study-big">
               Company, business name, NGO, and trademark setup support.
@@ -1007,7 +1007,7 @@ function renderStudyVisual(index: number) {
 
           <div className="study-card study-card--dark">
             <div className="study-topline" />
-            <div className="study-brand">Exxonim</div>
+            <div className="study-brand">Reference</div>
             <div className="study-divider" />
             <div className="study-paragraph">
               Clear documentation, coordinated follow-up, and fewer avoidable
@@ -1049,7 +1049,7 @@ function renderStudyVisual(index: number) {
       <div className="study-visual-track">
         <div className="study-card study-card--light">
           <div className="study-topline" />
-          <div className="study-brand">Exxonim</div>
+          <div className="study-brand">Reference</div>
           <div className="study-small">Business Readiness Pack</div>
           <div className="study-big">
             Compliance, licensing, and institutional support you can act on.
@@ -1061,7 +1061,7 @@ function renderStudyVisual(index: number) {
 
         <div className="study-card study-card--dark">
           <div className="study-topline" />
-          <div className="study-brand">Exxonim</div>
+          <div className="study-brand">Reference</div>
           <div className="study-divider" />
           <div className="study-paragraph">
             Submission-ready support across tax, licensing, registrations, and
@@ -1102,7 +1102,7 @@ function renderTaxApprovalsVisual() {
 
         <div className="compose-row">
           <span>Client</span>
-          <span>Exxonim Consultation</span>
+          <span>Client coordination</span>
         </div>
 
         <div className="compose-subject">

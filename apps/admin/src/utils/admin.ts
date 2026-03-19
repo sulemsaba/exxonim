@@ -1,6 +1,14 @@
 import axios from "axios";
 import type { ApiContentStatus } from "../types/api";
 
+export type AdminStatusTone =
+  | "published"
+  | "draft"
+  | "danger"
+  | "active"
+  | "inactive"
+  | "warning";
+
 export function slugify(value: string) {
   return value
     .toLowerCase()
@@ -93,6 +101,102 @@ export function getContentStatus(value: {
   }
 
   return "draft" as const;
+}
+
+export function getAdminStatusTone(status?: string | null): AdminStatusTone {
+  switch (status) {
+    case "published":
+    case "active":
+    case "completed":
+    case "open":
+      return "published";
+    case "archived":
+    case "cancelled":
+    case "inactive":
+    case "closed":
+      return "danger";
+    case "pending":
+    case "contacted":
+    case "warning":
+      return "warning";
+    default:
+      return "draft";
+  }
+}
+
+export function formatAdminRole(role?: string | null) {
+  if (!role) {
+    return "Administrator";
+  }
+
+  return role === "editor" ? "Editor" : "Administrator";
+}
+
+export function getAdminLabel(email?: string | null, fullName?: string | null) {
+  if (fullName?.trim()) {
+    return fullName.trim();
+  }
+
+  if (email?.trim()) {
+    return email.trim();
+  }
+
+  return "Admin User";
+}
+
+export function getAdminInitials(email?: string | null, fullName?: string | null) {
+  const source = fullName?.trim() || email?.split("@")[0] || "AU";
+  const parts = source.split(/[.\s_-]+/).filter(Boolean);
+
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  }
+
+  return source.slice(0, 2).toUpperCase();
+}
+
+export function normalizeHexColor(value: string | null | undefined, fallback: string) {
+  const normalizedValue = value?.trim() ?? "";
+  const normalizedFallback = fallback.trim();
+  const fallbackMatch = normalizedFallback.match(/^#?([a-f0-9]{3}|[a-f0-9]{6})$/i);
+
+  const fallbackColor = fallbackMatch
+    ? `#${fallbackMatch[1].length === 3
+        ? fallbackMatch[1]
+            .split("")
+            .map((part) => `${part}${part}`)
+            .join("")
+        : fallbackMatch[1].toLowerCase()}`
+    : "#0f5c63";
+  const match = normalizedValue.match(/^#?([a-f0-9]{3}|[a-f0-9]{6})$/i);
+
+  if (!match) {
+    return fallbackColor;
+  }
+
+  const hexValue =
+    match[1].length === 3
+      ? match[1]
+          .split("")
+          .map((part) => `${part}${part}`)
+          .join("")
+      : match[1];
+
+  return `#${hexValue.toLowerCase()}`;
+}
+
+export function getReadableForegroundColor(
+  backgroundColor: string,
+  lightColor = "#f7fbfb",
+  darkColor = "#08181b"
+) {
+  const normalizedColor = normalizeHexColor(backgroundColor, "#0f5c63").slice(1);
+  const red = parseInt(normalizedColor.slice(0, 2), 16);
+  const green = parseInt(normalizedColor.slice(2, 4), 16);
+  const blue = parseInt(normalizedColor.slice(4, 6), 16);
+  const luminance = (red * 0.299 + green * 0.587 + blue * 0.114) / 255;
+
+  return luminance > 0.64 ? darkColor : lightColor;
 }
 
 export function isContentPublished(value: {

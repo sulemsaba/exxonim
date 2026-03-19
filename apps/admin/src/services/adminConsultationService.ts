@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { apiRoutes } from "@exxonim/shared/api/routes";
 import type {
   ApiAdminStaff,
   ApiConsultationAdminDetail,
@@ -32,7 +33,7 @@ export interface AdminConsultationNotifyPayload {
 
 export async function getAdminConsultations(params: AdminConsultationListParams = {}) {
   const response = await api.get<ApiConsultationAdminListResponse>(
-    "/admin/consultations",
+    apiRoutes.admin.consultations.list,
     {
       params,
     }
@@ -42,7 +43,9 @@ export async function getAdminConsultations(params: AdminConsultationListParams 
 }
 
 export async function getAdminConsultation(id: number) {
-  const response = await api.get<ApiConsultationAdminDetail>(`/admin/consultations/${id}`);
+  const response = await api.get<ApiConsultationAdminDetail>(
+    apiRoutes.admin.consultations.detail(id)
+  );
   return response.data;
 }
 
@@ -51,7 +54,7 @@ export async function updateAdminConsultation(
   payload: AdminConsultationUpdatePayload
 ) {
   const response = await api.put<ApiConsultationAdminDetail>(
-    `/admin/consultations/${id}`,
+    apiRoutes.admin.consultations.detail(id),
     payload
   );
 
@@ -63,7 +66,7 @@ export async function notifyAdminConsultation(
   payload: AdminConsultationNotifyPayload
 ) {
   const response = await api.post<ApiConsultationManualNotifyResponse>(
-    `/admin/consultations/${id}/notify`,
+    apiRoutes.admin.consultations.notify(id),
     payload
   );
 
@@ -71,6 +74,6 @@ export async function notifyAdminConsultation(
 }
 
 export async function getAdminStaff() {
-  const response = await api.get<ApiAdminStaff[]>("/admin/staff");
+  const response = await api.get<ApiAdminStaff[]>(apiRoutes.admin.staff);
   return response.data;
 }

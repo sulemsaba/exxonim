@@ -4,7 +4,8 @@ import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useBlogCategories } from "../hooks/useBlogCategories";
 import { useBlogPosts } from "../hooks/useBlogPosts";
 import { usePage } from "../hooks/usePage";
-import { resourcePost } from "../routes";
+import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
+import { resourcePost, routes } from "../routes";
 import type {
   BlogCategoryId,
   BlogFeaturedSlot,
@@ -1213,7 +1214,9 @@ function getVisualSlot(post: BlogPost): VisualSlot {
 }
 
 function renderAuthor(post: BlogPost) {
-  const authorName = post.author?.name ?? "Exxonim Team";
+  if (!post.author) {
+    return null;
+  }
 
   return (
     <div className="cx-author">
@@ -1226,23 +1229,22 @@ function renderAuthor(post: BlogPost) {
         />
       ) : (
         <span className="cx-author-fallback" aria-hidden="true">
-          {getAuthorInitials(authorName)}
+          {getAuthorInitials(post.author.name)}
         </span>
       )}
 
-      <span className="cx-author-name">{authorName}</span>
+      <span className="cx-author-name">{post.author.name}</span>
     </div>
   );
 }
 
 function renderPlaceholder(
   post: BlogPost,
-  categoryLabel: string,
+  categoryLabel: string | undefined,
   slot: VisualSlot,
   variant: MediaVariant
 ) {
-  const metaLabel =
-    slot === "editors-pick" && variant !== "hero" ? "Operational brief" : categoryLabel;
+  const metaLabel = categoryLabel ?? "Article";
   const mediaLabel = post.mediaLabel || post.title;
 
   return (
@@ -1260,7 +1262,12 @@ function renderPlaceholder(
   );
 }
 
-function renderMedia(post: BlogPost, categoryLabel: string, slot: VisualSlot, variant: MediaVariant) {
+function renderMedia(
+  post: BlogPost,
+  categoryLabel: string | undefined,
+  slot: VisualSlot,
+  variant: MediaVariant
+) {
   if (post.coverImageSrc) {
     return (
       <>
@@ -1270,7 +1277,7 @@ function renderMedia(post: BlogPost, categoryLabel: string, slot: VisualSlot, va
           alt={post.coverAlt ?? post.title}
         />
         <div className="cx-cover-overlay">
-          <span>{categoryLabel}</span>
+          {categoryLabel ? <span>{categoryLabel}</span> : null}
           <strong>{post.mediaLabel || post.title}</strong>
         </div>
       </>
@@ -1281,7 +1288,6 @@ function renderMedia(post: BlogPost, categoryLabel: string, slot: VisualSlot, va
 }
 
 function renderTopHeroByline(post: BlogPost) {
-  const authorName = post.author?.name ?? "Exxonim Team";
   const metaParts = [formatBlogDate(post.publishedAt)];
 
   if (post.readTimeMinutes) {
@@ -1290,27 +1296,29 @@ function renderTopHeroByline(post: BlogPost) {
 
   return (
     <div className="cx-top-hero-byline">
-      <div className="cx-author">
-        {post.author?.avatarSrc ? (
-          <img
-            className="cx-author-img"
-            src={post.author.avatarSrc}
-            alt={post.author.name}
-            loading="lazy"
-          />
-        ) : (
-          <span className="cx-author-fallback" aria-hidden="true">
-            {getAuthorInitials(authorName)}
-          </span>
-        )}
+      {post.author ? (
+        <div className="cx-author">
+          {post.author.avatarSrc ? (
+            <img
+              className="cx-author-img"
+              src={post.author.avatarSrc}
+              alt={post.author.name}
+              loading="lazy"
+            />
+          ) : (
+            <span className="cx-author-fallback" aria-hidden="true">
+              {getAuthorInitials(post.author.name)}
+            </span>
+          )}
 
-        <span className="cx-author-name">{authorName}</span>
-      </div>
+          <span className="cx-author-name">{post.author.name}</span>
+        </div>
+      ) : null}
 
       {post.author?.role ? (
         <span className="cx-top-hero-role">{post.author.role}</span>
       ) : null}
-      <span className="cx-top-hero-metaText">{metaParts.join(" \u00b7 ")}</span>
+      <span className="cx-top-hero-metaText">{metaParts.join(" | ")}</span>
     </div>
   );
 }
@@ -1320,7 +1328,7 @@ function renderTopListItem(
   index: number,
   trendingMedia: string[]
 ) {
-  const categoryLabel = post.category?.label ?? "Insight";
+  const categoryLabel = post.category?.label;
   const articleLink = resourcePost(post.slug);
   const metaParts = [formatBlogDate(post.publishedAt)];
   const thumbnailSrc =
@@ -1339,8 +1347,10 @@ function renderTopListItem(
       <div className="cx-trending-content">
         <h3>{post.title}</h3>
         <div className="cx-trending-meta">
-          <span className="cx-trending-metaText">{metaParts.join(" · ")}</span>
-          <span className="cx-trending-pill">{categoryLabel}</span>
+          <span className="cx-trending-metaText">{metaParts.join(" | ")}</span>
+          {categoryLabel ? (
+            <span className="cx-trending-pill">{categoryLabel}</span>
+          ) : null}
         </div>
       </div>
     </a>
@@ -1348,9 +1358,14 @@ function renderTopListItem(
 }
 
 function renderGridCard(post: BlogPost) {
-  const categoryLabel = post.category?.label ?? "Insight";
+  const categoryLabel = post.category?.label;
   const slot = getVisualSlot(post);
   const articleLink = resourcePost(post.slug);
+  const metaParts = [formatBlogDate(post.publishedAt)];
+
+  if (categoryLabel) {
+    metaParts.push(categoryLabel);
+  }
 
   return (
     <article className="cx-post-card">
@@ -1359,11 +1374,7 @@ function renderGridCard(post: BlogPost) {
       </div>
 
       <div className="cx-post-content">
-        <span className="cx-date">
-          {formatBlogDate(post.publishedAt)}
-          {" · "}
-          {categoryLabel}
-        </span>
+        <span className="cx-date">{metaParts.join(" | ")}</span>
         <h3>{post.title}</h3>
         <p>{post.excerpt}</p>
 
@@ -1396,6 +1407,7 @@ export function ResourcesPage() {
     isPending: pagePending,
     error: pageError,
   } = usePage<ResourcesPageContent>("resources");
+  useResolvedPageSeo(page, routes.resources);
 
   if (postsPending || categoriesPending || pagePending) {
     return <LoadingSpinner label="Loading resources..." />;
@@ -1464,7 +1476,10 @@ export function ResourcesPage() {
                   </div>
                 </a>
 
-                <aside className="cx-top-aside" aria-label="Trending articles">
+                <aside
+                  className="cx-top-aside"
+                  aria-label={page.content.trending_label ?? "Trending articles"}
+                >
                   <div className="cx-trending-banner">
                     <img
                       className="cx-trending-bannerImage"
@@ -1473,7 +1488,9 @@ export function ResourcesPage() {
                       aria-hidden="true"
                     />
                     <div className="cx-trending-bannerContent">
-                      <h2>Trending on Exxonim</h2>
+                      {page.content.trending_label ? (
+                        <h2>{page.content.trending_label}</h2>
+                      ) : null}
                     </div>
                   </div>
 

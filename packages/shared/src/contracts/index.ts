@@ -7,6 +7,7 @@ export * from "./access";
 export * from "./jobs";
 export * from "./media";
 export * from "./navigation";
+export * from "./pagination";
 export * from "./pages";
 export * from "./pricing";
 export * from "./site-settings";

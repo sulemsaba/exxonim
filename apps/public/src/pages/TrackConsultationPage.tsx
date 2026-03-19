@@ -3,6 +3,8 @@ import type { ApiConsultationPublic } from "../types/api";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { usePage } from "../hooks/usePage";
+import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
+import { routes } from "../routes";
 import {
   getPublicConsultation,
   requestConsultationMagicLink,
@@ -280,6 +282,7 @@ function getTrackingIdFromToken(token: string) {
 export function TrackConsultationPage() {
   const { data: page, isPending, error } =
     usePage<TrackingSectionContent>("track-consultation");
+  useResolvedPageSeo(page, routes.tracking);
   const [email, setEmail] = useState("");
   const [trackingId, setTrackingId] = useState("");
   const [token, setToken] = useState<string | null>(null);
@@ -344,20 +347,6 @@ export function TrackConsultationPage() {
     };
   }, [token, trackingId]);
 
-  const introContent = useMemo(
-    () =>
-      page?.content ?? {
-        eyebrow: "Track consultation",
-        title: "Keep up with the next step in your consultation.",
-        description:
-          "Use your tracking ID and email address to request a fresh secure link.",
-        checkpoints: [],
-        case_examples: [],
-        workflow_steps: [],
-      },
-    [page]
-  );
-
   async function handleRequestMagicLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsRequestingLink(true);
@@ -409,12 +398,12 @@ export function TrackConsultationPage() {
         <div className="container">
           <div className="tracking-portal__stack">
             <div className="tracking-portal__hero">
-              <p className="section-pill">
-                <span></span>
-                {introContent.eyebrow}
-              </p>
-              <h1>{introContent.title}</h1>
-              <p>{introContent.description}</p>
+                <p className="section-pill">
+                  <span></span>
+                  {page.content.eyebrow}
+                </p>
+              <h1>{page.content.title}</h1>
+              <p>{page.content.description}</p>
             </div>
 
             <div className="tracking-portal__grid">
@@ -553,7 +542,7 @@ export function TrackConsultationPage() {
                           setRequestMessage(null);
                           setErrorMessage(null);
                           if (typeof window !== "undefined") {
-                            window.history.replaceState({}, "", "/track-consultation/");
+                            window.history.replaceState({}, "", routes.tracking);
                           }
                         }}
                       >

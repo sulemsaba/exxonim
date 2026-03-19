@@ -1,10 +1,13 @@
 import { ErrorMessage } from "../components/ErrorMessage";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { usePage } from "../hooks/usePage";
+import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
+import { routes } from "../routes";
 import type { FaqPageContent } from "../types";
 
 export function FaqPage() {
   const { data: page, isPending, error } = usePage<FaqPageContent>("faq");
+  useResolvedPageSeo(page, routes.faq);
 
   if (isPending) {
     return <LoadingSpinner label="Loading FAQ..." />;

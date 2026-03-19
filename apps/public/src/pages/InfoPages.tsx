@@ -2,6 +2,7 @@ import { routes } from "../routes";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { usePage } from "../hooks/usePage";
+import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
 import type { ContentSection, InfoPageContent } from "../types";
 
 const infoPageStyles = String.raw`
@@ -111,8 +112,7 @@ interface ContentPageProps {
   title: string;
   description: string;
   sections: ContentSection[];
-  primaryAction?: { href: string; label: string };
-  secondaryAction?: { href: string; label: string };
+  nextStep?: InfoPageContent["next_step"];
 }
 
 function ContentPage({
@@ -120,8 +120,7 @@ function ContentPage({
   title,
   description,
   sections,
-  primaryAction,
-  secondaryAction,
+  nextStep,
 }: ContentPageProps) {
   return (
     <>
@@ -154,26 +153,25 @@ function ContentPage({
               </section>
             ))}
 
-            {primaryAction || secondaryAction ? (
+            {nextStep ? (
               <section className="info-page__section">
-                <h2>Next step</h2>
-                <p>
-                  If you need help with a live filing, a licensing question, or a
-                  document handoff, use the contact options below and Exxonim will
-                  guide the next practical step.
-                </p>
+                <h2>{nextStep.title}</h2>
+                <p>{nextStep.description}</p>
                 <div className="info-page__actions">
-                  {primaryAction ? (
-                    <a className="landing-cta landing-cta--primary" href={primaryAction.href}>
-                      {primaryAction.label}
+                  {nextStep.primary_action ? (
+                    <a
+                      className="landing-cta landing-cta--primary"
+                      href={nextStep.primary_action.href}
+                    >
+                      {nextStep.primary_action.label}
                     </a>
                   ) : null}
-                  {secondaryAction ? (
+                  {nextStep.secondary_action ? (
                     <a
                       className="landing-cta landing-cta--secondary"
-                      href={secondaryAction.href}
+                      href={nextStep.secondary_action.href}
                     >
-                      {secondaryAction.label}
+                      {nextStep.secondary_action.label}
                     </a>
                   ) : null}
                 </div>
@@ -186,8 +184,19 @@ function ContentPage({
   );
 }
 
-function useInfoPage(slug: string, loadingLabel: string) {
+interface InfoPageRouteProps {
+  slug: string;
+  canonicalPath: string;
+  loadingLabel: string;
+}
+
+function InfoPageRoute({
+  slug,
+  canonicalPath,
+  loadingLabel,
+}: InfoPageRouteProps) {
   const { data: page, isPending, error } = usePage<InfoPageContent>(slug);
+  useResolvedPageSeo(page, canonicalPath);
 
   if (isPending) {
     return <LoadingSpinner label={loadingLabel} />;
@@ -202,81 +211,53 @@ function useInfoPage(slug: string, loadingLabel: string) {
     );
   }
 
-  return page.content;
+  return (
+    <ContentPage
+      eyebrow={page.content.hero.eyebrow}
+      title={page.content.hero.title}
+      description={page.content.hero.description}
+      sections={page.content.sections}
+      nextStep={page.content.next_step}
+    />
+  );
 }
 
 export function SupportPage() {
-  const content = useInfoPage("support", "Loading support page...");
-
-  if (!("hero" in content)) {
-    return content;
-  }
-
   return (
-    <ContentPage
-      eyebrow={content.hero.eyebrow}
-      title={content.hero.title}
-      description={content.hero.description}
-      sections={content.sections}
-      primaryAction={{ href: routes.contact, label: "Contact Exxonim" }}
-      secondaryAction={{ href: routes.faq, label: "Read the FAQ" }}
+    <InfoPageRoute
+      slug="support"
+      canonicalPath={routes.support}
+      loadingLabel="Loading support page..."
     />
   );
 }
 
 export function TermsPage() {
-  const content = useInfoPage("terms", "Loading terms...");
-
-  if (!("hero" in content)) {
-    return content;
-  }
-
   return (
-    <ContentPage
-      eyebrow={content.hero.eyebrow}
-      title={content.hero.title}
-      description={content.hero.description}
-      sections={content.sections}
-      primaryAction={{ href: routes.contact, label: "Ask a question" }}
-      secondaryAction={{ href: routes.privacy, label: "Privacy policy" }}
+    <InfoPageRoute
+      slug="terms"
+      canonicalPath={routes.terms}
+      loadingLabel="Loading terms..."
     />
   );
 }
 
 export function PrivacyPage() {
-  const content = useInfoPage("privacy", "Loading privacy policy...");
-
-  if (!("hero" in content)) {
-    return content;
-  }
-
   return (
-    <ContentPage
-      eyebrow={content.hero.eyebrow}
-      title={content.hero.title}
-      description={content.hero.description}
-      sections={content.sections}
-      primaryAction={{ href: routes.support, label: "Support details" }}
-      secondaryAction={{ href: routes.contact, label: "Contact Exxonim" }}
+    <InfoPageRoute
+      slug="privacy"
+      canonicalPath={routes.privacy}
+      loadingLabel="Loading privacy policy..."
     />
   );
 }
 
 export function NotFoundPage() {
-  const content = useInfoPage("404", "Loading page...");
-
-  if (!("hero" in content)) {
-    return content;
-  }
-
   return (
-    <ContentPage
-      eyebrow={content.hero.eyebrow}
-      title={content.hero.title}
-      description={content.hero.description}
-      sections={content.sections}
-      primaryAction={{ href: routes.home, label: "Go home" }}
-      secondaryAction={{ href: routes.resources, label: "Browse resources" }}
+    <InfoPageRoute
+      slug="404"
+      canonicalPath={routes.notFound}
+      loadingLabel="Loading page..."
     />
   );
 }

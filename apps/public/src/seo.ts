@@ -4,6 +4,7 @@ import {
   resourcePost,
   routes,
 } from "./routes";
+import type { BlogPost, PageRecord } from "./types";
 
 export interface PageSeo {
   title: string;
@@ -12,122 +13,28 @@ export interface PageSeo {
   image: string;
   type: "website" | "article";
   robots: string;
+  canonicalBaseUrl?: string;
 }
 
 export const siteOrigin = "https://exxonim.tz";
-const defaultImage = `${siteOrigin}/exxonim-logo.webp`;
-const resourceArticleFallbackDescription =
-  "Read practical guidance on registration, compliance, licensing, and business readiness from Exxonim.";
+const fallbackImagePath = "/exxonim-logo.webp";
 
-const pageSeoMap: Record<string, Omit<PageSeo, "canonicalPath">> = {
-  [normalizePathname(routes.home)]: {
-    title: "Exxonim | Registration, Licensing, and Compliance Support",
-    description:
-      "Exxonim helps businesses, NGOs, and institutions handle registration, licensing, statutory filing, and practical compliance work in Tanzania.",
-    image: defaultImage,
-    type: "website",
-    robots: "index,follow",
-  },
-  [normalizePathname(routes.about)]: {
-    title: "About Exxonim | Practical Regulatory Support",
-    description:
-      "Learn how Exxonim supports registration, regulatory follow-through, and compliance preparation for growing organizations in Tanzania.",
-    image: defaultImage,
-    type: "website",
-    robots: "index,follow",
-  },
-  [normalizePathname(routes.faq)]: {
-    title: "FAQ | Exxonim",
-    description:
-      "Answers to common questions about registration, filings, licensing, and how Exxonim supports follow-through after submission.",
-    image: defaultImage,
-    type: "website",
-    robots: "index,follow",
-  },
-  [normalizePathname(routes.services)]: {
-    title: "Services | Exxonim",
-    description:
-      "Explore Exxonim services for company registration, licensing, tax compliance, institutional registration, and business support.",
-    image: defaultImage,
-    type: "website",
-    robots: "index,follow",
-  },
-  [normalizePathname(routes.requestConsultation)]: {
-    title: "Request Consultation | Exxonim",
-    description:
-      "Submit your consultation request to Exxonim and receive a secure tracking ID for follow-up.",
-    image: defaultImage,
-    type: "website",
-    robots: "index,follow",
-  },
-  [normalizePathname(routes.tracking)]: {
-    title: "Consultation Follow-Through | Exxonim",
-    description:
-      "See how Exxonim structures intake, review, submission, and follow-up so clients know the next step after they reach out.",
-    image: defaultImage,
-    type: "website",
-    robots: "index,follow",
-  },
-  [normalizePathname(routes.resources)]: {
-    title: "Resources | Exxonim",
-    description:
-      "Read Exxonim articles on registration readiness, filing control, licensing preparation, and operational compliance support.",
-    image: defaultImage,
-    type: "website",
-    robots: "index,follow",
-  },
-  [normalizePathname(routes.career)]: {
-    title: "Career | Exxonim",
-    description:
-      "Explore career opportunities at Exxonim for client service, compliance support, documentation, and operations-focused roles.",
-    image: defaultImage,
-    type: "website",
-    robots: "index,follow",
-  },
-  [normalizePathname(routes.contact)]: {
-    title: "Contact Exxonim",
-    description:
-      "Contact Exxonim to start a consultation, ask a question, or follow up on registration, licensing, and compliance work.",
-    image: defaultImage,
-    type: "website",
-    robots: "index,follow",
-  },
-  [normalizePathname(routes.support)]: {
-    title: "Support | Exxonim",
-    description:
-      "Get support contact details, expected response channels, and guidance on how to share filing or licensing questions with Exxonim.",
-    image: defaultImage,
-    type: "website",
-    robots: "index,follow",
-  },
-  [normalizePathname(routes.terms)]: {
-    title: "Terms of Use | Exxonim",
-    description:
-      "Review the Exxonim website terms of use covering access, content, permitted use, and contact details.",
-    image: defaultImage,
-    type: "website",
-    robots: "index,follow",
-  },
-  [normalizePathname(routes.privacy)]: {
-    title: "Privacy Policy | Exxonim",
-    description:
-      "Read the Exxonim website privacy policy describing the information the site receives and how Exxonim uses it.",
-    image: defaultImage,
-    type: "website",
-    robots: "index,follow",
-  },
-  [normalizePathname(routes.notFound)]: {
-    title: "Page Not Found | Exxonim",
-    description:
-      "The page you requested could not be found. Return to Exxonim home, services, or resources.",
-    image: defaultImage,
-    type: "website",
-    robots: "noindex,follow",
-  },
-};
+function buildAbsoluteUrl(path: string, baseUrl: string = siteOrigin) {
+  return new URL(path, baseUrl).toString();
+}
 
-function buildAbsoluteUrl(path: string) {
-  return new URL(path, siteOrigin).toString();
+function toCanonicalPath(pathname: string | undefined) {
+  const normalizedPathname = normalizePathname(pathname);
+
+  if (normalizedPathname === normalizePathname(routes.home)) {
+    return routes.home;
+  }
+
+  if (normalizedPathname === normalizePathname(routes.notFound)) {
+    return routes.notFound;
+  }
+
+  return `${normalizedPathname}/`;
 }
 
 function escapeHtmlAttribute(value: string) {
@@ -162,38 +69,90 @@ function ensureLinkTag(selector: string, setup: (link: HTMLLinkElement) => void)
   return link;
 }
 
-export function getPageSeo(pathname: string | undefined): PageSeo {
+export function createFallbackSeo(
+  pathname: string | undefined,
+  options: {
+    canonicalBaseUrl?: string;
+    image?: string;
+    robots?: string;
+    title?: string;
+    description?: string;
+    type?: "website" | "article";
+  } = {}
+): PageSeo {
   const normalizedPathname = normalizePathname(pathname);
-  const articleSlug = getResourcePostSlug(normalizedPathname);
-
-  if (articleSlug) {
-    return {
-      title: "Exxonim Resource Article",
-      description: resourceArticleFallbackDescription,
-      canonicalPath: resourcePost(articleSlug),
-      image: defaultImage,
-      type: "article",
-      robots: "index,follow",
-    };
-  }
-
-  const pageSeo =
-    pageSeoMap[normalizedPathname] ??
-    pageSeoMap[normalizePathname(routes.notFound)];
+  const canonicalBaseUrl = options.canonicalBaseUrl ?? siteOrigin;
 
   return {
-    ...pageSeo,
-    canonicalPath:
-      pageSeo === pageSeoMap[normalizePathname(routes.notFound)]
-        ? routes.notFound
-        : normalizedPathname === "/"
-          ? routes.home
-          : `${normalizedPathname}/`,
+    title: options.title ?? "Content unavailable",
+    description:
+      options.description ?? "This content is temporarily unavailable.",
+    canonicalPath: toCanonicalPath(normalizedPathname),
+    image:
+      options.image ?? buildAbsoluteUrl(fallbackImagePath, canonicalBaseUrl),
+    type:
+      options.type ?? (getResourcePostSlug(normalizedPathname) ? "article" : "website"),
+    robots: options.robots ?? "noindex,follow",
+    canonicalBaseUrl,
+  };
+}
+
+export function createPageSeo<TContent>(
+  page: PageRecord<TContent>,
+  options: {
+    canonicalPath: string;
+    canonicalBaseUrl?: string;
+    defaultDescription?: string;
+    defaultImage?: string;
+    robots?: string;
+  }
+): PageSeo {
+  const canonicalBaseUrl = options.canonicalBaseUrl ?? siteOrigin;
+
+  return {
+    title: page.metaTitle ?? page.title,
+    description: page.metaDescription ?? options.defaultDescription ?? page.title,
+    canonicalPath: options.canonicalPath,
+    image:
+      page.ogImageUrl ??
+      options.defaultImage ??
+      buildAbsoluteUrl(fallbackImagePath, canonicalBaseUrl),
+    type: "website",
+    robots: options.robots ?? "index,follow",
+    canonicalBaseUrl,
+  };
+}
+
+export function createBlogPostSeo(
+  post: BlogPost,
+  options: {
+    canonicalBaseUrl?: string;
+    defaultDescription?: string;
+    defaultImage?: string;
+    robots?: string;
+  } = {}
+): PageSeo {
+  const canonicalBaseUrl = options.canonicalBaseUrl ?? siteOrigin;
+
+  return {
+    title: post.metaTitle ?? post.title,
+    description: post.metaDescription ?? post.excerpt ?? options.defaultDescription ?? post.title,
+    canonicalPath: resourcePost(post.slug),
+    image:
+      post.coverImageSrc ??
+      options.defaultImage ??
+      buildAbsoluteUrl(fallbackImagePath, canonicalBaseUrl),
+    type: "article",
+    robots: options.robots ?? "index,follow",
+    canonicalBaseUrl,
   };
 }
 
 export function applyResolvedSeo(seo: PageSeo) {
-  const canonicalUrl = buildAbsoluteUrl(seo.canonicalPath);
+  const canonicalUrl = buildAbsoluteUrl(
+    seo.canonicalPath,
+    seo.canonicalBaseUrl ?? siteOrigin
+  );
 
   document.title = seo.title;
 
@@ -280,10 +239,6 @@ export function applyResolvedSeo(seo: PageSeo) {
     }
   );
   canonicalLink.href = canonicalUrl;
-}
-
-export function applyPageSeo(pathname: string | undefined) {
-  applyResolvedSeo(getPageSeo(pathname));
 }
 
 export function escapeSeoValue(value: string) {

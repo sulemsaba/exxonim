@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { apiRoutes } from "@exxonim/shared/api/routes";
 import type {
   ApiConsultationCreateResponse,
   ApiConsultationMagicLinkResponse,
@@ -23,7 +24,7 @@ export async function createPublicConsultation(
   idempotencyKey: string
 ) {
   const response = await api.post<ApiConsultationCreateResponse>(
-    "/public/consultations",
+    apiRoutes.public.consultations.create,
     payload,
     {
       headers: {
@@ -39,7 +40,7 @@ export async function requestConsultationMagicLink(
   payload: PublicConsultationMagicLinkPayload
 ) {
   const response = await api.post<ApiConsultationMagicLinkResponse>(
-    "/public/consultations/magic-link",
+    apiRoutes.public.consultations.magicLink,
     payload
   );
 
@@ -51,7 +52,7 @@ export async function getPublicConsultation(
   token: string
 ) {
   const response = await api.get<ApiConsultationPublic>(
-    `/public/consultations/${trackingId}`,
+    apiRoutes.public.consultations.detail(trackingId),
     {
       headers: {
         Authorization: `Bearer ${token}`,

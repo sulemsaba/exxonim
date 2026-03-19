@@ -4,6 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AdminDeleteDialog } from "../../components/admin/AdminDeleteDialog";
+import { AdminSectionCard } from "../../components/admin/AdminSectionCard";
+import { AdminStatusBadge } from "../../components/admin/AdminStatusBadge";
+import { AdminToolbar } from "../../components/admin/AdminToolbar";
 import { ErrorMessage } from "../../components/ErrorMessage";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import {
@@ -13,7 +16,7 @@ import {
   updateAdminTestimonial,
 } from "../../services/adminTestimonialService";
 import { getContentStatus, getAdminErrorMessage } from "../../utils/admin";
-import type { ApiContentStatus, ApiTestimonial } from "../../types/api";
+import type { ApiTestimonial } from "../../types/api";
 
 const contentStatusSchema = z.enum(["draft", "published", "archived"]);
 
@@ -64,18 +67,6 @@ function toPayload(values: TestimonialFormValues) {
     sort_order: values.sort_order ? Number(values.sort_order) : 0,
     status: values.status,
   };
-}
-
-function getStatusClassName(status: ApiContentStatus) {
-  if (status === "published") {
-    return "admin-status admin-status--published";
-  }
-
-  if (status === "archived") {
-    return "admin-status admin-status--danger";
-  }
-
-  return "admin-status admin-status--draft";
 }
 
 export function TestimonialsPage() {
@@ -198,18 +189,13 @@ export function TestimonialsPage() {
   return (
     <>
       <div className="admin-grid">
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>Testimonials</h2>
-              <p>Manage testimonial copy, speaker metadata, and display status.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            <div className="admin-toolbar">
-              <span className="admin-toolbar__meta">
-                {testimonialsQuery.data.length} testimonials stored
-              </span>
+        <AdminSectionCard
+          title="Testimonials"
+          description="Manage testimonial copy, speaker metadata, and display status."
+        >
+          <AdminToolbar
+            meta={`${testimonialsQuery.data.length} testimonials stored`}
+            actions={
               <button
                 className="admin-action-button"
                 type="button"
@@ -221,20 +207,24 @@ export function TestimonialsPage() {
               >
                 New Testimonial
               </button>
-            </div>
+            }
+          />
 
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Author</th>
-                    <th>Headline</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {testimonialsQuery.data.map((testimonial) => (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Author</th>
+                  <th>Headline</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {testimonialsQuery.data.map((testimonial) => {
+                  const status = getContentStatus(testimonial);
+
+                  return (
                     <tr key={testimonial.id}>
                       <td>
                         <strong>{testimonial.author}</strong>
@@ -245,9 +235,7 @@ export function TestimonialsPage() {
                         <p>{testimonial.content}</p>
                       </td>
                       <td>
-                        <span className={getStatusClassName(getContentStatus(testimonial))}>
-                          {getContentStatus(testimonial)}
-                        </span>
+                        <AdminStatusBadge label={status} />
                       </td>
                       <td>
                         <div className="admin-table__actions">
@@ -271,121 +259,116 @@ export function TestimonialsPage() {
                         </div>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        </section>
+        </AdminSectionCard>
 
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>{selectedTestimonial ? "Edit testimonial" : "Create testimonial"}</h2>
-              <p>Keep the quote concise and attach the visible attribution data.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
-              <div className="admin-form__grid">
-                <div className="admin-form__field">
-                  <label htmlFor="testimonial-author">Author</label>
-                  <input id="testimonial-author" type="text" {...register("author")} />
-                  {errors.author ? (
-                    <p className="admin-form__error">{errors.author.message}</p>
-                  ) : null}
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="testimonial-role">Author role</label>
-                  <input id="testimonial-role" type="text" {...register("author_role")} />
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="testimonial-eyebrow">Eyebrow</label>
-                  <input id="testimonial-eyebrow" type="text" {...register("eyebrow")} />
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="testimonial-headline">Headline</label>
-                  <input id="testimonial-headline" type="text" {...register("headline")} />
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="testimonial-initials">Initials</label>
-                  <input id="testimonial-initials" type="text" {...register("initials")} />
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="testimonial-rating">Rating</label>
-                  <input id="testimonial-rating" type="text" {...register("rating")} />
-                  {errors.rating ? (
-                    <p className="admin-form__error">{errors.rating.message}</p>
-                  ) : null}
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="testimonial-order">Sort order</label>
-                  <input id="testimonial-order" type="text" {...register("sort_order")} />
-                  {errors.sort_order ? (
-                    <p className="admin-form__error">{errors.sort_order.message}</p>
-                  ) : null}
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="testimonial-status">Status</label>
-                  <select id="testimonial-status" {...register("status")}>
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
-
-                <div className="admin-form__field admin-form__field--full">
-                  <label htmlFor="testimonial-support">Support copy</label>
-                  <textarea id="testimonial-support" rows={4} {...register("support")} />
-                </div>
-
-                <div className="admin-form__field admin-form__field--full">
-                  <label htmlFor="testimonial-content">Quote</label>
-                  <textarea id="testimonial-content" rows={7} {...register("content")} />
-                  {errors.content ? (
-                    <p className="admin-form__error">{errors.content.message}</p>
-                  ) : null}
-                </div>
-              </div>
-
-              {formMessage ? <p className="admin-form__hint">{formMessage}</p> : null}
-
-              <div className="admin-form__actions">
-                {selectedTestimonial ? (
-                  <button
-                    className="admin-form__cancel"
-                    type="button"
-                    onClick={() => {
-                      setSelectedId(null);
-                      setFormMessage(null);
-                      reset(defaultValues);
-                    }}
-                  >
-                    Clear
-                  </button>
+        <AdminSectionCard
+          title={selectedTestimonial ? "Edit testimonial" : "Create testimonial"}
+          description="Keep the quote concise and attach the visible attribution data."
+        >
+          <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
+            <div className="admin-form__grid">
+              <div className="admin-form__field">
+                <label htmlFor="testimonial-author">Author</label>
+                <input id="testimonial-author" type="text" {...register("author")} />
+                {errors.author ? (
+                  <p className="admin-form__error">{errors.author.message}</p>
                 ) : null}
-                <button
-                  className="admin-form__submit"
-                  type="submit"
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                >
-                  {createMutation.isPending || updateMutation.isPending
-                    ? "Saving..."
-                    : selectedTestimonial
-                      ? "Update Testimonial"
-                      : "Create Testimonial"}
-                </button>
               </div>
-            </form>
-          </div>
-        </section>
+
+              <div className="admin-form__field">
+                <label htmlFor="testimonial-role">Author role</label>
+                <input id="testimonial-role" type="text" {...register("author_role")} />
+              </div>
+
+              <div className="admin-form__field">
+                <label htmlFor="testimonial-eyebrow">Eyebrow</label>
+                <input id="testimonial-eyebrow" type="text" {...register("eyebrow")} />
+              </div>
+
+              <div className="admin-form__field">
+                <label htmlFor="testimonial-headline">Headline</label>
+                <input id="testimonial-headline" type="text" {...register("headline")} />
+              </div>
+
+              <div className="admin-form__field">
+                <label htmlFor="testimonial-initials">Initials</label>
+                <input id="testimonial-initials" type="text" {...register("initials")} />
+              </div>
+
+              <div className="admin-form__field">
+                <label htmlFor="testimonial-rating">Rating</label>
+                <input id="testimonial-rating" type="text" {...register("rating")} />
+                {errors.rating ? (
+                  <p className="admin-form__error">{errors.rating.message}</p>
+                ) : null}
+              </div>
+
+              <div className="admin-form__field">
+                <label htmlFor="testimonial-order">Sort order</label>
+                <input id="testimonial-order" type="text" {...register("sort_order")} />
+                {errors.sort_order ? (
+                  <p className="admin-form__error">{errors.sort_order.message}</p>
+                ) : null}
+              </div>
+
+              <div className="admin-form__field">
+                <label htmlFor="testimonial-status">Status</label>
+                <select id="testimonial-status" {...register("status")}>
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+
+              <div className="admin-form__field admin-form__field--full">
+                <label htmlFor="testimonial-support">Support copy</label>
+                <textarea id="testimonial-support" rows={4} {...register("support")} />
+              </div>
+
+              <div className="admin-form__field admin-form__field--full">
+                <label htmlFor="testimonial-content">Quote</label>
+                <textarea id="testimonial-content" rows={7} {...register("content")} />
+                {errors.content ? (
+                  <p className="admin-form__error">{errors.content.message}</p>
+                ) : null}
+              </div>
+            </div>
+
+            {formMessage ? <p className="admin-form__hint">{formMessage}</p> : null}
+
+            <div className="admin-form__actions">
+              {selectedTestimonial ? (
+                <button
+                  className="admin-form__cancel"
+                  type="button"
+                  onClick={() => {
+                    setSelectedId(null);
+                    setFormMessage(null);
+                    reset(defaultValues);
+                  }}
+                >
+                  Clear
+                </button>
+              ) : null}
+              <button
+                className="admin-form__submit"
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
+                {createMutation.isPending || updateMutation.isPending
+                  ? "Saving..."
+                  : selectedTestimonial
+                    ? "Update Testimonial"
+                    : "Create Testimonial"}
+              </button>
+            </div>
+          </form>
+        </AdminSectionCard>
       </div>
 
       <AdminDeleteDialog

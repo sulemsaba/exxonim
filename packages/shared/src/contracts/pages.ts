@@ -1,4 +1,8 @@
 import type { ApiContentStatus } from "./content";
+import type {
+  ApiPaginatedResponse,
+  ApiPaginationParams,
+} from "./pagination";
 
 export interface ApiPage<TContent = Record<string, unknown>> {
   id: number;
@@ -13,3 +17,11 @@ export interface ApiPage<TContent = Record<string, unknown>> {
   created_at: string;
   updated_at: string;
 }
+
+export interface ApiPageListParams extends ApiPaginationParams {
+  status?: ApiContentStatus;
+  search?: string;
+}
+
+export type ApiPageListResponse<TContent = Record<string, unknown>> =
+  ApiPaginatedResponse<ApiPage<TContent>>;

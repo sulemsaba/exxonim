@@ -2,6 +2,7 @@ import { routes } from "../routes";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { usePage } from "../hooks/usePage";
+import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
 import type { AboutPageContent } from "../types";
 
 const aboutPageStyles = String.raw`
@@ -444,6 +445,7 @@ const aboutPageStyles = String.raw`
 
 export function AboutPage() {
   const { data: page, isPending, error } = usePage<AboutPageContent>("about");
+  useResolvedPageSeo(page, routes.about);
 
   if (isPending) {
     return <LoadingSpinner label="Loading about page..." />;
@@ -487,20 +489,20 @@ export function AboutPage() {
               </div>
 
               <div className="cx-about-stat">
-                <strong>Working style</strong>
+                {content.company_profile.working_style_label ? (
+                  <strong>{content.company_profile.working_style_label}</strong>
+                ) : null}
                 <span>{content.company_profile.working_style}</span>
               </div>
             </section>
 
             <section className="cx-about-section">
-              <div className="cx-about-section-heading">
-                <h2>Who we support</h2>
-                <p>
-                  Exxonim works with clients that need operational help moving through
-                  filing, registration, and regulator-facing processes with less
-                  confusion and stronger preparation.
-                </p>
-              </div>
+              {content.support_profiles_section ? (
+                <div className="cx-about-section-heading">
+                  <h2>{content.support_profiles_section.title}</h2>
+                  <p>{content.support_profiles_section.description}</p>
+                </div>
+              ) : null}
 
               <div className="cx-about-grid cx-about-grid--support">
                 {content.support_profiles.map((profile) => (
@@ -513,14 +515,12 @@ export function AboutPage() {
             </section>
 
             <section className="cx-about-section">
-              <div className="cx-about-section-heading">
-                <h2>What we actually do</h2>
-                <p>
-                  The work spans setup, filing, licensing, and institutional
-                  registration support. It is not abstract consulting. It is help
-                  organized around the operational requirements clients have to meet.
-                </p>
-              </div>
+              {content.service_scope_section ? (
+                <div className="cx-about-section-heading">
+                  <h2>{content.service_scope_section.title}</h2>
+                  <p>{content.service_scope_section.description}</p>
+                </div>
+              ) : null}
 
               <div className="cx-about-grid cx-about-grid--services">
                 {content.service_scope.map((service) => (
@@ -533,14 +533,12 @@ export function AboutPage() {
             </section>
 
             <section className="cx-about-section">
-              <div className="cx-about-section-heading">
-                <h2>How Exxonim works</h2>
-                <p>
-                  The operating model is built around getting the requirement clear,
-                  preparing the right information, and staying close to the next step
-                  until the filing or approval process moves forward again.
-                </p>
-              </div>
+              {content.operating_model_section ? (
+                <div className="cx-about-section-heading">
+                  <h2>{content.operating_model_section.title}</h2>
+                  <p>{content.operating_model_section.description}</p>
+                </div>
+              ) : null}
 
               <div className="cx-about-process">
                 {content.operating_model.map((item) => (
@@ -556,14 +554,12 @@ export function AboutPage() {
             </section>
 
             <section className="cx-about-section">
-              <div className="cx-about-section-heading">
-                <h2>What clients can expect</h2>
-                <p>
-                  The goal is not just to submit documents. It is to keep the work
-                  organized, reduce avoidable back-and-forth, and make progress easier
-                  to track from one step to the next.
-                </p>
-              </div>
+              {content.client_expectations_section ? (
+                <div className="cx-about-section-heading">
+                  <h2>{content.client_expectations_section.title}</h2>
+                  <p>{content.client_expectations_section.description}</p>
+                </div>
+              ) : null}
 
               <div className="cx-about-grid cx-about-grid--expectations">
                 {content.client_expectations.map((item) => (

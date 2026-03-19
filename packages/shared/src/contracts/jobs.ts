@@ -1,4 +1,8 @@
 import type { ApiContentStatus } from "./content";
+import type {
+  ApiPaginatedResponse,
+  ApiPaginationParams,
+} from "./pagination";
 
 export interface ApiCareerJob {
   id: number;
@@ -21,3 +25,9 @@ export interface ApiCareerJob {
   updated_at: string;
 }
 
+export interface ApiCareerJobListParams extends ApiPaginationParams {
+  status?: ApiContentStatus;
+  search?: string;
+}
+
+export type ApiCareerJobListResponse = ApiPaginatedResponse<ApiCareerJob>;

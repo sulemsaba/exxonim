@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { apiRoutes } from "@exxonim/shared/api/routes";
 import type { ApiContentStatus, ApiNavigationItem } from "../types/api";
 import { normalizeContentRecord, statusToActiveFlag } from "../utils/admin";
 
@@ -30,13 +31,13 @@ function toRequestPayload(payload: Partial<AdminNavigationPayload>) {
 }
 
 export async function getAdminNavigation() {
-  const response = await api.get<ApiNavigationItem[]>("/admin/navigation");
+  const response = await api.get<ApiNavigationItem[]>(apiRoutes.admin.navigation.list);
   return response.data.map((item) => normalizeNavigationItem(item));
 }
 
 export async function createAdminNavigationItem(payload: AdminNavigationPayload) {
   const response = await api.post<ApiNavigationItem>(
-    "/admin/navigation",
+    apiRoutes.admin.navigation.list,
     toRequestPayload(payload)
   );
   return normalizeNavigationItem(response.data);
@@ -47,12 +48,12 @@ export async function updateAdminNavigationItem(
   payload: Partial<AdminNavigationPayload>
 ) {
   const response = await api.put<ApiNavigationItem>(
-    `/admin/navigation/${id}`,
+    apiRoutes.admin.navigation.detail(id),
     toRequestPayload(payload)
   );
   return normalizeNavigationItem(response.data);
 }
 
 export async function deleteAdminNavigationItem(id: number) {
-  await api.delete(`/admin/navigation/${id}`);
+  await api.delete(apiRoutes.admin.navigation.detail(id));
 }

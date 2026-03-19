@@ -1,3 +1,8 @@
+import type {
+  ApiPaginatedResponse,
+  ApiPaginationParams,
+} from "./pagination";
+
 export type ApiConsultationStatus =
   | "pending"
   | "contacted"
@@ -82,12 +87,14 @@ export interface ApiConsultationAdminListItem {
   created_at: string;
 }
 
-export interface ApiConsultationAdminListResponse {
-  items: ApiConsultationAdminListItem[];
-  total: number;
-  page: number;
-  limit: number;
+export interface ApiConsultationAdminListParams extends ApiPaginationParams {
+  status?: ApiConsultationStatus;
+  assigned_to?: number;
+  search?: string;
 }
+
+export type ApiConsultationAdminListResponse =
+  ApiPaginatedResponse<ApiConsultationAdminListItem>;
 
 export interface ApiConsultationAdminDetail {
   id: number;

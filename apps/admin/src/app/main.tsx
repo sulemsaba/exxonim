@@ -3,6 +3,7 @@ import App from "./App";
 import { AppProviders } from "./providers/AppProviders";
 import "../styles.css";
 import "../styles/admin-system.css";
+import "../styles/admin-blog-editor.css";
 
 function bootstrapDocumentShell() {
   try {

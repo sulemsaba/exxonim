@@ -37,6 +37,7 @@ export function mapBlogAuthor(author?: ApiBlogAuthor | null): BlogAuthor | undef
     name: author.name,
     role: author.role ?? undefined,
     avatarSrc: author.avatar_src ?? undefined,
+    bio: author.bio ?? undefined,
   };
 }
 
@@ -84,6 +85,7 @@ export function mapPage<TContent>(page: ApiPage<TContent>): PageRecord<TContent>
     content: page.content,
     metaTitle: page.meta_title ?? undefined,
     metaDescription: page.meta_description ?? undefined,
+    ogImageUrl: page.og_image_url ?? undefined,
     isPublished: page.status === "published" || page.is_published === true,
     createdAt: page.created_at,
     updatedAt: page.updated_at,

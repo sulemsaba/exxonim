@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { apiRoutes } from "@exxonim/shared/api/routes";
 import type { ApiContentStatus, ApiPage } from "../types/api";
 import { normalizeContentRecord, statusToPublishedFlag } from "../utils/admin";
 
@@ -23,25 +24,31 @@ function toRequestPayload(payload: Partial<AdminPagePayload>) {
 }
 
 export async function getAdminPages() {
-  const response = await api.get<ApiPage[]>("/admin/pages");
+  const response = await api.get<ApiPage[]>(apiRoutes.admin.pages.list);
   return response.data.map((page) => normalizeContentRecord(page));
 }
 
 export async function getAdminPage(id: number) {
-  const response = await api.get<ApiPage>(`/admin/pages/${id}`);
+  const response = await api.get<ApiPage>(apiRoutes.admin.pages.detail(id));
   return normalizeContentRecord(response.data);
 }
 
 export async function createAdminPage(payload: AdminPagePayload) {
-  const response = await api.post<ApiPage>("/admin/pages", toRequestPayload(payload));
+  const response = await api.post<ApiPage>(
+    apiRoutes.admin.pages.list,
+    toRequestPayload(payload)
+  );
   return normalizeContentRecord(response.data);
 }
 
 export async function updateAdminPage(id: number, payload: Partial<AdminPagePayload>) {
-  const response = await api.put<ApiPage>(`/admin/pages/${id}`, toRequestPayload(payload));
+  const response = await api.put<ApiPage>(
+    apiRoutes.admin.pages.detail(id),
+    toRequestPayload(payload)
+  );
   return normalizeContentRecord(response.data);
 }
 
 export async function deleteAdminPage(id: number) {
-  await api.delete(`/admin/pages/${id}`);
+  await api.delete(apiRoutes.admin.pages.detail(id));
 }

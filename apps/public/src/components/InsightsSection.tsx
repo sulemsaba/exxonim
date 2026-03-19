@@ -429,11 +429,13 @@ function getAuthorInitials(name: string) {
     .join("");
 }
 
-function renderMedia(post: BlogPost, categoryLabel: string) {
+function renderMedia(post: BlogPost, categoryLabel?: string) {
   if (post.coverImageSrc) {
     return (
       <>
-        <span className="home-insights__tag">{categoryLabel}</span>
+        {categoryLabel ? (
+          <span className="home-insights__tag">{categoryLabel}</span>
+        ) : null}
         <img
           className="home-insights__cover"
           src={post.coverImageSrc}
@@ -441,7 +443,7 @@ function renderMedia(post: BlogPost, categoryLabel: string) {
           loading="lazy"
         />
         <div className="home-insights__media-overlay">
-          <span>{categoryLabel}</span>
+          {categoryLabel ? <span>{categoryLabel}</span> : null}
           <strong>{post.mediaLabel || post.title}</strong>
         </div>
       </>
@@ -450,7 +452,9 @@ function renderMedia(post: BlogPost, categoryLabel: string) {
 
   return (
     <>
-      <span className="home-insights__tag">{categoryLabel}</span>
+      {categoryLabel ? (
+        <span className="home-insights__tag">{categoryLabel}</span>
+      ) : null}
       <div className="home-insights__placeholder">
         <span className="home-insights__placeholder-mark" aria-hidden="true">
           E
@@ -464,7 +468,7 @@ function renderMedia(post: BlogPost, categoryLabel: string) {
           aria-hidden="true"
         ></span>
         <div className="home-insights__placeholder-copy">
-          <span>{categoryLabel}</span>
+          {categoryLabel ? <span>{categoryLabel}</span> : null}
           <strong>{post.mediaLabel || post.title}</strong>
         </div>
       </div>
@@ -494,8 +498,12 @@ export function InsightsSection({
         <div className="home-insights__bleed" data-reveal>
           <div className="home-insights__rail" ref={railRef}>
             {posts.map((post) => {
-              const categoryLabel = post.category?.label ?? "Insight";
-              const authorName = post.author?.name ?? "Exxonim Team";
+              const categoryLabel = post.category?.label;
+              const metaParts = [formatBlogDate(post.publishedAt)];
+
+              if (categoryLabel) {
+                metaParts.push(categoryLabel);
+              }
 
               return (
                 <article key={post.slug} className="home-insights__card">
@@ -504,31 +512,31 @@ export function InsightsSection({
                   </div>
 
                   <div className="home-insights__content">
-                    <span className="home-insights__meta">
-                      {formatBlogDate(post.publishedAt)}
-                      {" · "}
-                      {categoryLabel}
-                    </span>
+                    <span className="home-insights__meta">{metaParts.join(" | ")}</span>
                     <h3>{post.title}</h3>
                     <p>{post.excerpt}</p>
 
                     <div className="home-insights__bottom">
-                      <div className="home-insights__author">
-                        <span
-                          className="home-insights__author-avatar"
-                          aria-hidden="true"
-                        >
-                          {getAuthorInitials(authorName)}
-                        </span>
-                        <span className="home-insights__author-copy">
-                          <span className="home-insights__author-name">
-                            {authorName}
+                      {post.author ? (
+                        <div className="home-insights__author">
+                          <span
+                            className="home-insights__author-avatar"
+                            aria-hidden="true"
+                          >
+                            {getAuthorInitials(post.author.name)}
                           </span>
-                          <span className="home-insights__author-role">
-                            {post.author?.role ?? "Exxonim Team"}
+                          <span className="home-insights__author-copy">
+                            <span className="home-insights__author-name">
+                              {post.author.name}
+                            </span>
+                            {post.author.role ? (
+                              <span className="home-insights__author-role">
+                                {post.author.role}
+                              </span>
+                            ) : null}
                           </span>
-                        </span>
-                      </div>
+                        </div>
+                      ) : null}
 
                       <a className="home-insights__link" href={resourcePost(post.slug)}>
                         Learn more <span aria-hidden="true">&rarr;</span>

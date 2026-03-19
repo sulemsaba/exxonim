@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { apiRoutes } from "@exxonim/shared/api/routes";
 import type { ApiContentStatus, ApiTestimonial } from "../types/api";
 import { normalizeContentRecord, statusToActiveFlag } from "../utils/admin";
 
@@ -26,13 +27,13 @@ function toRequestPayload(payload: Partial<AdminTestimonialPayload>) {
 }
 
 export async function getAdminTestimonials() {
-  const response = await api.get<ApiTestimonial[]>("/admin/testimonials");
+  const response = await api.get<ApiTestimonial[]>(apiRoutes.admin.testimonials.list);
   return response.data.map((testimonial) => normalizeContentRecord(testimonial));
 }
 
 export async function createAdminTestimonial(payload: AdminTestimonialPayload) {
   const response = await api.post<ApiTestimonial>(
-    "/admin/testimonials",
+    apiRoutes.admin.testimonials.list,
     toRequestPayload(payload)
   );
   return normalizeContentRecord(response.data);
@@ -43,12 +44,12 @@ export async function updateAdminTestimonial(
   payload: Partial<AdminTestimonialPayload>
 ) {
   const response = await api.put<ApiTestimonial>(
-    `/admin/testimonials/${id}`,
+    apiRoutes.admin.testimonials.detail(id),
     toRequestPayload(payload)
   );
   return normalizeContentRecord(response.data);
 }
 
 export async function deleteAdminTestimonial(id: number) {
-  await api.delete(`/admin/testimonials/${id}`);
+  await api.delete(apiRoutes.admin.testimonials.detail(id));
 }

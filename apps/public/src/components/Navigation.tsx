@@ -155,7 +155,7 @@ html[data-theme="dark"] .nav-shell__mobile,
   content:"";
   position:absolute;
   inset:0;
-  border-radius:24px;
+  border-radius:0;
   border:1px solid var(--nav-shell-border);
   background:var(--nav-shell-surface);
   box-shadow:var(--nav-shell-shadow);

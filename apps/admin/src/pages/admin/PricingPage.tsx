@@ -4,6 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AdminDeleteDialog } from "../../components/admin/AdminDeleteDialog";
+import { AdminSectionCard } from "../../components/admin/AdminSectionCard";
+import { AdminStatusBadge } from "../../components/admin/AdminStatusBadge";
+import { AdminToolbar } from "../../components/admin/AdminToolbar";
 import { ErrorMessage } from "../../components/ErrorMessage";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import {
@@ -19,7 +22,7 @@ import {
   prettyJson,
   tryParseJsonValue,
 } from "../../utils/admin";
-import type { ApiContentStatus, ApiPricingPlan } from "../../types/api";
+import type { ApiPricingPlan } from "../../types/api";
 
 const contentStatusSchema = z.enum(["draft", "published", "archived"]);
 
@@ -75,18 +78,6 @@ function toPayload(values: PricingFormValues) {
     sort_order: values.sort_order ? Number(values.sort_order) : 0,
     status: values.status,
   };
-}
-
-function getStatusClassName(status: ApiContentStatus) {
-  if (status === "published") {
-    return "admin-status admin-status--published";
-  }
-
-  if (status === "archived") {
-    return "admin-status admin-status--danger";
-  }
-
-  return "admin-status admin-status--draft";
 }
 
 export function PricingPage() {
@@ -208,18 +199,13 @@ export function PricingPage() {
   return (
     <>
       <div className="admin-grid">
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>Pricing plans</h2>
-              <p>Manage the list of plans shown on the public services page.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            <div className="admin-toolbar">
-              <span className="admin-toolbar__meta">
-                {pricingQuery.data.length} plans stored
-              </span>
+        <AdminSectionCard
+          title="Pricing plans"
+          description="Manage the list of plans shown on the public services page."
+        >
+          <AdminToolbar
+            meta={`${pricingQuery.data.length} plans stored`}
+            actions={
               <button
                 className="admin-action-button"
                 type="button"
@@ -231,20 +217,24 @@ export function PricingPage() {
               >
                 New Plan
               </button>
-            </div>
+            }
+          />
 
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Plan</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pricingQuery.data.map((plan) => (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Plan</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pricingQuery.data.map((plan) => {
+                  const status = getContentStatus(plan);
+
+                  return (
                     <tr key={plan.id}>
                       <td>
                         <strong>{plan.name}</strong>
@@ -252,9 +242,7 @@ export function PricingPage() {
                       </td>
                       <td>{plan.price ?? "No price"}</td>
                       <td>
-                        <span className={getStatusClassName(getContentStatus(plan))}>
-                          {getContentStatus(plan)}
-                        </span>
+                        <AdminStatusBadge label={status} />
                       </td>
                       <td>
                         <div className="admin-table__actions">
@@ -278,127 +266,122 @@ export function PricingPage() {
                         </div>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        </section>
+        </AdminSectionCard>
 
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>{selectedPlan ? "Edit pricing plan" : "Create pricing plan"}</h2>
-              <p>{"Features are stored as JSON arrays of `{ label, included }` objects."}</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
-              <div className="admin-form__grid">
-                <div className="admin-form__field">
-                  <label htmlFor="pricing-name">Name</label>
-                  <input id="pricing-name" type="text" {...register("name")} />
-                  {errors.name ? (
-                    <p className="admin-form__error">{errors.name.message}</p>
-                  ) : null}
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="pricing-badge">Badge</label>
-                  <input id="pricing-badge" type="text" {...register("badge")} />
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="pricing-price">Price</label>
-                  <input id="pricing-price" type="text" {...register("price")} />
-                  {errors.price ? (
-                    <p className="admin-form__error">{errors.price.message}</p>
-                  ) : null}
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="pricing-order">Sort Order</label>
-                  <input id="pricing-order" type="text" {...register("sort_order")} />
-                  {errors.sort_order ? (
-                    <p className="admin-form__error">{errors.sort_order.message}</p>
-                  ) : null}
-                </div>
-
-                <div className="admin-form__field admin-form__field--full">
-                  <label htmlFor="pricing-description">Description</label>
-                  <textarea
-                    id="pricing-description"
-                    rows={4}
-                    {...register("description")}
-                  />
-                </div>
-
-                <div className="admin-form__field admin-form__field--full">
-                  <label htmlFor="pricing-notes">Notes</label>
-                  <textarea id="pricing-notes" rows={4} {...register("notes")} />
-                </div>
-
-                <div className="admin-form__field admin-form__field--full">
-                  <label htmlFor="pricing-features">Features JSON</label>
-                  <textarea
-                    id="pricing-features"
-                    rows={10}
-                    {...register("features_json")}
-                  />
-                  {errors.features_json ? (
-                    <p className="admin-form__error">{errors.features_json.message}</p>
-                  ) : null}
-                </div>
-
-                <div className="admin-form__field">
-                  <span>Recommended</span>
-                  <label className="admin-form__checkbox">
-                    <input type="checkbox" {...register("recommended")} />
-                    Mark this plan as recommended
-                  </label>
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="pricing-status">Status</label>
-                  <select id="pricing-status" {...register("status")}>
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
-              </div>
-
-              {formMessage ? <p className="admin-form__hint">{formMessage}</p> : null}
-
-              <div className="admin-form__actions">
-                {selectedPlan ? (
-                  <button
-                    className="admin-form__cancel"
-                    type="button"
-                    onClick={() => {
-                      setSelectedId(null);
-                      setFormMessage(null);
-                      reset(defaultValues);
-                    }}
-                  >
-                    Clear
-                  </button>
+        <AdminSectionCard
+          title={selectedPlan ? "Edit pricing plan" : "Create pricing plan"}
+          description={"Features are stored as JSON arrays of `{ label, included }` objects."}
+        >
+          <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
+            <div className="admin-form__grid">
+              <div className="admin-form__field">
+                <label htmlFor="pricing-name">Name</label>
+                <input id="pricing-name" type="text" {...register("name")} />
+                {errors.name ? (
+                  <p className="admin-form__error">{errors.name.message}</p>
                 ) : null}
-                <button
-                  className="admin-form__submit"
-                  type="submit"
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                >
-                  {createMutation.isPending || updateMutation.isPending
-                    ? "Saving..."
-                    : selectedPlan
-                      ? "Update Plan"
-                      : "Create Plan"}
-                </button>
               </div>
-            </form>
-          </div>
-        </section>
+
+              <div className="admin-form__field">
+                <label htmlFor="pricing-badge">Badge</label>
+                <input id="pricing-badge" type="text" {...register("badge")} />
+              </div>
+
+              <div className="admin-form__field">
+                <label htmlFor="pricing-price">Price</label>
+                <input id="pricing-price" type="text" {...register("price")} />
+                {errors.price ? (
+                  <p className="admin-form__error">{errors.price.message}</p>
+                ) : null}
+              </div>
+
+              <div className="admin-form__field">
+                <label htmlFor="pricing-order">Sort Order</label>
+                <input id="pricing-order" type="text" {...register("sort_order")} />
+                {errors.sort_order ? (
+                  <p className="admin-form__error">{errors.sort_order.message}</p>
+                ) : null}
+              </div>
+
+              <div className="admin-form__field admin-form__field--full">
+                <label htmlFor="pricing-description">Description</label>
+                <textarea
+                  id="pricing-description"
+                  rows={4}
+                  {...register("description")}
+                />
+              </div>
+
+              <div className="admin-form__field admin-form__field--full">
+                <label htmlFor="pricing-notes">Notes</label>
+                <textarea id="pricing-notes" rows={4} {...register("notes")} />
+              </div>
+
+              <div className="admin-form__field admin-form__field--full">
+                <label htmlFor="pricing-features">Features JSON</label>
+                <textarea
+                  id="pricing-features"
+                  rows={10}
+                  {...register("features_json")}
+                />
+                {errors.features_json ? (
+                  <p className="admin-form__error">{errors.features_json.message}</p>
+                ) : null}
+              </div>
+
+              <div className="admin-form__field">
+                <span>Recommended</span>
+                <label className="admin-form__checkbox">
+                  <input type="checkbox" {...register("recommended")} />
+                  Mark this plan as recommended
+                </label>
+              </div>
+
+              <div className="admin-form__field">
+                <label htmlFor="pricing-status">Status</label>
+                <select id="pricing-status" {...register("status")}>
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+            </div>
+
+            {formMessage ? <p className="admin-form__hint">{formMessage}</p> : null}
+
+            <div className="admin-form__actions">
+              {selectedPlan ? (
+                <button
+                  className="admin-form__cancel"
+                  type="button"
+                  onClick={() => {
+                    setSelectedId(null);
+                    setFormMessage(null);
+                    reset(defaultValues);
+                  }}
+                >
+                  Clear
+                </button>
+              ) : null}
+              <button
+                className="admin-form__submit"
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
+                {createMutation.isPending || updateMutation.isPending
+                  ? "Saving..."
+                  : selectedPlan
+                    ? "Update Plan"
+                    : "Create Plan"}
+              </button>
+            </div>
+          </form>
+        </AdminSectionCard>
       </div>
 
       <AdminDeleteDialog

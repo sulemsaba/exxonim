@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AdminDeleteDialog } from "../../components/admin/AdminDeleteDialog";
+import { AdminSectionCard } from "../../components/admin/AdminSectionCard";
+import { AdminToolbar } from "../../components/admin/AdminToolbar";
 import { ErrorMessage } from "../../components/ErrorMessage";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import {
@@ -20,6 +22,7 @@ const authorSchema = z.object({
   slug: z.string().min(1, "Slug is required."),
   role: z.string().optional(),
   avatar_src: z.string().url("Avatar must be a valid URL.").optional().or(z.literal("")),
+  bio: z.string().optional(),
 });
 
 type AuthorFormValues = z.infer<typeof authorSchema>;
@@ -29,6 +32,7 @@ const defaultValues: AuthorFormValues = {
   slug: "",
   role: "",
   avatar_src: "",
+  bio: "",
 };
 
 export function BlogAuthorsPage() {
@@ -122,6 +126,7 @@ export function BlogAuthorsPage() {
         slug: selectedAuthor.slug,
         role: selectedAuthor.role ?? "",
         avatar_src: selectedAuthor.avatar_src ?? "",
+        bio: selectedAuthor.bio ?? "",
       });
       setSlugDirty(true);
       return;
@@ -158,18 +163,13 @@ export function BlogAuthorsPage() {
   return (
     <>
       <div className="admin-grid">
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>Author list</h2>
-              <p>Author records are reused by blog post metadata and article bylines.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            <div className="admin-toolbar">
-              <span className="admin-toolbar__meta">
-                {authorsQuery.data.length} author profiles stored
-              </span>
+        <AdminSectionCard
+          title="Author list"
+          description="Author records are reused by blog post metadata and article bylines."
+        >
+          <AdminToolbar
+            meta={`${authorsQuery.data.length} author profiles stored`}
+            actions={
               <button
                 className="admin-action-button"
                 type="button"
@@ -182,134 +182,134 @@ export function BlogAuthorsPage() {
               >
                 New Author
               </button>
-            </div>
+            }
+          />
 
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Slug</th>
-                    <th>Role</th>
-                    <th>Actions</th>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Slug</th>
+                  <th>Role</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {authorsQuery.data.map((author) => (
+                  <tr key={author.id}>
+                    <td>
+                      <strong>{author.name}</strong>
+                      <p>{author.avatar_src ?? "No avatar URL configured."}</p>
+                    </td>
+                    <td>{author.slug}</td>
+                    <td>{author.role ?? "No role"}</td>
+                    <td>
+                      <div className="admin-table__actions">
+                        <button
+                          className="admin-table__action"
+                          type="button"
+                          onClick={() => {
+                            setSelectedId(author.id);
+                            setFormMessage(null);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="admin-table__action admin-table__action--danger"
+                          type="button"
+                          onClick={() => setDeleteTarget(author)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {authorsQuery.data.map((author) => (
-                    <tr key={author.id}>
-                      <td>
-                        <strong>{author.name}</strong>
-                        <p>{author.avatar_src ?? "No avatar URL configured."}</p>
-                      </td>
-                      <td>{author.slug}</td>
-                      <td>{author.role ?? "No role"}</td>
-                      <td>
-                        <div className="admin-table__actions">
-                          <button
-                            className="admin-table__action"
-                            type="button"
-                            onClick={() => {
-                              setSelectedId(author.id);
-                              setFormMessage(null);
-                            }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="admin-table__action admin-table__action--danger"
-                            type="button"
-                            onClick={() => setDeleteTarget(author)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </section>
+        </AdminSectionCard>
 
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>{selectedAuthor ? "Edit author" : "Create author"}</h2>
-              <p>Use a stable slug and an optional avatar URL if bylines should show imagery.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
-              <div className="admin-form__grid">
-                <div className="admin-form__field">
-                  <label htmlFor="author-name">Name</label>
-                  <input id="author-name" type="text" {...register("name")} />
-                  {errors.name ? (
-                    <p className="admin-form__error">{errors.name.message}</p>
-                  ) : null}
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="author-slug">Slug</label>
-                  <input
-                    id="author-slug"
-                    type="text"
-                    {...register("slug", {
-                      onChange: () => setSlugDirty(true),
-                    })}
-                  />
-                  {errors.slug ? (
-                    <p className="admin-form__error">{errors.slug.message}</p>
-                  ) : null}
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="author-role">Role</label>
-                  <input id="author-role" type="text" {...register("role")} />
-                </div>
-
-                <div className="admin-form__field">
-                  <label htmlFor="author-avatar">Avatar URL</label>
-                  <input id="author-avatar" type="url" {...register("avatar_src")} />
-                  {errors.avatar_src ? (
-                    <p className="admin-form__error">{errors.avatar_src.message}</p>
-                  ) : null}
-                </div>
-              </div>
-
-              {formMessage ? <p className="admin-form__hint">{formMessage}</p> : null}
-
-              <div className="admin-form__actions">
-                {selectedAuthor ? (
-                  <button
-                    className="admin-form__cancel"
-                    type="button"
-                    onClick={() => {
-                      setSelectedId(null);
-                      setSlugDirty(false);
-                      setFormMessage(null);
-                      reset(defaultValues);
-                    }}
-                  >
-                    Clear
-                  </button>
+        <AdminSectionCard
+          title={selectedAuthor ? "Edit author" : "Create author"}
+          description="Use a stable slug and an optional avatar URL if bylines should show imagery."
+        >
+          <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
+            <div className="admin-form__grid">
+              <div className="admin-form__field">
+                <label htmlFor="author-name">Name</label>
+                <input id="author-name" type="text" {...register("name")} />
+                {errors.name ? (
+                  <p className="admin-form__error">{errors.name.message}</p>
                 ) : null}
-                <button
-                  className="admin-form__submit"
-                  type="submit"
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                >
-                  {createMutation.isPending || updateMutation.isPending
-                    ? "Saving..."
-                    : selectedAuthor
-                      ? "Update Author"
-                      : "Create Author"}
-                </button>
               </div>
-            </form>
-          </div>
-        </section>
+
+              <div className="admin-form__field">
+                <label htmlFor="author-slug">Slug</label>
+                <input
+                  id="author-slug"
+                  type="text"
+                  {...register("slug", {
+                    onChange: () => setSlugDirty(true),
+                  })}
+                />
+                {errors.slug ? (
+                  <p className="admin-form__error">{errors.slug.message}</p>
+                ) : null}
+              </div>
+
+              <div className="admin-form__field">
+                <label htmlFor="author-role">Role</label>
+                <input id="author-role" type="text" {...register("role")} />
+              </div>
+
+              <div className="admin-form__field">
+                <label htmlFor="author-avatar">Avatar URL</label>
+                <input id="author-avatar" type="url" {...register("avatar_src")} />
+                {errors.avatar_src ? (
+                  <p className="admin-form__error">{errors.avatar_src.message}</p>
+                ) : null}
+              </div>
+
+              <div className="admin-form__field admin-form__field--full">
+                <label htmlFor="author-bio">Bio</label>
+                <textarea id="author-bio" rows={5} {...register("bio")} />
+              </div>
+            </div>
+
+            {formMessage ? <p className="admin-form__hint">{formMessage}</p> : null}
+
+            <div className="admin-form__actions">
+              {selectedAuthor ? (
+                <button
+                  className="admin-form__cancel"
+                  type="button"
+                  onClick={() => {
+                    setSelectedId(null);
+                    setSlugDirty(false);
+                    setFormMessage(null);
+                    reset(defaultValues);
+                  }}
+                >
+                  Clear
+                </button>
+              ) : null}
+              <button
+                className="admin-form__submit"
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
+                {createMutation.isPending || updateMutation.isPending
+                  ? "Saving..."
+                  : selectedAuthor
+                    ? "Update Author"
+                    : "Create Author"}
+              </button>
+            </div>
+          </form>
+        </AdminSectionCard>
       </div>
 
       <AdminDeleteDialog

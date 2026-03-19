@@ -103,10 +103,25 @@ export const adminRoutes = {
   legacyMedia: "/admin/media/",
 } as const;
 
+export const editorRestrictedSections: AdminSection[] = [
+  "brand-settings",
+  "contact-settings",
+  "navigation",
+  "pricing",
+  "testimonials",
+  "footer-settings",
+  "seo-settings",
+  "access-roles",
+];
+
+export function isAdminSectionRestrictedForEditor(section: AdminSection) {
+  return editorRestrictedSections.includes(section);
+}
+
 const pageShortcuts = {
   home: {
     section: "page-home",
-    title: "Homepage",
+    title: "Home Page",
     description: "Edit homepage copy, content blocks, and publishing settings.",
   },
   services: {
@@ -131,8 +146,8 @@ const pageShortcuts = {
   },
   careers: {
     section: "page-careers",
-    title: "Careers Page",
-    description: "Edit the Careers page copy only. Job records live in Job Listings.",
+    title: "Career Page",
+    description: "Edit the public career page copy only. Job records live in Job Listings.",
   },
 } as const satisfies Record<
   string,
@@ -143,7 +158,7 @@ export type AdminPageShortcutSlug = keyof typeof pageShortcuts;
 
 export const adminNavGroups: AdminNavGroup[] = [
   {
-    label: "Operations",
+    label: "Overview",
     items: [
       {
         section: "dashboard",
@@ -162,8 +177,64 @@ export const adminNavGroups: AdminNavGroup[] = [
     ],
   },
   {
-    label: "Content",
+    label: "Content Management",
     items: [
+      {
+        section: "page-careers",
+        label: "Career Page",
+        href: adminRoutes.pageShortcut("careers"),
+        description: "Edit the public career page content and supporting copy.",
+        icon: "careers",
+      },
+      {
+        section: "jobs",
+        label: "Job Listings",
+        href: adminRoutes.jobs,
+        description: "Create, publish, and archive open roles.",
+        icon: "jobs",
+      },
+      {
+        section: "page-home",
+        label: "Home Page",
+        href: adminRoutes.pageShortcut("home"),
+        description: "Shortcut to the homepage record.",
+        icon: "page",
+      },
+      {
+        section: "page-services",
+        label: "Services Page",
+        href: adminRoutes.pageShortcut("services"),
+        description: "Shortcut to the services page record.",
+        icon: "services",
+      },
+      {
+        section: "page-about",
+        label: "About Page",
+        href: adminRoutes.pageShortcut("about"),
+        description: "Shortcut to the about page record.",
+        icon: "about",
+      },
+      {
+        section: "page-faq",
+        label: "FAQ Page",
+        href: adminRoutes.pageShortcut("faq"),
+        description: "Shortcut to the FAQ page record.",
+        icon: "faq",
+      },
+      {
+        section: "page-contact",
+        label: "Contact Page",
+        href: adminRoutes.pageShortcut("contact"),
+        description: "Edit contact page content only.",
+        icon: "contact",
+      },
+      {
+        section: "pages",
+        label: "All Pages",
+        href: adminRoutes.pages,
+        description: "Generic page manager and long-form page inventory.",
+        icon: "all-pages",
+      },
       {
         section: "blog-posts",
         label: "Blog Posts",
@@ -173,14 +244,14 @@ export const adminNavGroups: AdminNavGroup[] = [
       },
       {
         section: "blog-categories",
-        label: "Categories",
+        label: "Blog Categories",
         href: adminRoutes.blogCategories,
         description: "Organize posts with taxonomy controls.",
         icon: "categories",
       },
       {
         section: "blog-authors",
-        label: "Authors",
+        label: "Blog Authors",
         href: adminRoutes.blogAuthors,
         description: "Manage visible author identities.",
         icon: "authors",
@@ -188,73 +259,7 @@ export const adminNavGroups: AdminNavGroup[] = [
     ],
   },
   {
-    label: "Public Pages",
-    items: [
-      {
-        section: "page-home",
-        label: "Homepage",
-        href: adminRoutes.pageShortcut("home"),
-        description: "Shortcut to the homepage record.",
-        icon: "page",
-      },
-      {
-        section: "page-services",
-        label: "Services",
-        href: adminRoutes.pageShortcut("services"),
-        description: "Shortcut to the services page record.",
-        icon: "services",
-      },
-      {
-        section: "page-about",
-        label: "About",
-        href: adminRoutes.pageShortcut("about"),
-        description: "Shortcut to the about page record.",
-        icon: "about",
-      },
-      {
-        section: "page-faq",
-        label: "FAQ",
-        href: adminRoutes.pageShortcut("faq"),
-        description: "Shortcut to the FAQ page record.",
-        icon: "faq",
-      },
-      {
-        section: "page-contact",
-        label: "Contact",
-        href: adminRoutes.pageShortcut("contact"),
-        description: "Edit contact page content only.",
-        icon: "contact",
-      },
-      {
-        section: "page-careers",
-        label: "Careers Page",
-        href: adminRoutes.pageShortcut("careers"),
-        description: "Edit careers page content only.",
-        icon: "careers",
-      },
-      {
-        section: "pages",
-        label: "All Pages",
-        href: adminRoutes.pages,
-        description: "Generic page manager and long-form page inventory.",
-        icon: "all-pages",
-      },
-    ],
-  },
-  {
-    label: "Hiring",
-    items: [
-      {
-        section: "jobs",
-        label: "Job Listings",
-        href: adminRoutes.jobs,
-        description: "Create, publish, and archive open roles.",
-        icon: "jobs",
-      },
-    ],
-  },
-  {
-    label: "Configuration",
+    label: "Settings",
     items: [
       {
         section: "brand-settings",
@@ -374,7 +379,7 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
       "dashboard",
       "index",
       "Dashboard",
-      "SystemOS overview for consultations, content, settings, and hiring.",
+      "Admin overview for consultations, content, settings, and hiring.",
       [{ label: "Dashboard", href: adminRoutes.dashboard }]
     );
   }
@@ -450,7 +455,7 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
     return directMatch(
       normalizedPathname,
       "blog-categories",
-      "Categories",
+      "Blog Categories",
       "Manage blog taxonomy and category metadata.",
       adminRoutes.blogCategories
     );
@@ -460,7 +465,7 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
     return directMatch(
       normalizedPathname,
       "blog-authors",
-      "Authors",
+      "Blog Authors",
       "Maintain author identity, profile details, and bylines.",
       adminRoutes.blogAuthors
     );
@@ -520,7 +525,7 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
         config.description,
         [
           { label: "Dashboard", href: adminRoutes.dashboard },
-          { label: "Public Pages", href: adminRoutes.pages },
+          { label: "Content Management", href: adminRoutes.pages },
           { label: config.title, href: adminRoutes.pageShortcut(shortcut) },
         ],
         { pageSlug: shortcut }
