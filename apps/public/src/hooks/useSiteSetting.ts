@@ -5,5 +5,12 @@ export function useSiteSetting<TValue = unknown>(key: string) {
   return useQuery({
     queryKey: ["site-settings", key],
     queryFn: () => getSiteSetting<TValue>(key),
+    retry: (failureCount, error) => {
+      const status = (error as { response?: { status?: number } } | null)?.response?.status;
+      if (status === 404) {
+        return false;
+      }
+      return failureCount < 2;
+    },
   });
 }

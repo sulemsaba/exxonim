@@ -54,13 +54,13 @@ export function EngineSection({ content }: EngineSectionProps) {
 
         <div className="service-catalog__footer" data-reveal>
           <a className="landing-cta landing-cta--primary" href={routes.contact}>
-            Request a consultation
+            Contact Exxonim
           </a>
           <a
             className="landing-cta landing-cta--secondary"
-            href={routes.tracking}
+            href={routes.services}
           >
-            Track your consultation
+            Explore more services
           </a>
         </div>
       </div>

@@ -50,12 +50,6 @@ const defaultFeatureRows: FeatureRow[] = [
       "OSHA, NSSF, WCF, CRB / ERB, and related institutional registrations coordinated so compliance work stays current and submission-ready.",
     visualKey: "institutional",
   },
-  {
-    title: "Track Your Consultation",
-    description:
-      "See what is in intake, review, submission, and follow-up so the next action and current status stay visible all the way to release.",
-    visualKey: "tracking",
-  },
 ];
 
 const featureVisualContentMap: Record<FeatureVisualKey, FeatureVisualContent> = {
@@ -1168,65 +1162,6 @@ function renderInstitutionalSupportVisual() {
   );
 }
 
-function renderTrackingConsultationVisual() {
-  return (
-    <div className="compose-visual compose-visual--tracking">
-      <div className="compose-card">
-        <div className="compose-title">Consultation Tracking</div>
-
-        <div className="compose-label">Reference</div>
-        <div className="compose-pill">EXX-24091</div>
-
-        <div className="tracking-preview-list">
-          <div className="tracking-preview-step is-complete">
-            <span className="tracking-preview-step__dot" />
-            <div>
-              <strong>Intake confirmed</strong>
-              <span>Requirements captured and service scope agreed.</span>
-            </div>
-          </div>
-
-          <div className="tracking-preview-step is-complete">
-            <span className="tracking-preview-step__dot" />
-            <div>
-              <strong>Documents reviewed</strong>
-              <span>Submission pack checked before it goes active.</span>
-            </div>
-          </div>
-
-          <div className="tracking-preview-step is-active">
-            <span className="tracking-preview-step__dot" />
-            <div>
-              <strong>Authority follow-up</strong>
-              <span>Current status is visible and next action is clear.</span>
-            </div>
-          </div>
-
-          <div className="tracking-preview-step">
-            <span className="tracking-preview-step__dot" />
-            <div>
-              <strong>Final release</strong>
-              <span>Approval, certificate, or confirmation is handed over.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="compose-visual__side-panel">
-        <div className="compose-visual__side-label">Current note</div>
-        <div className="compose-visual__side-item">
-          <strong>Next-step visibility</strong>
-          <span>Know what is complete, active, and still outstanding.</span>
-        </div>
-        <div className="compose-visual__side-item">
-          <strong>Practical follow-up</strong>
-          <span>Less guessing while the consultation is moving.</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function renderFeatureVisual(
   visualKey: FeatureVisualKey,
   featureVisuals: Record<string, FeatureVisualContent>
@@ -1289,8 +1224,8 @@ function renderStatementCard(item: ExtendedStackItem, index: number) {
         {item.emphasis ? <p className="stack-emphasis">{item.emphasis}</p> : null}
 
         <div className="stack-actions">
-          <a href={item.ctaHref || "#"} className="stack-cta stack-cta--primary">
-            {item.ctaLabel || "Request Consultation"}
+          <a href={item.ctaHref || "/contact/"} className="stack-cta stack-cta--primary">
+            {item.ctaLabel || "Contact Exxonim"}
             <span className="stack-cta__arrow">→</span>
           </a>
         </div>
@@ -1335,7 +1270,7 @@ function renderFeatureCard(item: ExtendedStackItem) {
         </div>
 
         <div className="stack-actions">
-          <a href={item.ctaHref || "#"} className="stack-cta stack-cta--primary">
+          <a href={item.ctaHref || "/services/"} className="stack-cta stack-cta--primary">
             {item.ctaLabel || "Explore Services"}
             <span className="stack-cta__arrow">→</span>
           </a>
@@ -1440,6 +1375,7 @@ export function StackSection({
   const cardsRef = useRef<(HTMLElement | null)[]>([]);
   const rafRef = useRef<number | null>(null);
   const defaultRows = featureRowsProp?.length ? featureRowsProp : defaultFeatureRows;
+  const visibleItems = items.filter((item) => !/track\s+your\s+consultation/i.test(item.title));
   const featureVisuals =
     featureVisualsProp && Object.keys(featureVisualsProp).length
       ? featureVisualsProp
@@ -1508,7 +1444,7 @@ export function StackSection({
       <style>{stackSectionStyles}</style>
 
       <section className="scroll-snap-wrapper">
-        {items.map((rawItem, index) => {
+        {visibleItems.map((rawItem, index) => {
           const item = rawItem as ExtendedStackItem;
           const isMiddle = index === 1;
 

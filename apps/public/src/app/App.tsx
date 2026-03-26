@@ -7,10 +7,8 @@ import {
   FaqPage,
   NotFoundPage,
   PrivacyPage,
-  RequestConsultationPage,
   SupportPage,
   TermsPage,
-  TrackConsultationPage,
 } from "../features/pages";
 import { ResourceArticlePage, ResourcesPage } from "../features/resources";
 import { ServicesPage } from "../features/services";
@@ -145,10 +143,6 @@ export default function App({ initialPathname }: AppProps) {
     <FaqPage />
   ) : pathname === normalizePathname(routes.services) ? (
     <ServicesPage />
-  ) : pathname === normalizePathname(routes.requestConsultation) ? (
-    <RequestConsultationPage />
-  ) : pathname === normalizePathname(routes.tracking) ? (
-    <TrackConsultationPage />
   ) : pathname === normalizePathname(routes.resources) ? (
     <ResourcesPage />
   ) : pathname === normalizePathname(routes.career) ? (

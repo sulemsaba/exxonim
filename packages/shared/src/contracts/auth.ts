@@ -1,4 +1,4 @@
-export type ApiAdminRole = "admin" | "editor";
+export type ApiAdminRole = "admin" | "editor" | "author";
 
 export interface ApiAdminUser {
   id: number;

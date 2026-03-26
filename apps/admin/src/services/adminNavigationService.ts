@@ -48,12 +48,12 @@ export async function updateAdminNavigationItem(
   payload: Partial<AdminNavigationPayload>
 ) {
   const response = await api.put<ApiNavigationItem>(
-    apiRoutes.admin.navigation.detail(id),
+    apiRoutes.admin.navigation.byId(id),
     toRequestPayload(payload)
   );
   return normalizeNavigationItem(response.data);
 }
 
 export async function deleteAdminNavigationItem(id: number) {
-  await api.delete(apiRoutes.admin.navigation.detail(id));
+  await api.delete(apiRoutes.admin.navigation.byId(id));
 }

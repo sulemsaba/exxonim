@@ -44,12 +44,12 @@ export async function updateAdminTestimonial(
   payload: Partial<AdminTestimonialPayload>
 ) {
   const response = await api.put<ApiTestimonial>(
-    apiRoutes.admin.testimonials.detail(id),
+    apiRoutes.admin.testimonials.byId(id),
     toRequestPayload(payload)
   );
   return normalizeContentRecord(response.data);
 }
 
 export async function deleteAdminTestimonial(id: number) {
-  await api.delete(apiRoutes.admin.testimonials.detail(id));
+  await api.delete(apiRoutes.admin.testimonials.byId(id));
 }

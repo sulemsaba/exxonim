@@ -2,8 +2,8 @@ import { normalizePathname, routes } from "../app/routes";
 
 export type AdminSection =
   | "dashboard"
-  | "consultations"
   | "blog-posts"
+  | "blog-analytics"
   | "blog-categories"
   | "blog-authors"
   | "page-home"
@@ -37,8 +37,8 @@ export interface AdminNavItem {
   description: string;
   icon:
     | "dashboard"
-    | "consultations"
-    | "posts"
+      | "posts"
+    | "analytics"
     | "categories"
     | "authors"
     | "page"
@@ -78,10 +78,10 @@ export interface AdminRouteMatch {
 
 export const adminRoutes = {
   dashboard: routes.admin,
-  consultations: "/admin/consultations/",
   blogPosts: "/admin/blog/posts/",
   blogPostsNew: "/admin/blog/posts/new/",
   blogPostEdit: (id: number) => `/admin/blog/posts/${id}/edit/`,
+  blogAnalytics: "/admin/blog/analytics/",
   blogCategories: "/admin/blog/categories/",
   blogAuthors: "/admin/blog/authors/",
   pages: "/admin/pages/",
@@ -106,6 +106,14 @@ export const adminRoutes = {
 export const editorRestrictedSections: AdminSection[] = [
   "brand-settings",
   "contact-settings",
+  "page-home",
+  "page-services",
+  "page-about",
+  "page-faq",
+  "page-contact",
+  "page-careers",
+  "pages",
+  "jobs",
   "navigation",
   "pricing",
   "testimonials",
@@ -114,8 +122,28 @@ export const editorRestrictedSections: AdminSection[] = [
   "access-roles",
 ];
 
+export const authorRestrictedSections: AdminSection[] = [
+  ...editorRestrictedSections,
+  "blog-categories",
+];
+
 export function isAdminSectionRestrictedForEditor(section: AdminSection) {
   return editorRestrictedSections.includes(section);
+}
+
+export function isAdminSectionRestrictedForRole(
+  role: "admin" | "editor" | "author" | string | null | undefined,
+  section: AdminSection
+) {
+  if (role === "author") {
+    return authorRestrictedSections.includes(section);
+  }
+
+  if (role === "editor") {
+    return isAdminSectionRestrictedForEditor(section);
+  }
+
+  return false;
 }
 
 const pageShortcuts = {
@@ -166,13 +194,6 @@ export const adminNavGroups: AdminNavGroup[] = [
         href: adminRoutes.dashboard,
         description: "Overview, alerts, and workspace pulse.",
         icon: "dashboard",
-      },
-      {
-        section: "consultations",
-        label: "Consultations",
-        href: adminRoutes.consultations,
-        description: "Track requests, updates, and assignments.",
-        icon: "consultations",
       },
     ],
   },
@@ -241,6 +262,13 @@ export const adminNavGroups: AdminNavGroup[] = [
         href: adminRoutes.blogPosts,
         description: "Create, edit, publish, and review articles.",
         icon: "posts",
+      },
+      {
+        section: "blog-analytics",
+        label: "Blog Analytics",
+        href: adminRoutes.blogAnalytics,
+        description: "Traffic, SEO, and publishing performance for blog content.",
+        icon: "analytics",
       },
       {
         section: "blog-categories",
@@ -379,7 +407,7 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
       "dashboard",
       "index",
       "Dashboard",
-      "Admin overview for consultations, content, settings, and hiring.",
+      "Admin overview for content, settings, and hiring.",
       [{ label: "Dashboard", href: adminRoutes.dashboard }]
     );
   }
@@ -461,6 +489,16 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
     );
   }
 
+  if (segments[1] === "blog" && segments[2] === "analytics") {
+    return directMatch(
+      normalizedPathname,
+      "blog-analytics",
+      "Blog Analytics",
+      "Estimated traffic, SEO, and publishing performance for blog content.",
+      adminRoutes.blogAnalytics
+    );
+  }
+
   if (segments[1] === "blog" && segments[2] === "authors") {
     return directMatch(
       normalizedPathname,
@@ -471,15 +509,6 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
     );
   }
 
-  if (segments[1] === "consultations") {
-    return directMatch(
-      normalizedPathname,
-      "consultations",
-      "Consultations",
-      "Manage incoming requests, assignments, status updates, and customer notifications.",
-      adminRoutes.consultations
-    );
-  }
 
   if (segments[1] === "pages") {
     if (segments[2] === "new") {

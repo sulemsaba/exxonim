@@ -76,6 +76,7 @@ export interface SiteSettingFooterValue {
   other_resources: Array<{ label: string; href: string }>;
   tagline: string;
   primary_cta: { label: string; href: string };
+  social_links?: SiteSettingSocialLinkValue[];
   copyright: string;
 }
 

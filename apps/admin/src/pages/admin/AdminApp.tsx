@@ -2,15 +2,15 @@ import { AdminLayout } from "../../components/admin/AdminLayout";
 import { ErrorMessage } from "../../components/ErrorMessage";
 import { useAuth } from "../../contexts/AuthContext";
 import {
-  isAdminSectionRestrictedForEditor,
+  isAdminSectionRestrictedForRole,
   type AdminRouteMatch,
 } from "../../lib/adminRoutes";
 import {
   BlogAuthorsPage,
+  BlogAnalyticsPage,
   BlogCategoriesPage,
   BlogPostsPage,
 } from "../../features/blog";
-import { ConsultationsPage } from "../../features/consultations";
 import { AdminDashboardPage } from "../../features/dashboard";
 import { NavigationPage } from "../../features/navigation";
 import { PagesPage } from "../../features/pages";
@@ -32,8 +32,12 @@ interface AdminAppProps {
 export function AdminApp({ match, theme, onToggleTheme }: AdminAppProps) {
   const { admin } = useAuth();
   const adminRole = admin?.role ?? "admin";
+  const layoutMode =
+    match.section === "blog-posts" && (match.mode === "new" || match.mode === "edit")
+      ? "editor"
+      : "default";
 
-  if (adminRole === "editor" && isAdminSectionRestrictedForEditor(match.section)) {
+  if (isAdminSectionRestrictedForRole(adminRole, match.section)) {
     return (
       <AdminLayout
         activeSection={match.section}
@@ -42,10 +46,11 @@ export function AdminApp({ match, theme, onToggleTheme }: AdminAppProps) {
         breadcrumbs={match.breadcrumbs}
         theme={theme}
         onToggleTheme={onToggleTheme}
+        layoutMode={layoutMode}
       >
         <ErrorMessage
           title="Restricted workspace"
-          detail="Editors cannot access this admin section."
+          detail={`${adminRole === "author" ? "Authors" : "Editors"} cannot access this admin section.`}
         />
       </AdminLayout>
     );
@@ -60,13 +65,13 @@ export function AdminApp({ match, theme, onToggleTheme }: AdminAppProps) {
     ) : match.section === "dashboard" ? (
       <AdminDashboardPage />
     ) : match.section === "blog-posts" ? (
-      <BlogPostsPage mode={match.mode} entityId={match.entityId} />
+      <BlogPostsPage mode={match.mode} entityId={match.entityId} theme={theme} />
+    ) : match.section === "blog-analytics" ? (
+      <BlogAnalyticsPage theme={theme} />
     ) : match.section === "blog-categories" ? (
-      <BlogCategoriesPage />
+      <BlogCategoriesPage theme={theme} />
     ) : match.section === "blog-authors" ? (
-      <BlogAuthorsPage />
-    ) : match.section === "consultations" ? (
-      <ConsultationsPage />
+      <BlogAuthorsPage theme={theme} />
     ) : [
         "page-home",
         "page-services",
@@ -78,7 +83,7 @@ export function AdminApp({ match, theme, onToggleTheme }: AdminAppProps) {
       ].includes(match.section) ? (
       <PagesPage mode={match.mode} entityId={match.entityId} pageSlug={match.pageSlug} />
     ) : match.section === "jobs" ? (
-      <JobsPage mode={match.mode} entitySlug={match.entitySlug} />
+      <JobsPage mode={match.mode} entitySlug={match.entitySlug} theme={theme} />
     ) : match.section === "brand-settings" ? (
       <BrandSettingsPage />
     ) : match.section === "contact-settings" ? (
@@ -110,6 +115,7 @@ export function AdminApp({ match, theme, onToggleTheme }: AdminAppProps) {
       breadcrumbs={match.breadcrumbs}
       theme={theme}
       onToggleTheme={onToggleTheme}
+      layoutMode={layoutMode}
     >
       {content}
     </AdminLayout>

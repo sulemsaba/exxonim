@@ -14,19 +14,15 @@ import {
   adminNavGroups,
   adminNavItems,
   adminRoutes,
-  isAdminSectionRestrictedForEditor,
+  isAdminSectionRestrictedForRole,
   type AdminBreadcrumb,
   type AdminSection,
 } from "../../lib/adminRoutes";
-import { getAdminPosts } from "../../services/adminBlogService";
-import { getAdminConsultations } from "../../services/adminConsultationService";
+import { listAdminBlogPosts } from "../../services/adminBlogService";
 import { getAdminJobs } from "../../services/adminJobsService";
 import { getBrandSetting, getCompanyInfoSetting } from "../../services/adminStructuredSettingsService";
 import {
-  formatAdminRole,
   getContentStatus,
-  getAdminInitials,
-  getAdminLabel,
   getReadableForegroundColor,
   normalizeHexColor,
 } from "../../utils/admin";
@@ -41,6 +37,7 @@ interface AdminLayoutProps extends PropsWithChildren {
   theme: "light" | "dark";
   onToggleTheme: () => void;
   actions?: ReactNode;
+  layoutMode?: "default" | "editor";
 }
 
 function getFocusableElements(node: HTMLElement) {
@@ -133,6 +130,7 @@ export function AdminLayout({
   theme,
   onToggleTheme,
   actions,
+  layoutMode = "default",
   children,
 }: AdminLayoutProps) {
   const { admin, logout } = useAuth();
@@ -144,9 +142,17 @@ export function AdminLayout({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const deferredSearch = useDeferredValue(searchValue);
   const adminRole = admin?.role ?? "admin";
-  const roleLabel = formatAdminRole(adminRole);
-  const adminLabel = getAdminLabel(admin?.email, admin?.full_name);
-  const adminInitials = getAdminInitials(admin?.email, admin?.full_name);
+  const condensedBreadcrumbs = useMemo(() => {
+    if (breadcrumbs.length <= 1) {
+      return breadcrumbs;
+    }
+
+    return breadcrumbs.filter((breadcrumb, index) => {
+      const isLast = index === breadcrumbs.length - 1;
+      return !(isLast && breadcrumb.label.trim() === title.trim());
+    });
+  }, [breadcrumbs, title]);
+  const isEditorLayout = layoutMode === "editor";
 
   const brandQuery = useQuery({
     queryKey: ["admin", "site-settings", "brand"],
@@ -156,14 +162,9 @@ export function AdminLayout({
     queryKey: ["admin", "site-settings", "company_info"],
     queryFn: getCompanyInfoSetting,
   });
-  const pendingConsultationsCountQuery = useQuery({
-    queryKey: ["admin", "consultations", "pending-count"],
-    queryFn: () => getAdminConsultations({ page: 1, limit: 1, status: "pending" }),
-    select: (response) => response.total,
-  });
   const blogDraftCountQuery = useQuery({
     queryKey: ["admin", "blog", "posts"],
-    queryFn: getAdminPosts,
+    queryFn: () => listAdminBlogPosts(),
     select: (posts) =>
       posts.filter((post) => getContentStatus(post) === "draft").length,
   });
@@ -306,11 +307,7 @@ export function AdminLayout({
   const searchIndex = useMemo(
     () =>
       adminNavItems
-        .filter((item) =>
-          adminRole === "editor"
-            ? !isAdminSectionRestrictedForEditor(item.section)
-            : true
-        )
+        .filter((item) => !isAdminSectionRestrictedForRole(adminRole, item.section))
         .map((item) => ({
           ...item,
           groupLabel: navGroupLookup.get(item.section) ?? "Workspace",
@@ -335,12 +332,10 @@ export function AdminLayout({
   }, [searchIndex, searchQuery]);
   const sidebarCounts = useMemo(
     () => ({
-      pendingConsultations: pendingConsultationsCountQuery.data ?? 0,
       blogDrafts: blogDraftCountQuery.data ?? 0,
       openJobs: openJobsCountQuery.data ?? 0,
     }),
     [
-      pendingConsultationsCountQuery.data,
       blogDraftCountQuery.data,
       openJobsCountQuery.data,
     ]
@@ -409,24 +404,25 @@ export function AdminLayout({
                 <span className="adminx-mobile-toggle__line"></span>
               </button>
 
-              <div className="adminx-topbar__title-block">
-                <div className="adminx-breadcrumbs" aria-label="Breadcrumb">
-                  {breadcrumbs.map((breadcrumb, index) => (
-                    <span key={`${breadcrumb.label}-${index}`}>
-                      {breadcrumb.href ? (
-                        <a href={breadcrumb.href}>{breadcrumb.label}</a>
-                      ) : (
-                        breadcrumb.label
-                      )}
-                    </span>
-                  ))}
-                </div>
+              {!isEditorLayout ? (
+                <div className="adminx-topbar__title-block">
+                  <div className="adminx-breadcrumbs" aria-label="Breadcrumb">
+                    {condensedBreadcrumbs.map((breadcrumb, index) => (
+                      <span key={`${breadcrumb.label}-${index}`}>
+                        {breadcrumb.href ? (
+                          <a href={breadcrumb.href}>{breadcrumb.label}</a>
+                        ) : (
+                          breadcrumb.label
+                        )}
+                      </span>
+                    ))}
+                  </div>
 
-                <div className="adminx-page-title">
-                  <h1>{title}</h1>
-                  <span className="adminx-page-title__role">{roleLabel}</span>
+                  <div className="adminx-page-title">
+                    <h1>{title}</h1>
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
 
             <div className="adminx-topbar__center">
@@ -499,29 +495,21 @@ export function AdminLayout({
               >
                 <SettingsIcon />
               </a>
-
-              <div className="adminx-topbar-profile">
-                <div className="adminx-topbar-profile__avatar" aria-hidden="true">
-                  {adminInitials}
-                </div>
-                <div className="adminx-topbar-profile__info">
-                  <strong>{adminLabel}</strong>
-                  <span>{roleLabel}</span>
-                </div>
-              </div>
             </div>
           </header>
 
           <div className="adminx-content">
-            <section className="adminx-page-header">
-              <div className="adminx-page-header__copy">
-                <span className="adminx-page-header__eyebrow">Workspace context</span>
-                <p>{description}</p>
-              </div>
-              {actions ? (
-                <div className="adminx-page-header__actions">{actions}</div>
-              ) : null}
-            </section>
+            {!isEditorLayout ? (
+              <section className="adminx-page-header">
+                <div className="adminx-page-header__copy">
+                  <span className="adminx-page-header__eyebrow">Workspace context</span>
+                  <p>{description}</p>
+                </div>
+                {actions ? (
+                  <div className="adminx-page-header__actions">{actions}</div>
+                ) : null}
+              </section>
+            ) : null}
 
             <section className="adminx-page-body">{children}</section>
           </div>

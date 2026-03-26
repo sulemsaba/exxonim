@@ -1,5 +1,5 @@
 import type { SiteSettingSeoDefaultsValue } from "../types/api";
-import { getPosts, getPostBySlug } from "../services/blogService";
+import { getPublicBlogPostBySlug, listPublicBlogPosts } from "../services/blogService";
 import { getPageBySlug } from "../services/pageService";
 import { getSiteSetting } from "../services/siteSettingsService";
 import {
@@ -21,8 +21,6 @@ const pageSlugByRoute: Record<string, string> = {
   [normalizePathname(routes.about)]: "about",
   [normalizePathname(routes.faq)]: "faq",
   [normalizePathname(routes.services)]: "services",
-  [normalizePathname(routes.requestConsultation)]: "request-consultation",
-  [normalizePathname(routes.tracking)]: "track-consultation",
   [normalizePathname(routes.resources)]: "resources",
   [normalizePathname(routes.career)]: "career",
   [normalizePathname(routes.contact)]: "contact",
@@ -68,7 +66,7 @@ export async function resolveServerSeo(pathname: string | undefined): Promise<Pa
 
   if (articleSlug) {
     try {
-      const post = await getPostBySlug(articleSlug);
+      const post = await getPublicBlogPostBySlug(articleSlug);
       return createBlogPostSeo(post, {
         canonicalBaseUrl,
         defaultDescription: seoDefaults?.defaultMetaDescription ?? undefined,
@@ -113,7 +111,7 @@ export async function resolveServerSeo(pathname: string | undefined): Promise<Pa
 
 export async function getBlogPrerenderRoutes() {
   try {
-    const posts = await getPosts();
+    const posts = await listPublicBlogPosts();
     return posts.map((post) => resourcePost(post.slug));
   } catch {
     return [];

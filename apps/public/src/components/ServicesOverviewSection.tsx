@@ -450,7 +450,7 @@ export function ServicesOverviewSection({
                   className="landing-cta landing-cta--secondary"
                   href={routes.contact}
                 >
-                  Request consultation
+                  Contact Exxonim
                 </a>
               </div>
             </article>

@@ -6,7 +6,7 @@ import type { ApiSiteSetting } from "../types/api";
 
 export async function getSiteSetting<TValue = unknown>(key: string) {
   const response = await api.get<ApiSiteSetting<TValue>>(
-    apiRoutes.public.siteSettings.detail(key)
+    apiRoutes.public.siteSettings.byKey(key)
   );
   return mapSiteSetting(response.data) as SiteSetting<TValue>;
 }

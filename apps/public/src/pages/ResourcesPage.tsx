@@ -12,7 +12,7 @@ import type {
   BlogPost,
   ResourcesPageContent,
 } from "../types";
-import { getFeaturedBlogPosts, getVisibleBlogPosts } from "../utils/blog";
+import { buildResourcesBlogLayout, getVisibleBlogPosts } from "../utils/blog";
 
 const resourcesPageStyles = String.raw`
   .cx-blog-page {
@@ -192,12 +192,12 @@ const resourcesPageStyles = String.raw`
 
   .cx-top-hero-copy h2 {
     margin: 0;
-    max-width: 12.75ch;
+    max-width: 16ch;
     color: var(--cx-page-text);
     font-family: var(--font-display);
-    font-size: clamp(2.65rem, 4.05vw, 4rem);
+    font-size: clamp(2.15rem, 3.35vw, 3.35rem);
     font-weight: 500;
-    line-height: 1.12;
+    line-height: 1.02;
     letter-spacing: -0.06em;
   }
 
@@ -362,43 +362,26 @@ const resourcesPageStyles = String.raw`
     white-space: nowrap;
   }
 
-  /* --- Interactive Card Wrappers --- */
-  .cx-featured-wrapper,
-  .cx-sub-card,
   .cx-post-card {
     position: relative;
-    border-radius: var(--cx-radius);
-    transition: transform 240ms ease;
-  }
-
-  .cx-featured-wrapper:hover,
-  .cx-sub-card:hover,
-  .cx-post-card:hover {
-    transform: translateY(-2px);
-  }
-
-  .cx-featured-image,
-  .cx-featured-content,
-  .cx-sub-card,
-  .cx-post-card,
-  .cx-empty-state {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--cx-card-border);
+    border-radius: 10px;
+    background: var(--cx-content-surface);
+    box-shadow: var(--cx-card-shadow);
     transition:
-      border-color 240ms ease,
-      box-shadow 240ms ease,
-      background-color 240ms ease;
+      transform 220ms ease,
+      border-color 220ms ease,
+      box-shadow 220ms ease,
+      background-color 220ms ease;
   }
 
-  .cx-featured-wrapper:hover .cx-featured-image,
-  .cx-featured-wrapper:hover .cx-featured-content,
-  .cx-sub-card:hover,
   .cx-post-card:hover {
+    transform: translateY(-4px);
     border-color: var(--cx-hover-border);
     box-shadow: var(--cx-card-shadow-hover);
-  }
-
-  .cx-featured-wrapper:hover .cx-featured-content,
-  .cx-sub-card:hover .cx-sub-content,
-  .cx-post-card:hover .cx-post-content {
     background-color: var(--cx-content-surface-hover);
   }
 
@@ -419,38 +402,10 @@ const resourcesPageStyles = String.raw`
     z-index: 0;
   }
 
-  .cx-featured-wrapper:hover .cx-cover-image,
-  .cx-sub-card:hover .cx-cover-image,
   .cx-post-card:hover .cx-cover-image {
     transform: scale(1.02);
   }
 
-  .cx-featured-section {
-    display: grid;
-    grid-template-columns: minmax(0, 45%) minmax(0, 55%);
-    gap: 24px;
-    margin-bottom: 24px;
-    align-items: stretch;
-  }
-
-  .cx-featured-image,
-  .cx-featured-content,
-  .cx-sub-card,
-  .cx-post-card,
-  .cx-empty-state {
-    border: 1px solid var(--cx-card-border);
-    box-shadow: var(--cx-card-shadow);
-    border-radius: var(--cx-radius);
-    transition: box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .cx-featured-image,
-  .cx-featured-content {
-    overflow: hidden;
-  }
-
-  .cx-featured-image,
-  .cx-sub-image,
   .cx-post-media {
     position: relative;
     display: flex;
@@ -459,8 +414,6 @@ const resourcesPageStyles = String.raw`
     isolation: isolate;
   }
 
-  .cx-featured-image::after,
-  .cx-sub-image::after,
   .cx-post-media::after {
     content: "";
     position: absolute;
@@ -472,8 +425,6 @@ const resourcesPageStyles = String.raw`
     pointer-events: none;
   }
 
-  .cx-featured-wrapper:hover .cx-featured-image::after,
-  .cx-sub-card:hover .cx-sub-image::after,
   .cx-post-card:hover .cx-post-media::after {
     opacity: 1;
   }
@@ -512,35 +463,9 @@ const resourcesPageStyles = String.raw`
     text-transform: uppercase;
   }
 
-  .cx-featured-content,
-  .cx-sub-content,
   .cx-post-content {
     background-color: var(--cx-content-surface);
-    transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .cx-featured-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 40px;
-  }
-
-  .cx-featured-content h2 {
-    margin: 0 0 20px;
-    color: var(--cx-page-text);
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 3.1vw, 3rem);
-    font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: -0.04em;
-  }
-
-  .cx-featured-content p {
-    margin: 0 0 20px;
-    color: var(--cx-muted);
-    font-size: 1rem;
-    line-height: 1.56;
+    transition: background-color 220ms ease;
   }
 
   .cx-author {
@@ -550,10 +475,6 @@ const resourcesPageStyles = String.raw`
     min-width: 0;
     position: relative;
     z-index: 11;
-  }
-
-  .cx-featured-content .cx-author {
-    margin-bottom: 22px;
   }
 
   .cx-author-img,
@@ -607,61 +528,12 @@ const resourcesPageStyles = String.raw`
     transition: transform 180ms ease;
   }
 
-  .cx-featured-wrapper:hover .cx-learn-more,
-  .cx-sub-card:hover .cx-learn-more,
   .cx-post-card:hover .cx-learn-more {
     color: var(--cx-link-hover);
   }
 
-  .cx-featured-wrapper:hover .cx-learn-more span,
-  .cx-sub-card:hover .cx-learn-more span,
   .cx-post-card:hover .cx-learn-more span {
     transform: translateX(3px);
-  }
-
-  .cx-learn-more--push {
-    margin-top: auto;
-  }
-
-  .cx-sub-articles {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px;
-  }
-
-  .cx-sub-card {
-    display: grid;
-    grid-template-columns: minmax(0, 40%) minmax(0, 60%);
-    overflow: hidden;
-  }
-
-  .cx-sub-image {
-    display: flex;
-    align-items: stretch;
-    justify-content: stretch;
-  }
-
-  .cx-sub-content {
-    display: flex;
-    flex-direction: column;
-    padding: 24px;
-  }
-
-  .cx-sub-content h3 {
-    margin: 0 0 12px;
-    color: var(--cx-page-text);
-    font-family: var(--font-display);
-    font-size: clamp(1.25rem, 2vw, 1.55rem);
-    font-weight: 500;
-    line-height: 1.18;
-    letter-spacing: -0.03em;
-  }
-
-  .cx-sub-content p {
-    margin: 0;
-    color: var(--cx-muted);
-    font-size: 0.95rem;
-    line-height: 1.56;
   }
 
   .cx-filters {
@@ -718,21 +590,19 @@ const resourcesPageStyles = String.raw`
     margin-top: 36px;
   }
 
-  .cx-post-card {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
   .cx-post-media {
     aspect-ratio: 16 / 10;
+    background:
+      radial-gradient(circle at top right, rgba(127, 188, 193, 0.3), transparent 48%),
+      linear-gradient(160deg, rgba(8, 31, 35, 0.96), rgba(15, 92, 99, 0.82));
+    border-bottom: 1px solid var(--cx-card-border);
   }
 
   .cx-post-content {
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding: 20px;
+    padding: 22px 22px 20px;
   }
 
   .cx-post-content .cx-date {
@@ -765,10 +635,12 @@ const resourcesPageStyles = String.raw`
   }
 
   .cx-post-bottom {
-    display: grid;
-    gap: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
     margin-top: auto;
-    padding-top: 16px;
+    padding-top: 26px;
   }
 
   .cx-empty-state {
@@ -1066,22 +938,6 @@ const resourcesPageStyles = String.raw`
     .cx-top-layout {
       grid-template-columns: 1fr;
     }
-
-    .cx-featured-section {
-      grid-template-columns: 1fr;
-    }
-
-    .cx-featured-content {
-      padding: 32px;
-    }
-
-    .cx-sub-articles {
-      grid-template-columns: 1fr;
-    }
-
-    .cx-sub-card {
-      grid-template-columns: 1fr;
-    }
   }
 
   @media (max-width: 767px) {
@@ -1127,20 +983,10 @@ const resourcesPageStyles = String.raw`
       aspect-ratio: 16 / 10;
     }
 
-    .cx-featured-content {
-      padding: 28px 22px;
-    }
-
-    .cx-sub-content,
     .cx-post-content {
       padding: 20px 18px;
     }
 
-    .cx-featured-content h2 {
-      font-size: 28px;
-    }
-
-    .cx-sub-content h3,
     .cx-post-content h3 {
       font-size: 18px;
     }
@@ -1276,10 +1122,12 @@ function renderMedia(
           src={post.coverImageSrc}
           alt={post.coverAlt ?? post.title}
         />
-        <div className="cx-cover-overlay">
-          {categoryLabel ? <span>{categoryLabel}</span> : null}
-          <strong>{post.mediaLabel || post.title}</strong>
-        </div>
+        {variant !== "grid" ? (
+          <div className="cx-cover-overlay">
+            {categoryLabel ? <span>{categoryLabel}</span> : null}
+            <strong>{post.mediaLabel || post.title}</strong>
+          </div>
+        ) : null}
       </>
     );
   }
@@ -1332,7 +1180,9 @@ function renderTopListItem(
   const articleLink = resourcePost(post.slug);
   const metaParts = [formatBlogDate(post.publishedAt)];
   const thumbnailSrc =
-    trendingMedia[index] ?? trendingMedia[trendingMedia.length - 1];
+    post.coverImageSrc ??
+    trendingMedia[index] ??
+    trendingMedia[trendingMedia.length - 1];
 
   if (post.readTimeMinutes) {
     metaParts.push(`${post.readTimeMinutes} min`);
@@ -1341,7 +1191,7 @@ function renderTopListItem(
   return (
     <a href={articleLink} className="cx-trending-item">
       <div className="cx-trending-thumb">
-        <img src={thumbnailSrc} alt={post.title} loading="lazy" />
+        <img src={thumbnailSrc} alt={post.coverAlt ?? post.title} loading="lazy" />
       </div>
 
       <div className="cx-trending-content">
@@ -1423,17 +1273,10 @@ export function ResourcesPage() {
   }
 
   const topMedia = page.content.top_media;
-  const featuredPosts = getFeaturedBlogPosts(posts).slice(0, 3);
-  const heroPost = featuredPosts[0];
-  const topRailPosts = getVisibleBlogPosts({
-    posts,
-    categoryId: "all",
-    limit: 3,
-    excludeSlugs: heroPost ? [heroPost.slug] : [],
-  });
-  const topSectionSlugs = [heroPost?.slug, ...topRailPosts.map((post) => post.slug)].filter(
-    Boolean
-  ) as string[];
+  const { heroPost, topRailPosts, topSectionSlugs: defaultTopSectionSlugs } =
+    buildResourcesBlogLayout(posts);
+  const topSectionSlugs =
+    selectedCategory === "all" ? defaultTopSectionSlugs : [];
   const filteredPosts = getVisibleBlogPosts({
     posts,
     categoryId: selectedCategory,
@@ -1445,6 +1288,8 @@ export function ResourcesPage() {
     selectedCategory === "all"
       ? null
       : categories.find((category) => category.id === selectedCategory);
+  const heroMediaSrc = heroPost?.coverImageSrc ?? topMedia.hero;
+  const heroMediaAlt = heroPost?.coverAlt ?? heroPost?.title ?? page.content.hero_title;
 
   const handleSelectCategory = (categoryId: ActiveCategory) => {
     setSelectedCategory(categoryId);
@@ -1466,7 +1311,7 @@ export function ResourcesPage() {
               <div className="cx-top-layout">
                 <a href={resourcePost(heroPost.slug)} className="cx-top-hero-card">
                   <div className="cx-top-hero-media">
-                    <img src={topMedia.hero} alt={heroPost.title} />
+                    <img src={heroMediaSrc} alt={heroMediaAlt} />
                   </div>
 
                   <div className="cx-top-hero-copy">

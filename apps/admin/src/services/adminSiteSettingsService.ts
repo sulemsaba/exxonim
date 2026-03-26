@@ -7,7 +7,7 @@ export interface AdminSiteSettingPayload {
   value: unknown;
 }
 
-export async function getAdminSiteSettings() {
+export async function listAdminSiteSettings() {
   const response = await api.get<ApiSiteSetting[]>(apiRoutes.admin.siteSettings.list);
   return response.data;
 }
@@ -20,17 +20,17 @@ export async function createAdminSiteSetting(payload: AdminSiteSettingPayload) {
   return response.data;
 }
 
-export async function updateAdminSiteSetting(
-  id: number,
+export async function updateAdminSiteSettingByKey(
+  key: string,
   payload: Partial<AdminSiteSettingPayload>
 ) {
   const response = await api.put<ApiSiteSetting>(
-    apiRoutes.admin.siteSettings.detail(id),
+    apiRoutes.admin.siteSettings.byKey(key),
     payload
   );
   return response.data;
 }
 
-export async function deleteAdminSiteSetting(id: number) {
-  await api.delete(apiRoutes.admin.siteSettings.detail(id));
+export async function deleteAdminSiteSettingByKey(key: string) {
+  await api.delete(apiRoutes.admin.siteSettings.byKey(key));
 }

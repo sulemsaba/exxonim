@@ -1,8 +1,10 @@
-import type { ApiContentStatus } from "./content";
 import type {
   ApiPaginatedResponse,
   ApiPaginationParams,
 } from "./pagination";
+
+export type ApiBlogStatus = "draft" | "published" | "scheduled" | "archived";
+export type ApiBlogRevisionState = "working" | "ready_for_review";
 
 export interface ApiBlogAuthor {
   id: number;
@@ -33,6 +35,7 @@ export interface ApiBlogPost {
       heading: string;
       paragraphs: string[];
     }>;
+    html?: string;
   };
   featured_image?: string | null;
   cover_alt?: string | null;
@@ -45,7 +48,11 @@ export interface ApiBlogPost {
   meta_description?: string | null;
   og_image_url?: string | null;
   published_at?: string | null;
-  status?: ApiContentStatus;
+  status?: ApiBlogStatus;
+  revision_of_id?: number | null;
+  revision_state?: ApiBlogRevisionState | null;
+  open_revision_id?: number | null;
+  open_revision_state?: ApiBlogRevisionState | null;
   is_published?: boolean;
   created_at: string;
   updated_at: string;
@@ -54,7 +61,7 @@ export interface ApiBlogPost {
 }
 
 export interface ApiAdminBlogPostListParams extends ApiPaginationParams {
-  status?: ApiContentStatus;
+  status?: ApiBlogStatus;
   category_id?: number;
   author_id?: number;
   featured_on_home?: boolean;

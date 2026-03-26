@@ -5,8 +5,7 @@ import type {
   ApiAdminDashboardSummary,
   ApiContentStatus,
 } from "../types/api";
-import { getAdminPosts } from "./adminBlogService";
-import { getAdminConsultations } from "./adminConsultationService";
+import { listAdminBlogPosts } from "./adminBlogService";
 import { getAdminJobs } from "./adminJobsService";
 import { getAdminPages } from "./adminPageService";
 import { getSeoDefaultsSetting } from "./adminStructuredSettingsService";
@@ -65,17 +64,13 @@ export async function getAdminDashboardSummary() {
     );
     return response.data;
   } catch {
-    const [posts, pages, consultationsResponse, seoDefaults, jobs] = await Promise.all([
-      getAdminPosts(),
+    const [posts, pages, seoDefaults, jobs] = await Promise.all([
+      listAdminBlogPosts(),
       getAdminPages(),
-      getAdminConsultations({ limit: 50, page: 1 }),
       getSeoDefaultsSetting(),
       getAdminJobs().catch(() => []),
     ]);
 
-    const consultations = consultationsResponse.items;
-    const pendingConsultations = consultations.filter((item) => item.status === "pending");
-    const activeConsultations = consultations.filter((item) => item.status === "contacted");
     const publishedPosts = posts.filter((item) => getContentStatus(item) === "published");
     const openJobs = jobs.filter((item) => getContentStatus(item) === "published");
     const seoFallbacksMissing =
@@ -84,18 +79,18 @@ export async function getAdminDashboardSummary() {
     return {
       metrics: [
         {
-          key: "pending_consultations",
-          label: "Pending Consultations",
-          value: pendingConsultations.length,
-          helper: "Awaiting first response",
-          href: adminRoutes.consultations,
+          key: "draft_posts",
+          label: "Draft Posts",
+          value: posts.filter((item) => getContentStatus(item) === "draft").length,
+          helper: "Articles still being prepared",
+          href: adminRoutes.blogPosts,
         },
         {
-          key: "active_consultations",
-          label: "Active Consultations",
-          value: activeConsultations.length,
-          helper: "Already contacted",
-          href: adminRoutes.consultations,
+          key: "published_pages",
+          label: "Published Pages",
+          value: pages.filter((item) => getContentStatus(item) === "published").length,
+          helper: "Live public pages",
+          href: adminRoutes.pages,
         },
         {
           key: "published_posts",
@@ -125,31 +120,7 @@ export async function getAdminDashboardSummary() {
             ]
           : []),
       ],
-      consultation_inflow: Array.from({ length: 14 }).map((_, index) => ({
-        label: `${index + 1}`,
-        count:
-          consultations.filter((item) => {
-            const createdAt = new Date(item.created_at);
-            const targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() - (13 - index));
-            return (
-              createdAt.getFullYear() === targetDate.getFullYear() &&
-              createdAt.getMonth() === targetDate.getMonth() &&
-              createdAt.getDate() === targetDate.getDate()
-            );
-          }).length || 0,
-      })),
       recent_activity: buildFallbackEvents(),
-      recent_consultations: consultations.slice(0, 5).map((item) => ({
-        id: item.id,
-        tracking_id: item.tracking_id,
-        client_name: item.full_name,
-        subject: item.email,
-        status: item.status,
-        assignee_name: item.assigned_to?.full_name ?? null,
-        href: adminRoutes.consultations,
-        created_at: item.created_at,
-      })),
       content_pipeline: [...posts.slice(0, 3), ...pages.slice(0, 3)].map((item) => ({
         id: `${"featured_image" in item ? "post" : "page"}-${item.id}`,
         title: item.title,

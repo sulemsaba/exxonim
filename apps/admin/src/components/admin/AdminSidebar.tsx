@@ -12,7 +12,7 @@ import type { ApiAdminUser } from "../../types/api";
 import {
   adminNavGroups,
   adminRoutes,
-  isAdminSectionRestrictedForEditor,
+  isAdminSectionRestrictedForRole,
   type AdminNavItem,
   type AdminSection,
 } from "../../lib/adminRoutes";
@@ -23,7 +23,6 @@ import {
 } from "../../utils/admin";
 
 export interface AdminSidebarCounts {
-  pendingConsultations?: number;
   blogDrafts?: number;
   openJobs?: number;
 }
@@ -47,9 +46,10 @@ interface AdminSidebarProps {
   counts?: AdminSidebarCounts;
 }
 
-const operationSections: AdminSection[] = ["dashboard", "consultations"];
+const operationSections: AdminSection[] = ["dashboard"];
 const contentSections: AdminSection[] = [
   "blog-posts",
+  "blog-analytics",
   "blog-categories",
   "blog-authors",
   "jobs",
@@ -112,12 +112,6 @@ function NavIcon({ name }: { name: AdminNavItem["icon"] }) {
           <rect x="14" y="14" width="7" height="7" rx="1.5" />
         </svg>
       );
-    case "consultations":
-      return (
-        <svg {...props}>
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-      );
     case "posts":
       return (
         <svg {...props}>
@@ -125,6 +119,15 @@ function NavIcon({ name }: { name: AdminNavItem["icon"] }) {
           <polyline points="14 2 14 8 20 8" />
           <line x1="9" y1="13" x2="15" y2="13" />
           <line x1="9" y1="17" x2="13" y2="17" />
+        </svg>
+      );
+    case "analytics":
+      return (
+        <svg {...props}>
+          <path d="M4 19h16" />
+          <path d="M7 16V9" />
+          <path d="M12 16V5" />
+          <path d="M17 16v-4" />
         </svg>
       );
     case "categories":
@@ -286,15 +289,6 @@ function getBadge(
   counts: AdminSidebarCounts,
   adminRole: string
 ): { value: string; variant: "amber" | "teal" | "blue" | "red" } | null {
-  if (section === "consultations" && counts.pendingConsultations) {
-    return {
-      value:
-        counts.pendingConsultations > 99
-          ? "99+"
-          : String(counts.pendingConsultations),
-      variant: "amber",
-    };
-  }
 
   if (section === "blog-posts" && counts.blogDrafts) {
     return {
@@ -449,11 +443,7 @@ export function AdminSidebar({
     () =>
       adminNavGroups
         .flatMap((group) => group.items)
-        .filter((item) =>
-          adminRole === "editor"
-            ? !isAdminSectionRestrictedForEditor(item.section)
-            : true
-        ),
+        .filter((item) => !isAdminSectionRestrictedForRole(adminRole, item.section)),
     [adminRole]
   );
 
@@ -535,9 +525,9 @@ export function AdminSidebar({
   );
 
   const secondaryActionHref =
-    adminRole === "editor" ? adminRoutes.blogPosts : adminRoutes.settingsBrand;
+    adminRole === "admin" ? adminRoutes.settingsBrand : adminRoutes.blogPosts;
   const secondaryActionLabel =
-    adminRole === "editor" ? "Open content" : "Workspace settings";
+    adminRole === "admin" ? "Workspace settings" : "Open content";
 
   const renderNavItem = (item: AdminNavItem) => {
     const isActive = item.section === activeSection;
@@ -765,7 +755,7 @@ export function AdminSidebar({
                 href={secondaryActionHref}
                 onClick={handleNavClick}
               >
-                {adminRole === "editor" ? <NavIcon name="posts" /> : <SettingsIcon />}
+                {adminRole === "admin" ? <SettingsIcon /> : <NavIcon name="posts" />}
                 {secondaryActionLabel}
               </a>
 

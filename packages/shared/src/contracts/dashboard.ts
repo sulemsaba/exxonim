@@ -7,15 +7,12 @@ export interface ApiActivityEvent {
     | "published"
     | "draft_created"
     | "updated"
-    | "consultation_assigned"
-    | "consultation_status_changed"
     | "settings_updated"
     | "job_posted"
     | "seo_warning";
   resource_type:
     | "blog_post"
     | "page"
-    | "consultation"
     | "setting"
     | "job"
     | "navigation"
@@ -60,16 +57,6 @@ export interface ApiAdminDashboardPipelineItem {
   href?: string | null;
 }
 
-export interface ApiAdminDashboardConsultationItem {
-  id: number;
-  tracking_id: string;
-  client_name: string;
-  subject: string;
-  status: string;
-  assignee_name?: string | null;
-  href?: string | null;
-  created_at: string;
-}
 
 export interface ApiAdminDashboardJobItem {
   id: number;
@@ -86,9 +73,7 @@ export interface ApiAdminDashboardJobItem {
 export interface ApiAdminDashboardSummary {
   metrics: ApiAdminDashboardMetric[];
   alerts: ApiAdminDashboardAlert[];
-  consultation_inflow: ApiAdminDashboardPoint[];
   recent_activity: ApiActivityEvent[];
-  recent_consultations: ApiAdminDashboardConsultationItem[];
   content_pipeline: ApiAdminDashboardPipelineItem[];
   open_jobs: ApiAdminDashboardJobItem[];
 }

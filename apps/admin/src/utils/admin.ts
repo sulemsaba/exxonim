@@ -1,5 +1,7 @@
 import axios from "axios";
-import type { ApiContentStatus } from "../types/api";
+import type { ApiAdminRole, ApiContentStatus } from "../types/api";
+
+type ContentLikeStatus = ApiContentStatus | "scheduled";
 
 export type AdminStatusTone =
   | "published"
@@ -42,6 +44,29 @@ export function getAdminErrorMessage(
     const detail = error.response?.data?.detail;
     if (typeof detail === "string") {
       return detail;
+    }
+
+    if (detail && typeof detail === "object") {
+      const message =
+        "message" in detail && typeof detail.message === "string"
+          ? detail.message
+          : null;
+      const issues =
+        "issues" in detail && Array.isArray(detail.issues)
+          ? detail.issues.filter((item: unknown): item is string => typeof item === "string")
+          : [];
+
+      if (message && issues.length) {
+        return `${message} ${issues.join(" ")}`;
+      }
+
+      if (message) {
+        return message;
+      }
+
+      if (issues.length) {
+        return issues.join(" ");
+      }
     }
   }
 
@@ -87,9 +112,19 @@ export function getContentStatus(value: {
   status?: ApiContentStatus | null;
   is_published?: boolean | null;
   is_active?: boolean | null;
-}) {
+}): ApiContentStatus;
+export function getContentStatus(value: {
+  status?: ContentLikeStatus | null;
+  is_published?: boolean | null;
+  is_active?: boolean | null;
+}): ContentLikeStatus;
+export function getContentStatus(value: {
+  status?: string | null;
+  is_published?: boolean | null;
+  is_active?: boolean | null;
+}): ContentLikeStatus {
   if (value.status) {
-    return value.status;
+    return value.status as ContentLikeStatus;
   }
 
   if (typeof value.is_published === "boolean") {
@@ -103,6 +138,14 @@ export function getContentStatus(value: {
   return "draft" as const;
 }
 
+export function getBlogContentStatus(value: {
+  status?: ContentLikeStatus | null;
+  is_published?: boolean | null;
+  is_active?: boolean | null;
+}): ContentLikeStatus {
+  return getContentStatus(value);
+}
+
 export function getAdminStatusTone(status?: string | null): AdminStatusTone {
   switch (status) {
     case "published":
@@ -110,6 +153,8 @@ export function getAdminStatusTone(status?: string | null): AdminStatusTone {
     case "completed":
     case "open":
       return "published";
+    case "scheduled":
+      return "warning";
     case "archived":
     case "cancelled":
     case "inactive":
@@ -124,12 +169,20 @@ export function getAdminStatusTone(status?: string | null): AdminStatusTone {
   }
 }
 
-export function formatAdminRole(role?: string | null) {
+export function formatAdminRole(role?: ApiAdminRole | string | null) {
   if (!role) {
     return "Administrator";
   }
 
-  return role === "editor" ? "Editor" : "Administrator";
+  if (role === "editor") {
+    return "Editor";
+  }
+
+  if (role === "author") {
+    return "Author";
+  }
+
+  return "Administrator";
 }
 
 export function getAdminLabel(email?: string | null, fullName?: string | null) {
@@ -207,7 +260,7 @@ export function isContentPublished(value: {
   return getContentStatus(value) === "published";
 }
 
-export function statusToPublishedFlag(status: ApiContentStatus) {
+export function statusToPublishedFlag(status: ApiContentStatus | "scheduled") {
   return status === "published";
 }
 
@@ -225,5 +278,18 @@ export function normalizeContentRecord<
   return {
     ...value,
     status: getContentStatus(value),
+  };
+}
+
+export function normalizeBlogContentRecord<
+  TValue extends {
+    status?: ContentLikeStatus | null;
+    is_published?: boolean | null;
+    is_active?: boolean | null;
+  },
+>(value: TValue): TValue & { status: ContentLikeStatus } {
+  return {
+    ...value,
+    status: getBlogContentStatus(value),
   };
 }

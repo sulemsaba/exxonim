@@ -7,3 +7,12 @@ dist
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+backend/media/uploads/
+backend/.venv/
+venv/
+.venv/

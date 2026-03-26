@@ -190,7 +190,7 @@ function PlanCardContent({
             href={routes.contact}
             className={`sp-planCard__button ${isDark ? "is-dark" : "is-light"}`}
           >
-            Request Consultation
+            Contact Exxonim
           </a>
         </div>
       </div>

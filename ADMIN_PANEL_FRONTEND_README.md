@@ -139,9 +139,9 @@ Use:
 
 Examples:
 
-- `/api/v1/admin/blog-posts`
-- `/api/v1/admin/consultations`
-- `/api/v1/public/pages/about`
+- `/api/v1/admin/blog/posts`
+- `/api/v1/admin/site-settings/footer`
+- `/api/v1/pages/about`
 
 ### 7. Media decision for MVP
 
@@ -993,19 +993,19 @@ Slugged resources should also have:
 
 ### Blog
 
-- `GET /api/v1/admin/blog-posts?page=1&limit=10`
-- `POST /api/v1/admin/blog-posts`
-- `GET /api/v1/admin/blog-posts/:id`
-- `PUT /api/v1/admin/blog-posts/:id`
-- `DELETE /api/v1/admin/blog-posts/:id`
-- `GET /api/v1/admin/blog-categories`
-- `POST /api/v1/admin/blog-categories`
-- `PUT /api/v1/admin/blog-categories/:id`
-- `DELETE /api/v1/admin/blog-categories/:id`
-- `GET /api/v1/admin/blog-authors`
-- `POST /api/v1/admin/blog-authors`
-- `PUT /api/v1/admin/blog-authors/:id`
-- `DELETE /api/v1/admin/blog-authors/:id`
+- `GET /api/v1/admin/blog/posts`
+- `POST /api/v1/admin/blog/posts`
+- `GET /api/v1/admin/blog/posts/:id`
+- `PUT /api/v1/admin/blog/posts/:id`
+- `DELETE /api/v1/admin/blog/posts/:id`
+- `GET /api/v1/admin/blog/categories`
+- `POST /api/v1/admin/blog/categories`
+- `PUT /api/v1/admin/blog/categories/:id`
+- `DELETE /api/v1/admin/blog/categories/:id`
+- `GET /api/v1/admin/blog/authors`
+- `POST /api/v1/admin/blog/authors`
+- `PUT /api/v1/admin/blog/authors/:id`
+- `DELETE /api/v1/admin/blog/authors/:id`
 
 ### Pages
 
@@ -1054,17 +1054,16 @@ Slugged resources should also have:
 
 ## Recommended Public API Endpoints
 
-- `GET /api/v1/public/pages/:slug`
-- `GET /api/v1/public/navigation`
-- `GET /api/v1/public/blog-posts`
-- `GET /api/v1/public/blog-posts/:slug`
-- `GET /api/v1/public/blog-categories`
-- `GET /api/v1/public/pricing-plans`
-- `GET /api/v1/public/testimonials`
-- `GET /api/v1/public/site-settings/:key`
-- `POST /api/v1/public/consultations`
-- `POST /api/v1/public/consultations/magic-link`
-- `GET /api/v1/public/consultations/:tracking_id?token=...`
+- `GET /api/v1/pages/:slug`
+- `GET /api/v1/navigation`
+- `GET /api/v1/blog/posts`
+- `GET /api/v1/blog/posts/:slug`
+- `GET /api/v1/blog/categories`
+- `GET /api/v1/blog/authors`
+- `GET /api/v1/blog/authors/:slug`
+- `GET /api/v1/pricing/plans`
+- `GET /api/v1/testimonials`
+- `GET /api/v1/site-settings/:key`
 
 ## HTML-First Prototype Pages
 

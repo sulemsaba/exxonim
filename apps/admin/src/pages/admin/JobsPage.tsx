@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { AdminDeleteDialog } from "../../components/admin/AdminDeleteDialog";
-import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
-import { AdminFormBanner } from "../../components/admin/AdminFormBanner";
 import { ErrorMessage } from "../../components/ErrorMessage";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import { useAuth } from "../../contexts/AuthContext";
@@ -13,12 +12,15 @@ import {
   getAdminJobs,
   updateAdminJob,
 } from "../../services/adminJobsService";
+import { SystemOSFrame } from "../../systemos/SystemOSFrame";
+import { formatDate, relativeTime } from "../../systemos/utils";
 import type { ApiCareerJob, ApiContentStatus } from "../../types/api";
 import { getAdminErrorMessage, slugify } from "../../utils/admin";
 
 interface JobsPageProps {
   mode: AdminRouteMode;
   entitySlug?: string;
+  theme: "light" | "dark";
 }
 
 interface JobFormState {
@@ -99,11 +101,22 @@ function toPayload(values: JobFormState) {
   };
 }
 
-export function JobsPage({ mode, entitySlug }: JobsPageProps) {
+function getJobStatusClass(status?: ApiContentStatus | null) {
+  if (status === "published") return "published";
+  if (status === "archived") return "trash";
+  return "draft";
+}
+
+function isRemoteReady(job: ApiCareerJob) {
+  return /remote/i.test(job.location_mode);
+}
+
+export function JobsPage({ mode, entitySlug, theme }: JobsPageProps) {
   const queryClient = useQueryClient();
   const { admin } = useAuth();
   const [values, setValues] = useState<JobFormState>(defaultValues);
   const [slugDirty, setSlugDirty] = useState(false);
+  const [query, setQuery] = useState("");
   const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(
     null
   );
@@ -180,6 +193,81 @@ export function JobsPage({ mode, entitySlug }: JobsPageProps) {
     },
   });
 
+  const jobs = jobsQuery.data ?? [];
+  const filteredJobs = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return jobs;
+
+    return jobs.filter((job) =>
+      [
+        job.title,
+        job.slug,
+        job.department,
+        job.employment_type,
+        job.location_mode,
+        job.city,
+        job.country,
+        job.summary,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedQuery)
+    );
+  }, [jobs, query]);
+
+  const stats = useMemo(
+    () => [
+      {
+        label: "Total Roles",
+        value: jobs.length,
+        note: "All open and archived job records in this workspace.",
+        icon: (
+          <svg viewBox="0 0 24 24">
+            <path d="M9 4V2h6v2" />
+            <path d="M4 8h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" />
+            <path d="M4 12h16" />
+          </svg>
+        ),
+      },
+      {
+        label: "Published",
+        value: jobs.filter((job) => job.status === "published").length,
+        note: "Currently visible to candidates on the careers surface.",
+        icon: (
+          <svg viewBox="0 0 24 24">
+            <path d="M5 12.5 10 17l9-10" />
+          </svg>
+        ),
+      },
+      {
+        label: "Remote Friendly",
+        value: jobs.filter(isRemoteReady).length,
+        note: "Listings marked with a remote work mode.",
+        icon: (
+          <svg viewBox="0 0 24 24">
+            <path d="M4 5h16v10H4z" />
+            <path d="M8 19h8" />
+            <path d="M12 15v4" />
+          </svg>
+        ),
+      },
+      {
+        label: "Departments",
+        value: new Set(jobs.map((job) => job.department).filter(Boolean)).size,
+        note: "Distinct teams represented across active and archived roles.",
+        icon: (
+          <svg viewBox="0 0 24 24">
+            <path d="M4 6h7v6H4z" />
+            <path d="M13 6h7v6h-7z" />
+            <path d="M4 14h7v6H4z" />
+            <path d="M13 14h7v6h-7z" />
+          </svg>
+        ),
+      },
+    ],
+    [jobs]
+  );
+
   function handleChange<Key extends keyof JobFormState>(key: Key, value: JobFormState[Key]) {
     setValues((current) => ({ ...current, [key]: value }));
   }
@@ -223,252 +311,384 @@ export function JobsPage({ mode, entitySlug }: JobsPageProps) {
 
   return (
     <>
-      <div className="admin-grid">
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>Job Listings</h2>
-              <p>Published jobs are distinct from the Careers page content.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            <div className="admin-toolbar">
-              <span className="admin-toolbar__meta">{jobsQuery.data.length} records</span>
-              <a className="admin-action-button" href={adminRoutes.jobsNew}>
-                New Job
-              </a>
+      <SystemOSFrame theme={theme} padded={false}>
+        <div style={{ display: "grid", gap: 14 }}>
+          <section className="stats">
+            {stats.map((item) => (
+              <article className="card stat" key={item.label}>
+                <div className="stat-top">
+                  <div>
+                    <div className="stat-label">{item.label}</div>
+                    <div className="stat-value">{item.value}</div>
+                    <div className="stat-note">{item.note}</div>
+                  </div>
+                  <div className="stat-icon">{item.icon}</div>
+                </div>
+              </article>
+            ))}
+          </section>
+
+          <div className="workspace-split">
+            <div className="workspace-stack">
+              <section className="card toolbar">
+                <div style={{ display: "grid", gap: 14 }}>
+                  <div className="analytics-head">
+                    <div>
+                      <div className="analytics-kicker">Careers Workspace</div>
+                      <div className="analytics-title">Job listings</div>
+                      <div className="analytics-copy">
+                        Manage the roles shown on the careers page without changing the main admin shell.
+                      </div>
+                    </div>
+                    <div className="workspace-form-actions-end">
+                      <a className="btn small" href={adminRoutes.jobsNew}>
+                        New Job
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="m20 20-3.5-3.5" />
+                    </svg>
+                    <input
+                      className="field"
+                      value={query}
+                      onChange={(event) => setQuery(event.target.value)}
+                      placeholder="Search role, department, location, or summary"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <section className="card table-card">
+                {filteredJobs.length ? (
+                  <div className="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Role / Department</th>
+                          <th>Status</th>
+                          <th>Location</th>
+                          <th>Updated</th>
+                          <th style={{ textAlign: "right" }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredJobs.map((job) => (
+                          <tr key={job.id}>
+                            <td>
+                              <a className="title-btn" href={adminRoutes.jobEdit(job.slug)}>
+                                {job.title}
+                              </a>
+                              <div className="subtext">
+                                {job.department} · /{job.slug}
+                              </div>
+                              <div className="row-excerpt">{job.summary}</div>
+                            </td>
+                            <td>
+                              <span className={`status ${getJobStatusClass(job.status)}`}>
+                                <span className="dot" />
+                                {job.status ?? "draft"}
+                              </span>
+                            </td>
+                            <td>
+                              <div>{job.location_mode}</div>
+                              <div className="subtext">{[job.city, job.country].filter(Boolean).join(", ")}</div>
+                            </td>
+                            <td>
+                              {relativeTime(job.updated_at)}
+                              <div className="subtext">{formatDate(job.updated_at)}</div>
+                            </td>
+                            <td>
+                              <div className="icon-actions">
+                                <a className="icon-btn" href={adminRoutes.jobEdit(job.slug)} aria-label="Edit">
+                                  <svg viewBox="0 0 24 24">
+                                    <path d="M4 20h4l10-10-4-4L4 16v4Z" />
+                                    <path d="m12 6 4 4" />
+                                  </svg>
+                                </a>
+                                {adminRole === "admin" ? (
+                                  <button
+                                    className="icon-btn danger"
+                                    type="button"
+                                    aria-label="Delete"
+                                    onClick={() => setDeleteTarget(job)}
+                                  >
+                                    <svg viewBox="0 0 24 24">
+                                      <path d="M4 7h16" />
+                                      <path d="m10 11 1 6" />
+                                      <path d="m14 11-1 6" />
+                                      <path d="M9 7V5h6v2" />
+                                      <path d="M6 7l1 12h10l1-12" />
+                                    </svg>
+                                  </button>
+                                ) : null}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="empty">
+                    <div className="empty-title">No job listings match the current search</div>
+                    <div className="empty-note">
+                      Clear the search or create a new role for the careers page.
+                    </div>
+                    <div className="empty-actions">
+                      <a className="btn primary" href={adminRoutes.jobsNew}>
+                        Create Job
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </section>
             </div>
 
-            {jobsQuery.data.length ? (
-              <div className="admin-table-wrap">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Role</th>
-                      <th>Status</th>
-                      <th>Location</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {jobsQuery.data.map((job) => (
-                      <tr key={job.id}>
-                        <td>
-                          <strong>{job.title}</strong>
-                          <p>{job.slug}</p>
-                        </td>
-                        <td>
-                          <span
-                            className={
-                              job.status === "published"
-                                ? "admin-status admin-status--published"
-                                : job.status === "archived"
-                                  ? "admin-status admin-status--danger"
-                                  : "admin-status admin-status--draft"
-                            }
-                          >
-                            {job.status ?? "draft"}
-                          </span>
-                        </td>
-                        <td>{[job.city, job.country].filter(Boolean).join(", ")}</td>
-                        <td>
-                          <div className="admin-table__actions">
-                            <a className="admin-table__action" href={adminRoutes.jobEdit(job.slug)}>
-                              Edit
-                            </a>
-                            {adminRole === "admin" ? (
-                              <button
-                                className="admin-danger-button"
-                                type="button"
-                                onClick={() => setDeleteTarget(job)}
-                              >
-                                Delete
-                              </button>
-                            ) : null}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <AdminEmptyState
-                title="No job listings yet"
-                description="Create the first role and publish it from here."
-                primaryAction={<a className="admin-action-button" href={adminRoutes.jobsNew}>Create Job</a>}
-              />
-            )}
-          </div>
-        </section>
-
-        <section className="admin-card">
-          <div className="admin-card__header">
-            <div>
-              <h2>{mode === "edit" ? "Edit Job Listing" : "Create Job Listing"}</h2>
-              <p>Slug changes redirect to the new edit route immediately after save.</p>
-            </div>
-          </div>
-          <div className="admin-card__body">
-            <form className="admin-form" onSubmit={handleSubmit}>
-              <div className="admin-form__grid">
-                <div className="admin-form__field">
-                  <label htmlFor="job-title">Title</label>
-                  <input
-                    id="job-title"
-                    type="text"
-                    value={values.title}
-                    onChange={(event) => handleChange("title", event.target.value)}
-                  />
+            <section className="card workspace-form-card">
+              <div className="section-head">
+                <div className="section-title">
+                  {mode === "edit" ? "Edit Job Listing" : "Create Job Listing"}
                 </div>
-                <div className="admin-form__field">
-                  <label htmlFor="job-slug">Slug</label>
-                  <input
-                    id="job-slug"
-                    type="text"
-                    value={values.slug}
-                    onChange={(event) => {
-                      setSlugDirty(true);
-                      handleChange("slug", slugify(event.target.value));
-                    }}
-                  />
-                </div>
-                <div className="admin-form__field">
-                  <label htmlFor="job-department">Department</label>
-                  <input
-                    id="job-department"
-                    type="text"
-                    value={values.department}
-                    onChange={(event) => handleChange("department", event.target.value)}
-                  />
-                </div>
-                <div className="admin-form__field">
-                  <label htmlFor="job-status">Status</label>
-                  <select
-                    id="job-status"
-                    value={values.status}
-                    disabled={adminRole === "editor" && values.status === "archived"}
-                    onChange={(event) => handleChange("status", event.target.value as ApiContentStatus)}
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="archived" disabled={adminRole !== "admin"}>
-                      Archived
-                    </option>
-                  </select>
-                  {adminRole === "editor" && values.status === "archived" ? (
-                    <p className="admin-form__hint">
-                      Archived job listings can only be restored or changed by an admin.
-                    </p>
-                  ) : null}
-                </div>
-                <div className="admin-form__field">
-                  <label htmlFor="job-employment">Employment Type</label>
-                  <input
-                    id="job-employment"
-                    type="text"
-                    value={values.employment_type}
-                    onChange={(event) => handleChange("employment_type", event.target.value)}
-                  />
-                </div>
-                <div className="admin-form__field">
-                  <label htmlFor="job-location-mode">Location Mode</label>
-                  <input
-                    id="job-location-mode"
-                    type="text"
-                    value={values.location_mode}
-                    onChange={(event) => handleChange("location_mode", event.target.value)}
-                  />
-                </div>
-                <div className="admin-form__field">
-                  <label htmlFor="job-city">City</label>
-                  <input
-                    id="job-city"
-                    type="text"
-                    value={values.city}
-                    onChange={(event) => handleChange("city", event.target.value)}
-                  />
-                </div>
-                <div className="admin-form__field">
-                  <label htmlFor="job-country">Country</label>
-                  <input
-                    id="job-country"
-                    type="text"
-                    value={values.country}
-                    onChange={(event) => handleChange("country", event.target.value)}
-                  />
-                </div>
-                <div className="admin-form__field">
-                  <label htmlFor="job-compensation">Compensation</label>
-                  <input
-                    id="job-compensation"
-                    type="text"
-                    value={values.compensation_label}
-                    onChange={(event) => handleChange("compensation_label", event.target.value)}
-                  />
-                </div>
-                <div className="admin-form__field">
-                  <label htmlFor="job-experience">Experience</label>
-                  <input
-                    id="job-experience"
-                    type="text"
-                    value={values.experience_label}
-                    onChange={(event) => handleChange("experience_label", event.target.value)}
-                  />
-                </div>
-                <div className="admin-form__field admin-form__field--full">
-                  <label htmlFor="job-summary">Summary</label>
-                  <textarea
-                    id="job-summary"
-                    rows={4}
-                    value={values.summary}
-                    onChange={(event) => handleChange("summary", event.target.value)}
-                  />
-                </div>
-                <div className="admin-form__field admin-form__field--full">
-                  <label htmlFor="job-description">Description</label>
-                  <textarea
-                    id="job-description"
-                    rows={6}
-                    value={values.description}
-                    onChange={(event) => handleChange("description", event.target.value)}
-                  />
-                </div>
-                <div className="admin-form__field admin-form__field--full">
-                  <label htmlFor="job-requirements">Requirements</label>
-                  <textarea
-                    id="job-requirements"
-                    rows={5}
-                    value={values.requirementsText}
-                    onChange={(event) => handleChange("requirementsText", event.target.value)}
-                  />
-                </div>
-                <div className="admin-form__field admin-form__field--full">
-                  <label htmlFor="job-responsibilities">Responsibilities</label>
-                  <textarea
-                    id="job-responsibilities"
-                    rows={5}
-                    value={values.responsibilitiesText}
-                    onChange={(event) => handleChange("responsibilitiesText", event.target.value)}
-                  />
+                <div className="section-note">
+                  Slug changes still redirect to the correct edit route after save.
                 </div>
               </div>
 
-              {message ? <AdminFormBanner tone={message.tone} message={message.text} /> : null}
+              <form style={{ display: "grid", gap: 22 }} onSubmit={handleSubmit}>
+                <section className="modal-section">
+                  <div className="section-head">
+                    <div className="section-title">Role Profile</div>
+                    <div className="section-note">
+                      Define the public title, slug, department, and publishing state for this role.
+                    </div>
+                  </div>
 
-              <div className="admin-form__actions">
-                <button
-                  className="admin-form__submit"
-                  type="submit"
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                >
-                  {createMutation.isPending || updateMutation.isPending ? "Saving..." : "Save Job"}
-                </button>
-              </div>
-            </form>
+                  <div className="form-grid">
+                    <div>
+                      <label className="label" htmlFor="job-title">Title</label>
+                      <input
+                        className="field"
+                        id="job-title"
+                        type="text"
+                        value={values.title}
+                        onChange={(event) => handleChange("title", event.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="label" htmlFor="job-slug">Slug</label>
+                      <input
+                        className="field"
+                        id="job-slug"
+                        type="text"
+                        value={values.slug}
+                        onChange={(event) => {
+                          setSlugDirty(true);
+                          handleChange("slug", slugify(event.target.value));
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="label" htmlFor="job-department">Department</label>
+                      <input
+                        className="field"
+                        id="job-department"
+                        type="text"
+                        value={values.department}
+                        onChange={(event) => handleChange("department", event.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="label" htmlFor="job-status">Status</label>
+                      <select
+                        className="select"
+                        id="job-status"
+                        value={values.status}
+                        disabled={adminRole === "editor" && values.status === "archived"}
+                        onChange={(event) => handleChange("status", event.target.value as ApiContentStatus)}
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                        <option value="archived" disabled={adminRole !== "admin"}>
+                          Archived
+                        </option>
+                      </select>
+                      {adminRole === "editor" && values.status === "archived" ? (
+                        <div className="help">
+                          Archived job listings can only be restored or changed by an admin.
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </section>
+
+                <section className="modal-section">
+                  <div className="section-head">
+                    <div className="section-title">Work Setup</div>
+                    <div className="section-note">
+                      Capture the employment details candidates need before they open the full role.
+                    </div>
+                  </div>
+
+                  <div className="form-grid">
+                    <div>
+                      <label className="label" htmlFor="job-employment">Employment Type</label>
+                      <input
+                        className="field"
+                        id="job-employment"
+                        type="text"
+                        value={values.employment_type}
+                        onChange={(event) => handleChange("employment_type", event.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="label" htmlFor="job-location-mode">Location Mode</label>
+                      <input
+                        className="field"
+                        id="job-location-mode"
+                        type="text"
+                        value={values.location_mode}
+                        onChange={(event) => handleChange("location_mode", event.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="label" htmlFor="job-city">City</label>
+                      <input
+                        className="field"
+                        id="job-city"
+                        type="text"
+                        value={values.city}
+                        onChange={(event) => handleChange("city", event.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="label" htmlFor="job-country">Country</label>
+                      <input
+                        className="field"
+                        id="job-country"
+                        type="text"
+                        value={values.country}
+                        onChange={(event) => handleChange("country", event.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="label" htmlFor="job-compensation">Compensation</label>
+                      <input
+                        className="field"
+                        id="job-compensation"
+                        type="text"
+                        value={values.compensation_label}
+                        onChange={(event) => handleChange("compensation_label", event.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="label" htmlFor="job-experience">Experience</label>
+                      <input
+                        className="field"
+                        id="job-experience"
+                        type="text"
+                        value={values.experience_label}
+                        onChange={(event) => handleChange("experience_label", event.target.value)}
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                <section className="modal-section">
+                  <div className="section-head">
+                    <div className="section-title">Content</div>
+                    <div className="section-note">
+                      Use a short summary for the listing surface, then write the full description for the job page.
+                    </div>
+                  </div>
+
+                  <div className="form-grid">
+                    <div className="form-col-2">
+                      <label className="label" htmlFor="job-summary">Summary</label>
+                      <textarea
+                        className="textarea"
+                        id="job-summary"
+                        rows={4}
+                        value={values.summary}
+                        onChange={(event) => handleChange("summary", event.target.value)}
+                      />
+                    </div>
+                    <div className="form-col-2">
+                      <label className="label" htmlFor="job-description">Description</label>
+                      <textarea
+                        className="textarea"
+                        id="job-description"
+                        rows={7}
+                        value={values.description}
+                        onChange={(event) => handleChange("description", event.target.value)}
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                <section className="modal-section">
+                  <div className="section-head">
+                    <div className="section-title">Requirements & Responsibilities</div>
+                    <div className="section-note">
+                      Put one line per item so the API still receives clean arrays for each section.
+                    </div>
+                  </div>
+
+                  <div className="form-grid">
+                    <div className="form-col-2">
+                      <label className="label" htmlFor="job-requirements">Requirements</label>
+                      <textarea
+                        className="textarea"
+                        id="job-requirements"
+                        rows={6}
+                        value={values.requirementsText}
+                        onChange={(event) => handleChange("requirementsText", event.target.value)}
+                      />
+                    </div>
+                    <div className="form-col-2">
+                      <label className="label" htmlFor="job-responsibilities">Responsibilities</label>
+                      <textarea
+                        className="textarea"
+                        id="job-responsibilities"
+                        rows={6}
+                        value={values.responsibilitiesText}
+                        onChange={(event) => handleChange("responsibilitiesText", event.target.value)}
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                {message ? <div className="hero-note">{message.text}</div> : null}
+
+                <div className="workspace-form-actions">
+                  <div className="workspace-copy">
+                    {selectedJob
+                      ? `Last updated ${formatDate(selectedJob.updated_at)}.`
+                      : "Create a job listing and publish it when recruiting is ready."}
+                  </div>
+                  <div className="workspace-form-actions-end">
+                    {mode === "edit" ? (
+                      <a className="btn small" href={adminRoutes.jobs}>
+                        View List
+                      </a>
+                    ) : null}
+                    <button
+                      className="btn primary"
+                      type="submit"
+                      disabled={createMutation.isPending || updateMutation.isPending}
+                    >
+                      {createMutation.isPending || updateMutation.isPending ? "Saving..." : "Save Job"}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </section>
           </div>
-        </section>
-      </div>
+        </div>
+      </SystemOSFrame>
 
       <AdminDeleteDialog
         open={Boolean(deleteTarget)}

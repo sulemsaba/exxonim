@@ -29,7 +29,7 @@ export async function getAdminPages() {
 }
 
 export async function getAdminPage(id: number) {
-  const response = await api.get<ApiPage>(apiRoutes.admin.pages.detail(id));
+  const response = await api.get<ApiPage>(apiRoutes.admin.pages.byId(id));
   return normalizeContentRecord(response.data);
 }
 
@@ -43,12 +43,12 @@ export async function createAdminPage(payload: AdminPagePayload) {
 
 export async function updateAdminPage(id: number, payload: Partial<AdminPagePayload>) {
   const response = await api.put<ApiPage>(
-    apiRoutes.admin.pages.detail(id),
+    apiRoutes.admin.pages.byId(id),
     toRequestPayload(payload)
   );
   return normalizeContentRecord(response.data);
 }
 
 export async function deleteAdminPage(id: number) {
-  await api.delete(apiRoutes.admin.pages.detail(id));
+  await api.delete(apiRoutes.admin.pages.byId(id));
 }

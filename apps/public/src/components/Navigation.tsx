@@ -16,7 +16,6 @@ import {
   getPrimaryLinks,
 } from "../utils/navigation";
 import { ErrorMessage } from "./ErrorMessage";
-import { LoadingSpinner } from "./LoadingSpinner";
 
 interface NavigationProps {
   pathname: string;
@@ -119,7 +118,7 @@ html[data-theme="dark"] .nav-shell__mobile,
   position:fixed;
   inset:0 0 auto 0;
   z-index:50;
-  padding:15px 16px;
+  padding:0;
   font-family:var(--nav-sans);
 }
 
@@ -142,13 +141,13 @@ html[data-theme="dark"] .nav-shell__mobile,
 
 .nav-shell__bar{
   position:relative;
-  width:min(1600px,100%);
-  margin:0 auto;
+  width:100%;
+  margin:0;
   display:grid;
   grid-template-columns:auto minmax(0,1fr) auto;
   align-items:center;
   gap:12px;
-  padding:8px 10px;
+  padding:12px 16px;
 }
 
 .nav-shell__bar::before{
@@ -1036,7 +1035,7 @@ html[data-theme="dark"] .nav-shell__toggle:focus-visible{
 }
 
 @media (min-width:1280px){
-  .nav-shell{padding:15px 16px}
+  .nav-shell{padding:0}
   .nav-shell__desktop{display:flex}
   .nav-shell__toggle{display:none}
   .nav-shell__mobile{display:none!important}
@@ -1306,9 +1305,9 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
     setDesktopMenu(null);
   };
 
-  if (navigationPending || brandPending || companyPending) {
-    return <LoadingSpinner compact label="Loading navigation..." />;
-  }
+    if (navigationPending || brandPending || companyPending) {
+    return null;
+    }
 
   if (
     navigationError ||
@@ -1399,8 +1398,8 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
                       <a className="nav-shell__cta-primary" href={routes.services} onClick={closeAllMenus}>
                         See More Services
                       </a>
-                      <a className="nav-shell__cta-secondary" href={routes.tracking} onClick={closeAllMenus}>
-                        Track Your Consultation
+                      <a className="nav-shell__cta-secondary" href={routes.contact} onClick={closeAllMenus}>
+                        Contact Exxonim
                       </a>
                     </div>
                   </div>
@@ -1591,10 +1590,10 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
                   </a>
                   <a
                     className="nav-shell__mobile-card-secondary"
-                    href={routes.tracking}
+                    href={routes.contact}
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Track Your Consultation
+                    Contact Exxonim
                   </a>
                 </div>
               </div>

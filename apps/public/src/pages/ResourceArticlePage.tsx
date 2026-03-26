@@ -6,7 +6,13 @@ import { usePage } from "../hooks/usePage";
 import { useResolvedBlogSeo } from "../hooks/useResolvedSeo";
 import { resourcePost, routes } from "../routes";
 import type { BlogPost, ResourcesPageContent } from "../types";
-import { getRelatedBlogPosts } from "../utils/blog";
+import {
+  getBlogArticleIntro,
+  getRelatedBlogPosts,
+  getRenderableBlogHtml,
+  getRenderableBlogSections,
+  hasUsableBlogBody,
+} from "../utils/blog";
 
 const resourceArticlePageStyles = String.raw`
   .resource-article-page {
@@ -171,6 +177,51 @@ const resourceArticlePageStyles = String.raw`
     line-height: 1.78;
   }
 
+  .resource-article-section--html {
+    gap: 1rem;
+  }
+
+  .resource-article-section--html h2,
+  .resource-article-section--html h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    line-height: 1.28;
+  }
+
+  .resource-article-section--html p {
+    margin: 0;
+    color: rgba(17, 35, 37, 0.76);
+    line-height: 1.78;
+  }
+
+  .resource-article-section--html ul,
+  .resource-article-section--html ol {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: grid;
+    gap: 0.65rem;
+    color: rgba(17, 35, 37, 0.76);
+    line-height: 1.72;
+  }
+
+  .resource-article-section--html blockquote {
+    margin: 0;
+    padding-left: 1rem;
+    border-left: 3px solid rgba(15, 92, 99, 0.2);
+    color: var(--color-text-muted);
+    font-size: 1.02rem;
+    line-height: 1.72;
+  }
+
+  .resource-article-section--html img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 1rem;
+    border: 1px solid var(--cinematic-card-border);
+  }
+
   .resource-article-sidebar {
     display: grid;
     gap: 1rem;
@@ -256,6 +307,10 @@ const resourceArticlePageStyles = String.raw`
 
   html[data-theme="dark"] .resource-article-intro,
   html[data-theme="dark"] .resource-article-section p,
+  html[data-theme="dark"] .resource-article-section--html p,
+  html[data-theme="dark"] .resource-article-section--html ul,
+  html[data-theme="dark"] .resource-article-section--html ol,
+  html[data-theme="dark"] .resource-article-section--html blockquote,
   html[data-theme="dark"] .resource-article-highlights li,
   html[data-theme="dark"] .resource-article-related-card p {
     color: rgba(237, 242, 255, 0.76);
@@ -329,7 +384,7 @@ export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
     );
   }
 
-  if (!post.content || post.content.sections.length === 0) {
+  if (!hasUsableBlogBody(post.content)) {
     return (
       <ErrorMessage
         title="Article content is unavailable."
@@ -338,7 +393,10 @@ export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
     );
   }
 
-  const article = post.content;
+  const article = post.content!;
+  const articleHtml = getRenderableBlogHtml(article);
+  const articleSections = getRenderableBlogSections(post);
+  const introText = getBlogArticleIntro(post);
   const categoryLabel = post.category?.label;
   const articleSidebar = resourcesPage?.content.article_sidebar;
   const relatedPosts = getRelatedBlogPosts(post, posts);
@@ -370,7 +428,7 @@ export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
 
             <header className="resource-article-header">
               <h1>{post.title}</h1>
-              <p className="resource-article-intro">{article.introduction}</p>
+              <p className="resource-article-intro">{introText}</p>
             </header>
 
             {post.author ? (
@@ -397,14 +455,21 @@ export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
 
             <div className="resource-article-layout">
               <div className="resource-article-body">
-                {article.sections.map((section) => (
-                  <section key={section.heading} className="resource-article-section">
-                    <h2>{section.heading}</h2>
-                    {section.paragraphs.map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
-                    ))}
-                  </section>
-                ))}
+                {articleHtml ? (
+                  <section
+                    className="resource-article-section resource-article-section--html"
+                    dangerouslySetInnerHTML={{ __html: articleHtml }}
+                  />
+                ) : (
+                  articleSections.map((section) => (
+                    <section key={section.heading} className="resource-article-section">
+                      <h2>{section.heading}</h2>
+                      {section.paragraphs.map((paragraph) => (
+                        <p key={paragraph}>{paragraph}</p>
+                      ))}
+                    </section>
+                  ))
+                )}
               </div>
 
               {article.highlights.length > 0 || articleSidebar ? (

@@ -37,7 +37,7 @@ export async function getAdminJobs() {
 }
 
 export async function getAdminJob(slug: string) {
-  const response = await api.get<ApiCareerJob>(apiRoutes.admin.jobs.detail(slug));
+  const response = await api.get<ApiCareerJob>(apiRoutes.admin.jobs.bySlug(slug));
   return normalizeContentRecord(response.data);
 }
 
@@ -51,12 +51,12 @@ export async function createAdminJob(payload: AdminJobPayload) {
 
 export async function updateAdminJob(slug: string, payload: Partial<AdminJobPayload>) {
   const response = await api.put<ApiCareerJob>(
-    apiRoutes.admin.jobs.detail(slug),
+    apiRoutes.admin.jobs.bySlug(slug),
     toRequestPayload(payload)
   );
   return normalizeContentRecord(response.data);
 }
 
 export async function deleteAdminJob(slug: string) {
-  await api.delete(apiRoutes.admin.jobs.detail(slug));
+  await api.delete(apiRoutes.admin.jobs.bySlug(slug));
 }

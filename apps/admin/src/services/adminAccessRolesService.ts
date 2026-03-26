@@ -17,20 +17,20 @@ export interface AdminManagedUserPayload {
 }
 
 export async function getAdminUsers(params: AdminUsersListParams = {}) {
-  const response = await api.get<ApiAdminManagedUser[]>(apiRoutes.admin.access.users, {
+  const response = await api.get<ApiAdminManagedUser[]>(apiRoutes.admin.access.users.list, {
     params,
   });
   return response.data;
 }
 
 export async function createAdminUser(payload: AdminManagedUserPayload) {
-  const response = await api.post<ApiAdminManagedUser>(apiRoutes.admin.access.users, payload);
+  const response = await api.post<ApiAdminManagedUser>(apiRoutes.admin.access.users.list, payload);
   return response.data;
 }
 
 export async function updateAdminUser(id: number, payload: Partial<AdminManagedUserPayload>) {
   const response = await api.put<ApiAdminManagedUser>(
-    apiRoutes.admin.access.userDetail(id),
+    apiRoutes.admin.access.users.byId(id),
     payload
   );
   return response.data;
@@ -38,7 +38,7 @@ export async function updateAdminUser(id: number, payload: Partial<AdminManagedU
 
 export async function updateAdminUserRole(id: number, role: ApiAdminRole) {
   const response = await api.put<ApiAdminManagedUser>(
-    apiRoutes.admin.access.userRole(id),
+    apiRoutes.admin.access.users.role(id),
     { role }
   );
   return response.data;
@@ -46,7 +46,7 @@ export async function updateAdminUserRole(id: number, role: ApiAdminRole) {
 
 export async function updateAdminUserStatus(id: number, isActive: boolean) {
   const response = await api.put<ApiAdminManagedUser>(
-    apiRoutes.admin.access.userStatus(id),
+    apiRoutes.admin.access.users.status(id),
     {
       is_active: isActive,
     }

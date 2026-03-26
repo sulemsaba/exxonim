@@ -4,9 +4,11 @@ import type {
   ApiBlogAuthor,
   ApiBlogCategory,
   ApiBlogPost,
-  ApiContentStatus,
+  ApiBlogStatus,
+  ApiAdminBlogPostListParams,
+  ApiAdminBlogPostListResponse,
 } from "../types/api";
-import { normalizeContentRecord, statusToPublishedFlag } from "../utils/admin";
+import { normalizeBlogContentRecord, statusToPublishedFlag } from "../utils/admin";
 
 export interface AdminBlogPostPayload {
   title: string;
@@ -26,7 +28,7 @@ export interface AdminBlogPostPayload {
   meta_description?: string | null;
   og_image_url?: string | null;
   published_at?: string | null;
-  status: ApiContentStatus;
+  status: ApiBlogStatus;
 }
 
 export interface AdminBlogCategoryPayload {
@@ -53,85 +55,140 @@ function toRequestPayload(payload: Partial<AdminBlogPostPayload>) {
   };
 }
 
-export async function getAdminPosts() {
-  const response = await api.get<ApiBlogPost[]>(apiRoutes.admin.blogPosts.list);
-  return response.data.map((post) => normalizeContentRecord(post));
+function normalizeAdminPosts(
+  data: ApiAdminBlogPostListResponse | ApiBlogPost[],
+  params: ApiAdminBlogPostListParams
+) {
+  if (Array.isArray(data)) {
+    const page = params.page ?? 1;
+    const limit = params.limit ?? Math.max(data.length, 1);
+    const start = Math.max(0, (page - 1) * limit);
+    const items = data.slice(start, start + limit).map((post) => normalizeBlogContentRecord(post));
+
+    return {
+      items,
+      page,
+      limit,
+      total: data.length,
+      total_pages: data.length === 0 ? 0 : Math.ceil(data.length / limit),
+    };
+  }
+
+  return {
+    ...data,
+    items: data.items.map((post) => normalizeBlogContentRecord(post)),
+  };
 }
 
-export async function getAdminPost(id: number) {
-  const response = await api.get<ApiBlogPost>(apiRoutes.admin.blogPosts.detail(id));
-  return normalizeContentRecord(response.data);
+export async function listAdminBlogPosts(
+  params: ApiAdminBlogPostListParams = { page: 1, limit: 100 }
+) {
+  const response = await api.get<ApiAdminBlogPostListResponse | ApiBlogPost[]>(
+    apiRoutes.admin.blog.posts.list,
+    {
+      params,
+    }
+  );
+  return normalizeAdminPosts(response.data, params).items;
 }
 
-export async function createAdminPost(payload: AdminBlogPostPayload) {
+export async function listAdminBlogPostsPage(
+  params: ApiAdminBlogPostListParams = { page: 1, limit: 20 }
+) {
+  const response = await api.get<ApiAdminBlogPostListResponse | ApiBlogPost[]>(
+    apiRoutes.admin.blog.posts.list,
+    {
+      params,
+    }
+  );
+
+  return normalizeAdminPosts(response.data, params);
+}
+
+export async function getAdminBlogPost(id: number) {
+  const response = await api.get<ApiBlogPost>(apiRoutes.admin.blog.posts.byId(id));
+  return normalizeBlogContentRecord(response.data);
+}
+
+export async function createAdminBlogPost(payload: AdminBlogPostPayload) {
   const response = await api.post<ApiBlogPost>(
-    apiRoutes.admin.blogPosts.list,
+    apiRoutes.admin.blog.posts.list,
     toRequestPayload(payload)
   );
-  return normalizeContentRecord(response.data);
+  return normalizeBlogContentRecord(response.data);
 }
 
-export async function updateAdminPost(id: number, payload: Partial<AdminBlogPostPayload>) {
+export async function updateAdminBlogPost(id: number, payload: Partial<AdminBlogPostPayload>) {
   const response = await api.put<ApiBlogPost>(
-    apiRoutes.admin.blogPosts.detail(id),
+    apiRoutes.admin.blog.posts.byId(id),
     toRequestPayload(payload)
   );
-  return normalizeContentRecord(response.data);
+  return normalizeBlogContentRecord(response.data);
 }
 
-export async function deleteAdminPost(id: number) {
-  await api.delete(apiRoutes.admin.blogPosts.detail(id));
+export async function deleteAdminBlogPost(id: number) {
+  await api.delete(apiRoutes.admin.blog.posts.byId(id));
 }
 
-export async function getAdminCategories() {
-  const response = await api.get<ApiBlogCategory[]>(apiRoutes.admin.blogCategories.list);
+export async function listAdminBlogCategories() {
+  const response = await api.get<ApiBlogCategory[]>(apiRoutes.admin.blog.categories.list);
   return response.data;
 }
 
-export async function createAdminCategory(payload: AdminBlogCategoryPayload) {
+export async function createAdminBlogCategory(payload: AdminBlogCategoryPayload) {
   const response = await api.post<ApiBlogCategory>(
-    apiRoutes.admin.blogCategories.list,
+    apiRoutes.admin.blog.categories.list,
     payload
   );
   return response.data;
 }
 
-export async function updateAdminCategory(
+export async function updateAdminBlogCategory(
   id: number,
   payload: Partial<AdminBlogCategoryPayload>
 ) {
   const response = await api.put<ApiBlogCategory>(
-    apiRoutes.admin.blogCategories.detail(id),
+    apiRoutes.admin.blog.categories.byId(id),
     payload
   );
   return response.data;
 }
 
-export async function deleteAdminCategory(id: number) {
-  await api.delete(apiRoutes.admin.blogCategories.detail(id));
+export async function deleteAdminBlogCategory(id: number) {
+  await api.delete(apiRoutes.admin.blog.categories.byId(id));
 }
 
-export async function getAdminAuthors() {
-  const response = await api.get<ApiBlogAuthor[]>(apiRoutes.admin.blogAuthors.list);
+export async function listAdminBlogAuthors() {
+  const response = await api.get<ApiBlogAuthor[]>(apiRoutes.admin.blog.authors.list);
   return response.data;
 }
 
-export async function createAdminAuthor(payload: AdminBlogAuthorPayload) {
+export async function getAdminBlogAuthorMe() {
+  const response = await api.get<ApiBlogAuthor>(apiRoutes.admin.blog.authors.me);
+  return response.data;
+}
+
+export async function createAdminBlogAuthor(payload: AdminBlogAuthorPayload) {
   const response = await api.post<ApiBlogAuthor>(
-    apiRoutes.admin.blogAuthors.list,
+    apiRoutes.admin.blog.authors.list,
     payload
   );
   return response.data;
 }
 
-export async function updateAdminAuthor(id: number, payload: Partial<AdminBlogAuthorPayload>) {
+export async function updateAdminBlogAuthor(id: number, payload: Partial<AdminBlogAuthorPayload>) {
   const response = await api.put<ApiBlogAuthor>(
-    apiRoutes.admin.blogAuthors.detail(id),
+    apiRoutes.admin.blog.authors.byId(id),
     payload
   );
   return response.data;
 }
 
-export async function deleteAdminAuthor(id: number) {
-  await api.delete(apiRoutes.admin.blogAuthors.detail(id));
+export async function updateAdminBlogAuthorMe(payload: Partial<AdminBlogAuthorPayload>) {
+  const response = await api.put<ApiBlogAuthor>(apiRoutes.admin.blog.authors.me, payload);
+  return response.data;
+}
+
+export async function deleteAdminBlogAuthor(id: number) {
+  await api.delete(apiRoutes.admin.blog.authors.byId(id));
 }

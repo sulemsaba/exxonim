@@ -5,7 +5,7 @@ import type { NavigationItem } from "../types";
 import type { ApiNavigationItem } from "../types/api";
 
 export async function getNavigation() {
-  const response = await api.get<ApiNavigationItem[]>(apiRoutes.public.navigation);
+  const response = await api.get<ApiNavigationItem[]>(apiRoutes.public.navigation.list);
   return response.data.map(
     (item): NavigationItem => mapNavigationItem(item)
   );

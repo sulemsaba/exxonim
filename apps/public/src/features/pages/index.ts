@@ -8,5 +8,3 @@ export {
   SupportPage,
   TermsPage,
 } from "../../pages/InfoPages";
-export { RequestConsultationPage } from "../../pages/RequestConsultationPage";
-export { TrackConsultationPage } from "../../pages/TrackConsultationPage";

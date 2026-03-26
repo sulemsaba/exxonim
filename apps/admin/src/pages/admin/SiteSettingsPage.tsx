@@ -8,9 +8,9 @@ import { ErrorMessage } from "../../components/ErrorMessage";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import {
   createAdminSiteSetting,
-  deleteAdminSiteSetting,
-  getAdminSiteSettings,
-  updateAdminSiteSetting,
+  deleteAdminSiteSettingByKey,
+  listAdminSiteSettings,
+  updateAdminSiteSettingByKey,
 } from "../../services/adminSiteSettingsService";
 import {
   getAdminErrorMessage,
@@ -40,13 +40,13 @@ const defaultValues: SiteSettingFormValues = {
 
 export function SiteSettingsPage() {
   const queryClient = useQueryClient();
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ApiSiteSetting | null>(null);
   const [formMessage, setFormMessage] = useState<string | null>(null);
 
   const settingsQuery = useQuery({
     queryKey: ["admin", "site-settings"],
-    queryFn: getAdminSiteSettings,
+    queryFn: listAdminSiteSettings,
   });
 
   const {
@@ -60,7 +60,7 @@ export function SiteSettingsPage() {
   });
 
   const selectedSetting =
-    settingsQuery.data?.find((setting) => setting.id === selectedId) ?? null;
+    settingsQuery.data?.find((setting) => setting.key === selectedKey) ?? null;
 
   const createMutation = useMutation({
     mutationFn: createAdminSiteSetting,
@@ -68,7 +68,7 @@ export function SiteSettingsPage() {
       await queryClient.invalidateQueries({ queryKey: ["admin", "site-settings"] });
       await queryClient.invalidateQueries({ queryKey: ["site-settings", variables.key] });
       setFormMessage("Site setting created.");
-      setSelectedId(null);
+      setSelectedKey(null);
       reset(defaultValues);
     },
     onError: (error) => {
@@ -78,13 +78,13 @@ export function SiteSettingsPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({
-      id,
+      key,
       values,
     }: {
-      id: number;
+      key: string;
       values: SiteSettingFormValues;
     }) =>
-      updateAdminSiteSetting(id, {
+      updateAdminSiteSettingByKey(key, {
         key: values.key,
         value: parseJsonValue(values.value_json),
       }),
@@ -99,13 +99,13 @@ export function SiteSettingsPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: deleteAdminSiteSetting,
+    mutationFn: deleteAdminSiteSettingByKey,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin", "site-settings"] });
       setDeleteTarget(null);
       setFormMessage("Site setting deleted.");
-      if (selectedId && deleteTarget?.id === selectedId) {
-        setSelectedId(null);
+      if (selectedKey && deleteTarget?.key === selectedKey) {
+        setSelectedKey(null);
         reset(defaultValues);
       }
     },
@@ -130,7 +130,7 @@ export function SiteSettingsPage() {
   async function onSubmit(values: SiteSettingFormValues) {
     setFormMessage(null);
     if (selectedSetting) {
-      await updateMutation.mutateAsync({ id: selectedSetting.id, values });
+      await updateMutation.mutateAsync({ key: selectedSetting.key, values });
       return;
     }
 
@@ -172,7 +172,7 @@ export function SiteSettingsPage() {
                 className="admin-action-button"
                 type="button"
                 onClick={() => {
-                  setSelectedId(null);
+                  setSelectedKey(null);
                   setFormMessage(null);
                   reset(defaultValues);
                 }}
@@ -197,7 +197,7 @@ export function SiteSettingsPage() {
                           className="admin-table__action"
                           type="button"
                           onClick={() => {
-                            setSelectedId(setting.id);
+                            setSelectedKey(setting.key);
                             setFormMessage(null);
                           }}
                         >
@@ -259,7 +259,7 @@ export function SiteSettingsPage() {
                     className="admin-form__cancel"
                     type="button"
                     onClick={() => {
-                      setSelectedId(null);
+                      setSelectedKey(null);
                       setFormMessage(null);
                       reset(defaultValues);
                     }}
@@ -292,7 +292,7 @@ export function SiteSettingsPage() {
         onCancel={() => setDeleteTarget(null)}
         onConfirm={() => {
           if (deleteTarget) {
-            deleteMutation.mutate(deleteTarget.id);
+            deleteMutation.mutate(deleteTarget.key);
           }
         }}
       />

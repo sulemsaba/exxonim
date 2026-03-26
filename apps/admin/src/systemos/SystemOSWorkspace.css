@@ -1,0 +1,616 @@
+.systemos-admin{
+  --accent:#0f766e;
+  --accent-ink:#f4fffd;
+  --bg:#0f1319;
+  --panel:#151c24;
+  --panel-2:#10161d;
+  --line:rgba(255,255,255,.08);
+  --text:#eef2f6;
+  --muted:#a4adba;
+  --soft:#788393;
+  --focus:rgba(15,118,110,.22);
+  --shadow:0 24px 56px rgba(0,0,0,.26);
+  --radius:18px;
+  --sidebar:256px;
+  --topbar:70px;
+  font-family:"Manrope",system-ui,sans-serif;
+  color:var(--text);
+}
+.systemos-admin.systemos-frame{position:relative;isolation:isolate;min-height:calc(100vh - 220px);background:var(--bg)}
+.systemos-admin[data-theme="light"]{
+  --bg:#f3f6f8;
+  --panel:#ffffff;
+  --panel-2:#f8fafb;
+  --line:rgba(15,23,42,.08);
+  --text:#111827;
+  --muted:#5b6676;
+  --soft:#8a95a6;
+  --focus:rgba(15,118,110,.14);
+  --shadow:0 24px 60px rgba(15,23,42,.08);
+}
+.systemos-admin *{box-sizing:border-box}
+.systemos-admin button,.systemos-admin input,.systemos-admin select,.systemos-admin textarea{font:inherit;color:inherit}
+.systemos-admin button{background:none;border:none;cursor:pointer}
+.systemos-admin input,.systemos-admin select,.systemos-admin textarea{outline:none}
+.systemos-admin svg{stroke:currentColor;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.systemos-admin .app{display:grid;grid-template-columns:var(--sidebar) 1fr;min-height:100vh;background:var(--bg)}
+.systemos-admin .sidebar{display:flex;flex-direction:column;background:var(--panel);border-right:1px solid var(--line)}
+.systemos-admin .brandbar,.systemos-admin .topbar{height:var(--topbar);display:flex;align-items:center;border-bottom:1px solid var(--line)}
+.systemos-admin .brandbar{padding:0 18px;gap:13px}
+.systemos-admin .mark{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);display:grid;place-items:center}
+.systemos-admin .mark svg{width:19px;height:19px}
+.systemos-admin .brand-title{font-size:15px;font-weight:800;letter-spacing:.02em}
+.systemos-admin .brand-sub{font-size:13px;color:var(--soft)}
+.systemos-admin .sidebar-body{flex:1;overflow:auto;padding:18px 12px 16px;display:flex;flex-direction:column;justify-content:space-between;gap:20px}
+.systemos-admin .nav-section{margin-bottom:16px}
+.systemos-admin .nav-label{padding:0 10px 8px;font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.12em}
+.systemos-admin .nav-item,.systemos-admin .btn,.systemos-admin .tab,.systemos-admin .modal-tab,.systemos-admin .icon-btn,.systemos-admin .page-btn,.systemos-admin .filter-chip{
+  transition:border-color .16s ease,background .16s ease,color .16s ease,opacity .16s ease;
+}
+.systemos-admin .nav-item{
+  width:100%;position:relative;display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:11px;
+  padding:11px 13px;border-radius:10px;border:1px solid transparent;text-align:left;color:var(--muted);background:transparent;
+}
+.systemos-admin .nav-item:hover,.systemos-admin .nav-item.active{color:var(--text);background:var(--panel-2);border-color:var(--line)}
+.systemos-admin .nav-item.active::before{
+  content:"";position:absolute;left:-1px;top:8px;bottom:8px;width:3px;border-radius:999px;background:var(--accent);
+}
+.systemos-admin .nav-icon{width:20px;height:20px;display:grid;place-items:center;color:var(--soft)}
+.systemos-admin .nav-icon svg{width:18px;height:18px;stroke-width:1.9}
+.systemos-admin .nav-copy{font-size:14px;font-weight:700}
+.systemos-admin .nav-count{font-size:12px;color:var(--soft)}
+.systemos-admin .profile{display:flex;gap:11px;align-items:center;padding:13px;border:1px solid var(--line);border-radius:12px;background:transparent}
+.systemos-admin .avatar{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);display:grid;place-items:center;font-weight:800;letter-spacing:.02em}
+.systemos-admin .main{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--bg);overflow:hidden}
+.systemos-admin .topbar{position:sticky;top:0;z-index:20;padding:0 22px;justify-content:space-between;gap:16px;background:var(--panel)}
+.systemos-admin .crumbs{margin-bottom:5px;font-size:12px;color:var(--soft);letter-spacing:.12em;text-transform:uppercase}
+.systemos-admin .top-title{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.systemos-admin .top-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.systemos-admin .top-actions{display:flex;gap:10px;align-items:center}
+.systemos-admin .shell{display:grid;grid-template-columns:minmax(0,1fr);min-height:0;flex:1;overflow:hidden}
+.systemos-admin .content{min-height:0;overflow:auto;padding:20px 22px 22px}
+.systemos-admin .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 10px 30px rgba(15,23,42,.04)}
+.systemos-admin .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.systemos-admin .stat{padding:17px 18px;background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)),var(--panel)}
+.systemos-admin .stat-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.systemos-admin .stat-label,.systemos-admin .hero-label,.systemos-admin .analytics-kicker,.systemos-admin .chart-kpi-label,.systemos-admin .seo-score-label,.systemos-admin .detail-label,.systemos-admin .engagement-label,.systemos-admin .section-title,.systemos-admin .label{
+  font-size:10px;color:var(--soft);text-transform:uppercase;letter-spacing:.12em;font-weight:800;
+}
+.systemos-admin .stat-value{margin-top:8px;font-size:24px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.systemos-admin .stat-note{margin-top:5px;max-width:24ch;font-size:12px;line-height:1.5;color:var(--muted)}
+.systemos-admin .stat-icon{display:grid;place-items:center;color:var(--muted)}
+.systemos-admin .stat-icon svg{width:16px;height:16px;stroke-width:1.8}
+.systemos-admin .stack{display:grid;gap:12px;margin-top:12px}
+.systemos-admin .tabs-wrap,.systemos-admin .toolbar{padding:16px 18px}
+.systemos-admin .tabs{display:flex;gap:6px;flex-wrap:wrap}
+.systemos-admin .tab{
+  min-height:40px;padding:0 14px;border:1px solid transparent;border-radius:999px;color:var(--muted);
+  display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:700;background:transparent;
+}
+.systemos-admin .tab:hover,.systemos-admin .tab.active{background:color-mix(in srgb, var(--accent) 10%, var(--panel-2));border-color:color-mix(in srgb, var(--accent) 16%, var(--line));color:var(--text)}
+.systemos-admin .tab-count{min-width:26px;padding:2px 8px;border-radius:999px;background:rgba(15,23,42,.06);font-size:11px;color:var(--soft);text-align:center}
+.systemos-admin .toolbar-row{display:grid;grid-template-columns:minmax(260px,1.35fr) repeat(4,minmax(0,.72fr)) auto;gap:9px;align-items:center}
+.systemos-admin .field,.systemos-admin .select,.systemos-admin .textarea{
+  width:100%;min-height:46px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);
+  color:var(--text);transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;font-size:14px;
+}
+.systemos-admin .textarea{min-height:156px;padding:14px;resize:vertical}
+.systemos-admin .field:focus,.systemos-admin .select:focus,.systemos-admin .textarea:focus{border-color:color-mix(in srgb, var(--accent) 55%, var(--line));background:var(--panel);box-shadow:0 0 0 4px var(--focus)}
+.systemos-admin .search{position:relative}
+.systemos-admin .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--soft);pointer-events:none}
+.systemos-admin .search input{padding-left:38px}
+.systemos-admin .toolbar-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.systemos-admin .chip-row{display:flex;gap:6px;flex-wrap:wrap}
+.systemos-admin .filter-chip{
+  font-size:12px;font-weight:700;color:var(--muted);padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel-2);
+}
+.systemos-admin .filter-chip:hover{background:var(--panel);color:var(--text)}
+.systemos-admin .kbd-row{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.systemos-admin .btn{
+  min-height:42px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;color:var(--text);font-weight:600;font-size:14px;
+}
+.systemos-admin .btn:hover{background:var(--panel)}
+.systemos-admin .btn.primary{background:var(--accent);border-color:color-mix(in srgb, var(--accent) 88%, black 12%);color:var(--accent-ink);box-shadow:0 12px 24px rgba(15,118,110,.16)}
+.systemos-admin .btn.primary:hover{background:color-mix(in srgb, var(--accent) 92%, black 8%)}
+.systemos-admin .btn.secondary{background:var(--panel);border-color:rgba(15,23,42,.08)}
+.systemos-admin .btn.subtle{background:transparent;border-color:transparent;color:var(--muted)}
+.systemos-admin .btn.subtle:hover{background:var(--panel-2);border-color:var(--line);color:var(--text)}
+.systemos-admin .btn.icon{width:40px;min-width:40px;padding:0}
+.systemos-admin .btn.small{min-height:34px;padding:0 11px;font-size:13px}
+.systemos-admin .btn svg,.systemos-admin .page-btn svg,.systemos-admin .icon-btn svg{width:15px;height:15px;stroke-width:2}
+.systemos-admin .table-card{padding:0;overflow:hidden;background:var(--panel)}
+.systemos-admin .table-wrap{overflow:auto;padding:0 14px}
+.systemos-admin table{width:100%;border-collapse:collapse;font-size:14px}
+.systemos-admin th,.systemos-admin td{padding:15px 13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.systemos-admin th{font-size:10px;color:var(--soft);font-weight:800;text-transform:uppercase;letter-spacing:.12em}
+.systemos-admin tbody tr{transition:background .16s ease, box-shadow .16s ease}
+.systemos-admin tbody tr:hover{background:color-mix(in srgb, var(--accent) 4%, var(--panel-2))}
+.systemos-admin .post-actions-heading,.systemos-admin .post-actions-cell{width:1%;white-space:nowrap;text-align:right}
+.systemos-admin .post-actions-cell{vertical-align:middle}
+.systemos-admin .title-btn{padding:0;text-align:left;font-size:15px;font-weight:800;letter-spacing:-.02em;color:var(--text)}
+.systemos-admin .subtext{font-size:12px;color:var(--soft);margin-top:4px}
+.systemos-admin .row-excerpt{margin-top:6px;max-width:58ch;font-size:13px;line-height:1.55;color:var(--muted);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
+.systemos-admin .meta-line{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:7px}
+.systemos-admin .tag,.systemos-admin .status,.systemos-admin .trend-pill,.systemos-admin .signal-badge{
+  display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel-2);font-size:12px;font-weight:700;
+}
+.systemos-admin .tag,.systemos-admin .status,.systemos-admin .signal-badge.steady{color:var(--muted)}
+.systemos-admin .dot{width:7px;height:7px;border-radius:99px;background:currentColor;opacity:.72}
+.systemos-admin .published,.systemos-admin .draft,.systemos-admin .scheduled,.systemos-admin .trash{color:var(--muted)}
+.systemos-admin .hover-actions{opacity:0;transition:opacity .16s ease}
+.systemos-admin tr:hover .hover-actions,.systemos-admin tr:focus-within .hover-actions{opacity:1}
+.systemos-admin .icon-actions{display:flex;justify-content:flex-end;gap:6px}
+.systemos-admin .row-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.systemos-admin .post-card-actions{
+  display:inline-flex;gap:6px;flex-wrap:nowrap;align-items:center;margin-top:14px;padding:4px;border:1px solid var(--line);border-radius:12px;
+  background:var(--panel-2);box-shadow:inset 0 1px 0 rgba(255,255,255,.02);width:max-content;max-width:100%;
+}
+.systemos-admin .post-action-bar{
+  display:inline-flex;gap:6px;justify-content:flex-end;flex-wrap:nowrap;align-items:center;padding:4px;border:1px solid var(--line);border-radius:12px;
+  background:var(--panel-2);box-shadow:inset 0 1px 0 rgba(255,255,255,.02);width:max-content;max-width:100%;margin-left:auto;
+}
+.systemos-admin .post-action-btn{
+  flex:0 0 34px;width:34px;height:34px;padding:0;border-radius:10px;border:1px solid var(--line);background:transparent;display:inline-flex;align-items:center;
+  justify-content:center;color:var(--muted);cursor:pointer;text-decoration:none;transition:border-color .16s ease,background .16s ease,color .16s ease,box-shadow .16s ease;
+}
+.systemos-admin .post-action-btn:hover{
+  color:var(--text);border-color:rgba(255,255,255,.16);background:var(--panel-2);
+}
+.systemos-admin .post-action-btn:disabled{opacity:.58;cursor:wait}
+.systemos-admin .post-action-btn svg{
+  width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+}
+.systemos-admin .post-action-btn.preview{
+  color:var(--text);background:var(--panel);border-color:rgba(255,255,255,.08);
+}
+.systemos-admin .post-action-btn.edit{
+  color:var(--text);background:var(--text);border-color:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
+}
+.systemos-admin .post-action-btn.edit svg{color:var(--bg);stroke:currentColor}
+.systemos-admin .post-action-btn.edit:hover{background:#d7dde6;color:#0f1319}
+.systemos-admin .post-action-btn.duplicate{background:transparent}
+.systemos-admin .post-action-btn.trash{
+  color:#c88484;border-color:rgba(192,106,106,.28);background:rgba(192,106,106,.08);
+}
+.systemos-admin .post-action-btn.trash:hover{
+  color:#e1b1b1;border-color:rgba(192,106,106,.42);background:rgba(192,106,106,.14);
+}
+.systemos-admin .icon-btn{
+  width:34px;height:34px;border-radius:9px;border:1px solid var(--line);display:grid;place-items:center;color:var(--muted);background:transparent;
+}
+.systemos-admin .icon-btn:hover{background:var(--panel-2);color:var(--text)}
+.systemos-admin .btn.row-primary{background:var(--panel);border-color:var(--line);color:var(--text)}
+.systemos-admin .btn.row-primary:hover{background:var(--panel-2)}
+.systemos-admin .author{display:flex;align-items:center;gap:8px}
+.systemos-admin .author-mark{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--panel-2);border:1px solid var(--line);font-size:11px;font-weight:800;color:var(--muted)}
+.systemos-admin .revision-pill{
+  margin-top:8px;display:inline-flex;align-items:center;min-height:26px;padding:0 10px;border-radius:999px;border:1px solid var(--line);
+  background:var(--panel-2);font-size:12px;font-weight:700;color:var(--muted);
+}
+.systemos-admin .revision-pill.ready{background:var(--panel);color:var(--text)}
+.systemos-admin .revision-pill.working{color:var(--muted)}
+.systemos-admin .quick-edit{display:flex;gap:6px;align-items:center;flex-wrap:wrap;max-height:0;opacity:0;overflow:hidden;margin-top:0;transition:max-height .22s ease,opacity .18s ease,margin-top .18s ease}
+.systemos-admin tbody tr:hover .quick-edit,.systemos-admin tbody tr:focus-within .quick-edit{max-height:38px;opacity:1;margin-top:8px}
+.systemos-admin .inline-input,.systemos-admin .inline-select{height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel-2);padding:0 11px;font-size:13px;color:var(--text)}
+.systemos-admin .card-list{display:grid;gap:12px}
+.systemos-admin .post-card{padding:20px;border-radius:18px}
+.systemos-admin .post-card-head{display:flex;justify-content:space-between;gap:12px}
+html[data-theme="light"] .systemos-admin .post-action-btn:hover{border-color:rgba(15,23,42,.16)}
+html[data-theme="light"] .systemos-admin .post-action-btn.edit{background:#111827}
+html[data-theme="light"] .systemos-admin .post-action-btn.edit svg{color:#ffffff}
+html[data-theme="light"] .systemos-admin .post-action-btn.edit:hover{background:#1f2937;color:#ffffff}
+html[data-theme="light"] .systemos-admin .post-action-btn.trash{color:#9f4d4d;background:rgba(192,106,106,.06)}
+html[data-theme="light"] .systemos-admin .post-action-btn.trash:hover{color:#8a3f3f;background:rgba(192,106,106,.1)}
+html[data-theme="light"] .systemos-admin .post-card-actions,
+html[data-theme="light"] .systemos-admin .post-action-bar{box-shadow:inset 0 1px 0 rgba(255,255,255,.55)}
+.systemos-admin .pager{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 18px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}
+.systemos-admin .pager-controls{display:flex;gap:6px;align-items:center}
+.systemos-admin .page-btn{min-width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel-2);color:var(--muted);display:grid;place-items:center}
+.systemos-admin .page-btn:hover,.systemos-admin .page-btn.active{background:var(--panel);color:var(--text)}
+.systemos-admin .blog-workspace-shell{display:grid;gap:14px;max-width:1380px;margin:0 auto}
+.systemos-admin .workspace-banner{
+  display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);
+  border-radius:16px;background:color-mix(in srgb, var(--panel) 78%, white 22%);box-shadow:0 12px 28px rgba(15,23,42,.04)
+}
+.systemos-admin .workspace-banner strong{display:block;font-size:12px;font-weight:800;letter-spacing:-.01em}
+.systemos-admin .workspace-banner p{margin:4px 0 0;font-size:12px;line-height:1.55;color:var(--muted)}
+.systemos-admin .workspace-banner--error{border-color:rgba(192,106,106,.28);background:rgba(192,106,106,.06)}
+.systemos-admin #postsScreen,.systemos-admin #analyticsScreen{display:grid;gap:12px}
+.systemos-admin .analytics-hero{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.systemos-admin .hero-card,.systemos-admin .analytics-panel{padding:18px;display:grid;gap:14px;align-content:start}
+.systemos-admin .hero-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.systemos-admin .hero-value,.systemos-admin .engagement-value{font-size:32px;font-weight:800;line-height:.94;letter-spacing:-.04em}
+.systemos-admin .hero-note,.systemos-admin .analytics-copy,.systemos-admin .chart-kpi-note,.systemos-admin .seo-score-note,.systemos-admin .engagement-note,.systemos-admin .insight-note,.systemos-admin .live-note,.systemos-admin .action-note,.systemos-admin .section-note{
+  font-size:13px;line-height:1.55;color:var(--muted);
+}
+.systemos-admin .trend-pill.good,.systemos-admin .signal-badge.trending{border-color:rgba(90,154,115,.28);background:rgba(90,154,115,.12);color:#8bc39d}
+.systemos-admin .trend-pill.bad,.systemos-admin .signal-badge.dropping{border-color:rgba(192,106,106,.28);background:rgba(192,106,106,.12);color:#d39191}
+.systemos-admin .analytics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+.systemos-admin .analytics-panel-wide{grid-column:1/-1}
+.systemos-admin .analytics-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.systemos-admin .analytics-title{margin-top:4px;font-size:17px;font-weight:700;letter-spacing:-.02em}
+.systemos-admin .analytics-toggle{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2)}
+.systemos-admin .analytics-toggle-btn{min-width:78px;height:34px;padding:0 13px;border:1px solid transparent;border-radius:8px;color:var(--muted);font-size:13px;font-weight:700}
+.systemos-admin .analytics-toggle-btn:hover,.systemos-admin .analytics-toggle-btn.active{background:var(--panel);border-color:var(--line);color:var(--text)}
+.systemos-admin .chart-shell{display:grid;gap:16px}
+.systemos-admin .chart-metrics{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.systemos-admin .chart-kpi{display:grid;gap:4px}
+.systemos-admin .chart-kpi-value,.systemos-admin .seo-score-value{font-size:36px;font-weight:800;line-height:.95;letter-spacing:-.04em}
+.systemos-admin .analytics-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.systemos-admin .legend-item{display:inline-flex;align-items:center;gap:8px}
+.systemos-admin .legend-swatch{width:18px;height:2px;background:var(--text);border-radius:999px}
+.systemos-admin .legend-dot{width:10px;height:10px;border-radius:999px;background:#c79b53;border:2px solid var(--panel)}
+.systemos-admin .chart-frame{border:1px solid var(--line);border-radius:12px;background:var(--panel-2);padding:14px;overflow:auto hidden}
+.systemos-admin .trend-chart{display:block;width:100%;min-width:680px;height:260px}
+.systemos-admin .trend-chart text{fill:var(--soft);font-size:11px;font-family:"Manrope",system-ui,sans-serif}
+.systemos-admin .trend-chart .grid-line,.systemos-admin .trend-chart .axis-line{stroke:var(--line);stroke-width:1}
+.systemos-admin .trend-chart .area{fill:var(--text);opacity:.07}
+.systemos-admin .trend-chart .line{fill:none;stroke:var(--text);stroke-width:2.25}
+.systemos-admin .trend-chart .marker-stem{stroke:rgba(199,155,83,.45);stroke-width:1;stroke-dasharray:3 4}
+.systemos-admin .trend-chart .marker{fill:#c79b53;stroke:var(--panel);stroke-width:2}
+.systemos-admin .trend-chart .marker-count{fill:#c79b53;font-size:10px;font-weight:800}
+.systemos-admin .analytics-table-wrap{padding:0}
+.systemos-admin .analytics-table-wrap table th,.systemos-admin .analytics-table-wrap table td{padding:13px 11px}
+.systemos-admin .seo-grid{display:grid;gap:16px;align-content:start}
+.systemos-admin .seo-score,.systemos-admin .audience-card,.systemos-admin .engagement-card,.systemos-admin .insight-card,.systemos-admin .live-item,.systemos-admin .action-btn,.systemos-admin .worst-item{
+  border:1px solid var(--line);border-radius:12px;background:var(--panel-2);
+}
+.systemos-admin .seo-score{display:grid;gap:6px;padding:15px}
+.systemos-admin .progress-stack{display:grid;gap:10px}
+.systemos-admin .progress-row,.systemos-admin .device-row,.systemos-admin .country-row{display:grid;gap:6px}
+.systemos-admin .progress-meta,.systemos-admin .device-head,.systemos-admin .country-head,.systemos-admin .item-head{
+  display:flex;justify-content:space-between;gap:10px;align-items:center;
+}
+.systemos-admin .progress-label,.systemos-admin .action-title,.systemos-admin .insight-title,.systemos-admin .live-title,.systemos-admin .device-head strong,.systemos-admin .country-head strong,.systemos-admin .issue-item strong{
+  font-size:14px;font-weight:700;color:var(--text);
+}
+.systemos-admin .progress-value,.systemos-admin .device-head span,.systemos-admin .country-head span,.systemos-admin .issue-item span{font-size:12px;color:var(--muted)}
+.systemos-admin .progress-bar{height:9px;border-radius:999px;background:var(--panel);border:1px solid var(--line);overflow:hidden}
+.systemos-admin .progress-fill{display:block;height:100%;border-radius:999px}
+.systemos-admin .progress-fill.good{background:#5a9a73}
+.systemos-admin .progress-fill.warn{background:#c79b53}
+.systemos-admin .progress-fill.bad{background:#c06a6a}
+.systemos-admin .issue-list,.systemos-admin .worst-list,.systemos-admin .insight-list,.systemos-admin .analytics-feed,.systemos-admin .action-stack{display:grid;gap:12px}
+.systemos-admin .issue-item{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);font-size:13px}
+.systemos-admin .worst-item{display:grid;gap:11px;padding:14px}
+.systemos-admin .item-copy{display:grid;gap:4px}
+.systemos-admin .metric-inline,.systemos-admin .inline-action-row{display:flex;gap:8px;flex-wrap:wrap}
+.systemos-admin .metric-inline span{min-height:26px;padding:0 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel);display:inline-flex;align-items:center;font-size:12px;color:var(--muted)}
+.systemos-admin .audience-layout{display:grid;grid-template-columns:170px minmax(0,1fr);gap:18px;align-items:start}
+.systemos-admin .audience-ring{width:170px;height:170px;border-radius:50%;padding:15px;display:grid;place-items:center;margin:0 auto}
+.systemos-admin .audience-ring-center{width:100%;height:100%;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;text-align:center;padding:18px}
+.systemos-admin .audience-ring-value,.systemos-admin .chart-kpi-value{font-size:36px;font-weight:800;line-height:.95;letter-spacing:-.04em}
+.systemos-admin .audience-ring-note{margin-top:4px;font-size:12px;line-height:1.45;color:var(--muted)}
+.systemos-admin .audience-details{display:grid;gap:16px}
+.systemos-admin .audience-legend,.systemos-admin .engagement-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.systemos-admin .audience-card{padding:13px}
+.systemos-admin .audience-card-label{font-size:10px;color:var(--soft);text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+.systemos-admin .audience-card-value{margin-top:8px;font-size:24px;font-weight:800;line-height:1}
+.systemos-admin .audience-card-note{margin-top:5px;font-size:13px;line-height:1.5;color:var(--muted)}
+.systemos-admin .detail-group{display:grid;gap:8px}
+.systemos-admin .device-list,.systemos-admin .country-list{display:grid;gap:8px}
+.systemos-admin .analytics-split{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+.systemos-admin .engagement-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.systemos-admin .engagement-card,.systemos-admin .insight-card{display:grid;gap:7px;padding:15px}
+.systemos-admin .realtime-grid{display:grid;grid-template-columns:minmax(0,1fr) 296px;gap:14px;align-items:start}
+.systemos-admin .live-item{display:grid;gap:5px;padding:13px}
+.systemos-admin .action-btn{width:100%;padding:13px 14px;text-align:left;display:grid;gap:5px}
+.systemos-admin .action-btn:hover{background:var(--panel)}
+.systemos-admin .icon-btn.danger{color:var(--muted)}
+.systemos-admin .icon-btn.danger:hover{color:var(--text)}
+.systemos-admin .workspace-split{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:14px;align-items:start}
+.systemos-admin .workspace-stack{display:grid;gap:14px}
+.systemos-admin .workspace-form-card{padding:18px;display:grid;gap:22px;align-content:start}
+.systemos-admin .workspace-form-actions{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.systemos-admin .workspace-form-actions-end{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.systemos-admin .workspace-avatar{width:56px;height:56px;border-radius:16px;border:1px solid var(--line);background:var(--panel-2);display:grid;place-items:center;overflow:hidden;font-size:14px;font-weight:800;color:var(--muted)}
+.systemos-admin .workspace-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.systemos-admin .workspace-copy{font-size:13px;line-height:1.6;color:var(--muted)}
+.systemos-admin .workspace-inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.systemos-admin .workspace-inline-start{display:flex;gap:12px;align-items:flex-start}
+.systemos-admin .workspace-grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.systemos-admin .empty{display:block;padding:72px 26px 76px;text-align:center}
+.systemos-admin .empty-ico{width:64px;height:64px;border-radius:14px;border:1px solid var(--line);display:grid;place-items:center;margin:0 auto 18px;color:var(--muted);background:var(--panel-2)}
+.systemos-admin .empty-ico svg{width:32px;height:32px;stroke-width:1.8}
+.systemos-admin .empty-title{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.systemos-admin .empty-note{max-width:42ch;margin:10px auto 0;font-size:14px;line-height:1.65;color:var(--muted)}
+.systemos-admin .empty-actions{display:flex;justify-content:center;gap:12px;margin-top:20px;flex-wrap:wrap}
+.systemos-admin .modal{position:fixed;inset:0;background:rgba(10,13,18,.58);display:none;align-items:center;justify-content:center;padding:18px;z-index:140;overflow:auto;overscroll-behavior:contain}
+.systemos-admin .modal.open{display:flex}
+.systemos-admin .modal.is-fullscreen{padding:0;background:rgba(10,13,18,.78);backdrop-filter:blur(10px)}
+.systemos-admin .modal-box{width:min(1000px,100%);max-height:calc(100vh - 36px);overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;margin:auto}
+.systemos-admin .modal-box.is-editor-fullscreen,
+.systemos-admin .modal-box.is-body-fullscreen{width:100vw;max-width:none;height:100vh;max-height:100vh;border-radius:0;border:none;box-shadow:none}
+.systemos-admin .modal-box.is-body-fullscreen{background:var(--bg)}
+.systemos-admin .blog-editor-modal{inset:calc(var(--topbar) + 12px) 18px 18px calc(var(--sidebar) + 18px);padding:0;align-items:flex-start;justify-content:center;background:rgba(10,13,18,.34);backdrop-filter:blur(6px)}
+.systemos-admin .blog-editor-modal.is-fullscreen{background:rgba(10,13,18,.42);backdrop-filter:blur(8px)}
+.systemos-admin .blog-editor-modal-box{width:min(1180px,100%);max-width:100%;max-height:100%;border-radius:22px}
+.systemos-admin .blog-editor-modal-box.is-editor-fullscreen,
+.systemos-admin .blog-editor-modal-box.is-body-fullscreen{width:min(1300px,100%);max-width:100%;height:100%;max-height:100%;border-radius:22px;border:1px solid var(--line);box-shadow:var(--shadow)}
+.systemos-admin .blog-editor-modal-box.is-body-fullscreen{background:var(--panel)}
+.systemos-admin.systemos-frame .blog-editor-modal{
+  position:absolute;
+  inset:0;
+  padding:14px;
+  align-items:flex-start;
+  justify-content:center;
+  background:rgba(244,246,248,.88);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+.systemos-admin[data-theme="dark"].systemos-frame .blog-editor-modal{
+  background:rgba(15,19,25,.82);
+}
+.systemos-admin.systemos-frame .blog-editor-modal.is-fullscreen{
+  background:rgba(244,246,248,.94);
+}
+.systemos-admin[data-theme="dark"].systemos-frame .blog-editor-modal.is-fullscreen{
+  background:rgba(15,19,25,.9);
+}
+.systemos-admin.systemos-frame .blog-editor-modal-box{
+  width:min(1120px,100%);
+  max-height:100%;
+  margin:0 auto;
+}
+.systemos-admin.systemos-frame .blog-editor-modal-box.is-editor-fullscreen,
+.systemos-admin.systemos-frame .blog-editor-modal-box.is-body-fullscreen{
+  width:min(1240px,100%);
+  height:auto;
+  max-height:100%;
+  border-radius:22px;
+}
+.systemos-admin.systemos-frame .blog-editor-modal-box.is-body-fullscreen{
+  background:var(--panel);
+}
+.systemos-admin .modal-head,.systemos-admin .modal-foot{padding:18px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)),var(--panel)}
+.systemos-admin .modal-title{font-size:24px;font-weight:700;letter-spacing:-.035em;line-height:1.05}
+.systemos-admin .modal-sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.55}
+.systemos-admin .editor-head-copy{display:grid;gap:14px;min-width:0}
+.systemos-admin .editor-head-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.systemos-admin .editor-head-actions{display:flex;gap:10px;align-items:flex-start;margin-left:auto}
+.systemos-admin .editor-action-cluster{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.systemos-admin .editor-save-chip{
+  display:inline-flex;align-items:center;min-height:30px;padding:0 10px;border-radius:999px;background:var(--panel-2);
+  border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--muted)
+}
+.systemos-admin .editor-back{display:inline-flex;align-items:center;gap:8px;width:max-content;min-height:32px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel-2);color:var(--muted);font-size:12px;font-weight:700}
+.systemos-admin .editor-back:hover{background:var(--panel);color:var(--text)}
+.systemos-admin .editor-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.systemos-admin .editor-progress{margin-top:14px;display:grid;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb, var(--panel-2) 88%, white 12%)}
+.systemos-admin .editor-progress-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.systemos-admin .editor-progress-copy-block{display:grid;gap:5px}
+.systemos-admin .editor-progress-title{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.systemos-admin .editor-progress-copy{font-size:12px;line-height:1.55;color:var(--muted);max-width:58ch}
+.systemos-admin .editor-progress-status{display:grid;gap:4px;justify-items:end;text-align:right}
+.systemos-admin .editor-progress-next{font-size:12px;line-height:1.5;color:var(--muted);max-width:34ch}
+.systemos-admin .editor-progress-score{font-size:20px;font-weight:800;letter-spacing:-.03em;color:var(--text);line-height:1}
+.systemos-admin .editor-progress-bar{height:10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);overflow:hidden}
+.systemos-admin .editor-progress-fill{display:block;height:100%;width:0;border-radius:999px;background:var(--accent);transition:width .18s ease}
+.systemos-admin .editor-checks{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.systemos-admin .check-pill{min-height:28px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--muted);display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700}
+.systemos-admin .check-pill::before{content:"";width:8px;height:8px;border-radius:999px;background:var(--soft);flex:0 0 auto}
+.systemos-admin .check-pill:hover{background:var(--panel-2);color:var(--text)}
+.systemos-admin .check-pill.done{color:var(--text)}
+.systemos-admin .check-pill.done::before{background:#8bc39d}
+.systemos-admin .check-pill.todo{border-color:rgba(199,155,83,.34);color:var(--text)}
+.systemos-admin .check-pill.todo::before{background:#c79b53}
+.systemos-admin .editor-checks-note{font-size:11px;font-weight:700;color:var(--soft)}
+.systemos-admin .editor-note{margin-top:12px;padding:11px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2);color:var(--muted);font-size:13px;line-height:1.55;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.systemos-admin .editor-note-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.systemos-admin .editor-alert{margin-top:12px;padding:12px 14px;border:1px solid rgba(192,106,106,.28);border-radius:14px;background:rgba(192,106,106,.08);color:#d9a3a3;font-size:13px;line-height:1.55}
+.systemos-admin .editor-inline-error{font-size:12px;line-height:1.55;color:#d9a3a3}
+.systemos-admin .modal-body{padding:22px;overflow:auto;display:grid;gap:20px;background:color-mix(in srgb, var(--bg) 55%, var(--panel) 45%)}
+.systemos-admin .modal-box.is-editor-fullscreen .modal-head,
+.systemos-admin .modal-box.is-editor-fullscreen .modal-foot,
+.systemos-admin .modal-box.is-body-fullscreen .modal-head,
+.systemos-admin .modal-box.is-body-fullscreen .modal-foot{padding-left:28px;padding-right:28px}
+.systemos-admin .modal-box.is-editor-fullscreen .modal-body,
+.systemos-admin .modal-box.is-body-fullscreen .modal-body{padding:24px 28px 28px;flex:1}
+.systemos-admin .modal-box.is-body-fullscreen .editor-progress{display:none}
+.systemos-admin .modal-box.is-body-fullscreen .modal-tabs,
+.systemos-admin .modal-box.is-body-fullscreen .preview-sheet{display:none}
+.systemos-admin .modal-box.is-body-fullscreen .pane--main.active{max-width:940px;width:100%;margin:0 auto}
+.systemos-admin .blog-editor-modal-box.is-editor-fullscreen .modal-head,
+.systemos-admin .blog-editor-modal-box.is-editor-fullscreen .modal-foot,
+.systemos-admin .blog-editor-modal-box.is-body-fullscreen .modal-head,
+.systemos-admin .blog-editor-modal-box.is-body-fullscreen .modal-foot{padding-left:20px;padding-right:20px}
+.systemos-admin .blog-editor-modal-box.is-editor-fullscreen .modal-body,
+.systemos-admin .blog-editor-modal-box.is-body-fullscreen .modal-body{padding:20px;flex:1}
+.systemos-admin .blog-editor-modal-box.is-body-fullscreen .pane--main.active{max-width:840px}
+.systemos-admin.systemos-frame .blog-editor-modal-box.is-editor-fullscreen .modal-head,
+.systemos-admin.systemos-frame .blog-editor-modal-box.is-editor-fullscreen .modal-foot,
+.systemos-admin.systemos-frame .blog-editor-modal-box.is-body-fullscreen .modal-head,
+.systemos-admin.systemos-frame .blog-editor-modal-box.is-body-fullscreen .modal-foot{padding-left:20px;padding-right:20px}
+.systemos-admin.systemos-frame .blog-editor-modal-box.is-editor-fullscreen .modal-body,
+.systemos-admin.systemos-frame .blog-editor-modal-box.is-body-fullscreen .modal-body{padding:20px;flex:1}
+.systemos-admin.systemos-frame .blog-editor-modal-box.is-body-fullscreen .pane--main.active{max-width:860px}
+.systemos-admin .modal-body.is-body-focus .editor-side-column,
+.systemos-admin .modal-body.is-body-focus .pane--main:not(.active){display:none}
+.systemos-admin .modal-body.is-body-focus .pane--main.active>.modal-section:not(:last-child){display:none}
+.systemos-admin .modal-body.is-body-focus .pane--main.active{gap:0}
+.systemos-admin .modal-body.is-body-focus .modal-section{gap:12px}
+.systemos-admin .modal-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.systemos-admin .modal-tabs{display:none;gap:8px;flex-wrap:wrap;margin-top:18px}
+.systemos-admin .modal-tab{height:38px;padding:0 13px;border-radius:9px;border:1px solid transparent;color:var(--muted);font-size:14px;font-weight:700}
+.systemos-admin .modal-tab:hover,.systemos-admin .modal-tab.active{background:var(--panel-2);border-color:var(--line);color:var(--text)}
+.systemos-admin .editor-layout{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(280px,.72fr);gap:20px;align-items:start}
+.systemos-admin .editor-main-column,.systemos-admin .editor-side-column{display:grid;gap:20px;align-content:start}
+.systemos-admin .pane{display:grid;gap:20px}
+.systemos-admin .modal-section{display:grid;gap:14px}
+.systemos-admin .editor-main-column .modal-section{padding:0;border:none;background:transparent}
+.systemos-admin .editor-side-column .modal-section{
+  padding:16px;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb, var(--panel) 86%, white 14%);
+  box-shadow:0 16px 30px rgba(15,23,42,.04)
+}
+.systemos-admin .section-head{display:grid;gap:6px}
+.systemos-admin .section-title{font-size:11px}
+.systemos-admin .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px}
+.systemos-admin .form-col-2{grid-column:span 2}
+.systemos-admin .label{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;font-weight:700;letter-spacing:.02em;margin-bottom:10px;color:var(--soft)}
+.systemos-admin .required-tag{color:#c79b53;font-size:10px;font-weight:800;letter-spacing:.1em;white-space:nowrap}
+.systemos-admin .label-missing{color:#c79b53}
+.systemos-admin .field-missing{border-color:rgba(199,155,83,.38)!important;box-shadow:0 0 0 3px rgba(199,155,83,.1)!important}
+.systemos-admin .help{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6}
+.systemos-admin .editor-basics-flow{display:grid;gap:20px}
+.systemos-admin .editor-title-block,.systemos-admin .editor-excerpt-block{display:grid;gap:10px}
+.systemos-admin .editor-title-input{
+  min-height:auto;padding:0 0 12px;border:none;border-bottom:1px solid var(--line);border-radius:0;background:transparent;
+  font-size:clamp(1.75rem,2.6vw,2.55rem);line-height:1.08;font-weight:700;letter-spacing:-.045em
+}
+.systemos-admin .editor-title-input:focus{background:transparent;box-shadow:none;border-color:color-mix(in srgb, var(--accent) 50%, var(--line))}
+.systemos-admin .editor-excerpt-input{min-height:108px;font-size:15px;line-height:1.7}
+.systemos-admin .editor-basics-grid{gap:18px 16px}
+.systemos-admin .summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.systemos-admin .summary-card{display:grid;gap:6px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
+.systemos-admin .summary-label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.systemos-admin .summary-value{font-size:15px;font-weight:700;letter-spacing:-.02em;color:var(--text);line-height:1.4;word-break:break-word}
+.systemos-admin .summary-note{font-size:12px;line-height:1.55;color:var(--muted)}
+.systemos-admin .summary-actions,.systemos-admin .cover-actions{display:flex;gap:8px;flex-wrap:wrap}
+.systemos-admin .rich-editor{border:1px solid var(--line);border-radius:18px;background:var(--panel);overflow:hidden;box-shadow:0 18px 38px rgba(15,23,42,.05)}
+.systemos-admin .rich-editor.is-invalid{border-color:rgba(199,155,83,.38);box-shadow:0 0 0 3px rgba(199,155,83,.1)}
+.systemos-admin .rich-editor.is-disabled{opacity:.76}
+.systemos-admin .rich-editor.is-body-fullscreen{position:relative;inset:auto;z-index:auto;border-radius:18px;box-shadow:var(--shadow)}
+.systemos-admin .rich-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);background:color-mix(in srgb, var(--panel-2) 88%, white 12%)}
+.systemos-admin .rich-toolbar-group{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.systemos-admin .rich-toolbar-group--end{margin-left:auto}
+.systemos-admin .rich-btn{min-height:34px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted)}
+.systemos-admin .rich-btn:hover,.systemos-admin .rich-btn.is-active{background:color-mix(in srgb, var(--accent) 8%, var(--panel));color:var(--text);border-color:color-mix(in srgb, var(--accent) 16%, var(--line))}
+.systemos-admin .rich-btn:disabled{opacity:.6;cursor:not-allowed}
+.systemos-admin .rich-link-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);background:color-mix(in srgb, var(--panel-2) 92%, white 8%)}
+.systemos-admin .rich-link-input{min-width:min(100%,320px);flex:1 1 240px}
+.systemos-admin .rich-surface{min-height:320px;padding:24px;outline:none;font-size:15px;line-height:1.78;color:var(--text);background:
+linear-gradient(180deg, rgba(255,255,255,.01), rgba(255,255,255,0)),
+var(--panel)}
+.systemos-admin .modal-box.is-body-fullscreen .rich-editor{min-height:calc(100vh - 290px)}
+.systemos-admin .rich-editor.is-body-fullscreen .rich-surface{min-height:calc(100vh - 360px);padding:24px 28px;font-size:15px}
+.systemos-admin .blog-editor-modal-box.is-body-fullscreen .rich-editor{min-height:min(620px, calc(100vh - var(--topbar) - 220px))}
+.systemos-admin .blog-editor-modal-box.is-body-fullscreen .rich-editor .rich-surface{min-height:min(540px, calc(100vh - var(--topbar) - 300px))}
+.systemos-admin .rich-surface:focus{background:var(--panel)}
+.systemos-admin .rich-surface:empty::before{content:attr(data-placeholder);color:var(--soft)}
+.systemos-admin .rich-surface h2{margin:1.2em 0 .5em;font-size:22px;line-height:1.22;letter-spacing:-.03em}
+.systemos-admin .rich-surface p{margin:0 0 1em}
+.systemos-admin .rich-surface ul,.systemos-admin .rich-surface ol{margin:0 0 1em 1.25em;padding:0}
+.systemos-admin .rich-surface blockquote{margin:0 0 1.1em;padding:2px 0 2px 16px;border-left:3px solid color-mix(in srgb, var(--accent) 34%, var(--line));color:var(--muted)}
+.systemos-admin .rich-surface a{color:var(--text);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.systemos-admin .rich-surface img{max-width:100%;height:auto;display:block;border-radius:14px;margin:1.15em 0;border:1px solid var(--line);box-shadow:0 12px 32px rgba(0,0,0,.14)}
+.systemos-admin .cover-drop{min-height:260px;padding:18px;border-style:dashed;align-items:stretch;cursor:pointer;transition:border-color .16s ease,background .16s ease}
+.systemos-admin .cover-drop:hover{border-color:var(--muted);background:var(--panel)}
+.systemos-admin .cover-drop.dragging{border-color:#c79b53;background:var(--panel)}
+.systemos-admin .cover-drop.is-disabled{cursor:default;opacity:.76}
+.systemos-admin .cover-placeholder{display:grid;gap:12px;align-content:center;justify-items:center;text-align:center;min-height:220px}
+.systemos-admin .cover-placeholder svg{width:30px;height:30px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.systemos-admin .cover-placeholder strong{font-size:15px;color:var(--text)}
+.systemos-admin .cover-placeholder span{max-width:34ch;font-size:13px;line-height:1.6;color:var(--muted)}
+.systemos-admin .cover-preview{display:grid;gap:10px}
+.systemos-admin .cover-preview img{width:100%;aspect-ratio:16 / 9;object-fit:cover;display:block;border-radius:12px;border:1px solid var(--line)}
+.systemos-admin .cover-preview-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.systemos-admin .cover-box{border:1px solid var(--line);border-radius:10px;background:var(--panel-2);min-height:208px;display:grid;place-items:center;overflow:hidden;color:var(--muted);font-size:13px}
+.systemos-admin .cover-box img{width:100%;height:100%;object-fit:cover;display:block}
+.systemos-admin .hidden-file-input{display:none}
+.systemos-admin .preview-sheet{overflow:hidden;border:1px solid rgba(15,23,42,.08);border-radius:20px;box-shadow:0 20px 38px rgba(15,23,42,.05);background:#f8fafb;color:#111827}
+.systemos-admin .preview-page-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:16px 24px;border-bottom:1px solid #e5e7eb;background:#ffffff;font-size:12px;color:#6b7280;letter-spacing:.08em;text-transform:uppercase}
+.systemos-admin .preview-page-head strong{color:#111827;font-weight:800;letter-spacing:.12em}
+.systemos-admin .preview-article{display:grid;gap:18px;max-width:760px;margin:0 auto;padding:24px 22px 32px}
+.systemos-admin .preview-cover{display:none;margin:0}
+.systemos-admin .preview-cover.show{display:block}
+.systemos-admin .preview-cover img{width:100%;aspect-ratio:16 / 9;object-fit:cover;border-radius:18px;display:block;box-shadow:0 8px 24px rgba(15,23,42,.08)}
+.systemos-admin .preview-title{font-size:28px;font-weight:700;line-height:1.14;letter-spacing:-.02em;color:#111827}
+.systemos-admin .preview-excerpt{max-width:46ch;font-size:15px;line-height:1.7;color:#4b5563}
+.systemos-admin .preview-meta{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280}
+.systemos-admin .preview-body{max-width:64ch;font-size:15px;line-height:1.78;color:#1f2937}
+.systemos-admin .preview-body p{margin:0 0 1.15em}
+.systemos-admin .preview-body h2{margin:1.2em 0 .45em;font-size:22px;line-height:1.22;color:#111827}
+.systemos-admin .preview-body ul,.systemos-admin .preview-body ol{margin:0 0 1.15em 1.25em}
+.systemos-admin .preview-body blockquote{margin:0 0 1.15em;padding-left:16px;border-left:3px solid #d1d5db;color:#4b5563}
+.systemos-admin .preview-body img{max-width:100%;height:auto;display:block;margin:1.2em 0;border-radius:16px;box-shadow:0 8px 24px rgba(15,23,42,.08)}
+.systemos-admin .editor-save-indicator{display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);font-size:12px;font-weight:700;color:var(--muted)}
+.systemos-admin .desktop-only{display:inline-flex}
+@media (max-width:1280px){
+  .systemos-admin .toolbar-row{grid-template-columns:minmax(220px,1fr) repeat(4,minmax(120px,1fr)) auto}
+  .systemos-admin .editor-layout{grid-template-columns:minmax(0,1.05fr) minmax(280px,.82fr)}
+  .systemos-admin .blog-workspace-shell{max-width:none}
+}
+@media (max-width:980px){
+  .systemos-admin{--sidebar:88px}
+  .systemos-admin .stats,.systemos-admin .analytics-hero{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .systemos-admin .analytics-grid,.systemos-admin .analytics-split,.systemos-admin .realtime-grid,.systemos-admin .audience-layout{grid-template-columns:1fr}
+  .systemos-admin .workspace-split,.systemos-admin .workspace-grid-2{grid-template-columns:1fr}
+  .systemos-admin .engagement-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .systemos-admin .toolbar-row{grid-template-columns:1fr 1fr}
+  .systemos-admin .toolbar-row>*:first-child{grid-column:1/-1}
+  .systemos-admin .editor-layout{grid-template-columns:1fr}
+  .systemos-admin .modal-tabs{display:flex}
+  .systemos-admin .editor-main-column,.systemos-admin .editor-side-column{gap:18px}
+  .systemos-admin .editor-layout .pane{display:none}
+  .systemos-admin .editor-layout .pane.active{display:grid}
+  .systemos-admin .editor-side-column{align-content:start}
+  .systemos-admin .editor-head-actions{width:100%;margin-left:0;justify-content:space-between}
+  .systemos-admin .editor-action-cluster{justify-content:flex-start}
+  .systemos-admin .modal-title{font-size:26px}
+  .systemos-admin .content{padding:18px}
+  .systemos-admin .blog-editor-modal{inset:calc(var(--topbar) + 10px) 14px 14px calc(var(--sidebar) + 14px)}
+  .systemos-admin.systemos-frame{min-height:calc(100vh - 200px)}
+  .systemos-admin.systemos-frame .blog-editor-modal{padding:12px}
+  .systemos-admin .brandbar{justify-content:center;padding:0}
+  .systemos-admin .brand-text,.systemos-admin .nav-copy,.systemos-admin .nav-count,.systemos-admin .nav-label,.systemos-admin .profile-details{display:none}
+  .systemos-admin .sidebar-body{padding:18px 10px}
+  .systemos-admin .nav-item{grid-template-columns:1fr;justify-items:center;gap:0;padding:12px 0}
+  .systemos-admin .nav-item::before{left:8px;top:8px;bottom:8px}
+  .systemos-admin .profile{justify-content:center;padding:12px}
+}
+@media (max-width:760px){
+  .systemos-admin .app{grid-template-columns:1fr}
+  .systemos-admin .sidebar{display:none}
+  .systemos-admin .top-sub,.systemos-admin .desktop-only{display:none}
+  .systemos-admin .stats,.systemos-admin .analytics-hero,.systemos-admin .engagement-grid,.systemos-admin .audience-legend{grid-template-columns:1fr}
+  .systemos-admin .analytics-panel{padding:14px}
+  .systemos-admin .analytics-toggle{width:100%}
+  .systemos-admin .analytics-toggle-btn{flex:1}
+  .systemos-admin #postsScreen .table-wrap{display:none}
+  .systemos-admin .card-list{display:grid}
+  .systemos-admin .pager{flex-direction:column;align-items:flex-start}
+  .systemos-admin .modal{padding:10px}
+  .systemos-admin .modal-box{max-height:calc(100vh - 20px)}
+  .systemos-admin .blog-editor-modal{inset:calc(var(--topbar) + 8px) 10px 10px 10px}
+  .systemos-admin .blog-editor-modal.is-fullscreen{padding:0}
+  .systemos-admin.systemos-frame{min-height:calc(100vh - 160px)}
+  .systemos-admin.systemos-frame .blog-editor-modal{
+    position:fixed;
+    inset:88px 10px 10px 10px;
+    padding:0;
+  }
+  .systemos-admin .modal-box.is-editor-fullscreen,
+  .systemos-admin .modal-box.is-body-fullscreen{width:100vw;max-height:100vh;height:100vh}
+  .systemos-admin .blog-editor-modal-box,
+  .systemos-admin .blog-editor-modal-box.is-editor-fullscreen,
+  .systemos-admin .blog-editor-modal-box.is-body-fullscreen{width:100%;max-width:100%;max-height:100%;height:100%;border-radius:18px}
+  .systemos-admin .modal-box.is-editor-fullscreen .modal-head,
+  .systemos-admin .modal-box.is-editor-fullscreen .modal-foot,
+  .systemos-admin .modal-box.is-body-fullscreen .modal-head,
+  .systemos-admin .modal-box.is-body-fullscreen .modal-foot,
+  .systemos-admin .modal-box.is-editor-fullscreen .modal-body,
+  .systemos-admin .modal-box.is-body-fullscreen .modal-body{padding-left:16px;padding-right:16px}
+  .systemos-admin .blog-editor-modal-box.is-editor-fullscreen .modal-head,
+  .systemos-admin .blog-editor-modal-box.is-editor-fullscreen .modal-foot,
+  .systemos-admin .blog-editor-modal-box.is-body-fullscreen .modal-head,
+  .systemos-admin .blog-editor-modal-box.is-body-fullscreen .modal-foot,
+  .systemos-admin .blog-editor-modal-box.is-editor-fullscreen .modal-body,
+  .systemos-admin .blog-editor-modal-box.is-body-fullscreen .modal-body{padding-left:16px;padding-right:16px}
+  .systemos-admin .modal-box.is-body-fullscreen .pane.active{max-width:none}
+  .systemos-admin .rich-editor.is-body-fullscreen{box-shadow:none}
+  .systemos-admin .rich-editor.is-body-fullscreen .rich-surface{min-height:calc(100vh - 330px);padding:22px}
+  .systemos-admin .form-grid{grid-template-columns:1fr}
+  .systemos-admin .form-col-2{grid-column:span 1}
+  .systemos-admin .summary-grid{grid-template-columns:1fr}
+  .systemos-admin .editor-progress-top,.systemos-admin .editor-head-meta,.systemos-admin .workspace-banner{grid-template-columns:1fr}
+  .systemos-admin .editor-head-actions{display:grid;gap:10px}
+  .systemos-admin .editor-action-cluster{display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
+  .systemos-admin .editor-action-cluster .btn{width:100%}
+  .systemos-admin .editor-progress-status{justify-items:start;text-align:left}
+  .systemos-admin .editor-note{align-items:flex-start}
+  .systemos-admin .modal-title{font-size:22px}
+  .systemos-admin .editor-title-input{font-size:1.95rem}
+  .systemos-admin .topbar{padding:0 14px}
+  .systemos-admin .content{padding:14px}
+}

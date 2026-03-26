@@ -105,7 +105,7 @@ export function AdminLoginPage() {
             </div>
             <h1>Manage the live Exxonim website from one secure console.</h1>
             <p>
-              This workspace controls content publishing, consultation follow-up, navigation,
+              This workspace controls content publishing, navigation,
               pricing, testimonials, and global site settings.
             </p>
             <div className="admin-auth-grid">

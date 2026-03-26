@@ -20,12 +20,12 @@ export async function createAdminMedia(payload: AdminMediaPayload) {
 }
 
 export async function updateAdminMedia(id: number, payload: Partial<AdminMediaPayload>) {
-  const response = await api.put<ApiMedia>(apiRoutes.admin.media.detail(id), payload);
+  const response = await api.put<ApiMedia>(apiRoutes.admin.media.byId(id), payload);
   return response.data;
 }
 
 export async function deleteAdminMedia(id: number) {
-  await api.delete(apiRoutes.admin.media.detail(id));
+  await api.delete(apiRoutes.admin.media.byId(id));
 }
 
 export async function uploadMediaFile(file: File, altText?: string) {

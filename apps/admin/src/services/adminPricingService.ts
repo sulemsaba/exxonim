@@ -26,13 +26,13 @@ function toRequestPayload(payload: Partial<AdminPricingPayload>) {
 }
 
 export async function getAdminPricingPlans() {
-  const response = await api.get<ApiPricingPlan[]>(apiRoutes.admin.pricing.list);
+  const response = await api.get<ApiPricingPlan[]>(apiRoutes.admin.pricing.plans.list);
   return response.data.map((plan) => normalizeContentRecord(plan));
 }
 
 export async function createAdminPricingPlan(payload: AdminPricingPayload) {
   const response = await api.post<ApiPricingPlan>(
-    apiRoutes.admin.pricing.list,
+    apiRoutes.admin.pricing.plans.list,
     toRequestPayload(payload)
   );
   return normalizeContentRecord(response.data);
@@ -43,12 +43,12 @@ export async function updateAdminPricingPlan(
   payload: Partial<AdminPricingPayload>
 ) {
   const response = await api.put<ApiPricingPlan>(
-    apiRoutes.admin.pricing.detail(id),
+    apiRoutes.admin.pricing.plans.byId(id),
     toRequestPayload(payload)
   );
   return normalizeContentRecord(response.data);
 }
 
 export async function deleteAdminPricingPlan(id: number) {
-  await api.delete(apiRoutes.admin.pricing.detail(id));
+  await api.delete(apiRoutes.admin.pricing.plans.byId(id));
 }

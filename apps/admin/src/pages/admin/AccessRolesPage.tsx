@@ -98,7 +98,7 @@ export function AccessRolesPage() {
         <div className="admin-card__header">
           <div>
             <h2>Admin Users</h2>
-            <p>Admins have full access. Editors cannot archive or manage settings.</p>
+            <p>Admins have full access. Editors manage content. Authors are limited to their own posts and profile.</p>
           </div>
         </div>
         <div className="admin-card__body">
@@ -167,7 +167,7 @@ export function AccessRolesPage() {
         <div className="admin-card__header">
           <div>
             <h2>{selectedUser ? "Edit User" : "Create User"}</h2>
-            <p>Editors can publish and unpublish, but only admins can archive or manage settings.</p>
+            <p>Choose the least privilege needed: author for bylines and own posts, editor for editorial management, admin for full control.</p>
           </div>
         </div>
         <div className="admin-card__body">
@@ -211,6 +211,7 @@ export function AccessRolesPage() {
                 >
                   <option value="admin">Admin</option>
                   <option value="editor">Editor</option>
+                  <option value="author">Author</option>
                 </select>
               </div>
               <div className="admin-form__field">

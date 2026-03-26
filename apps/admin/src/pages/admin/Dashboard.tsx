@@ -38,8 +38,6 @@ export function AdminDashboardPage() {
   }
 
   const summary = summaryQuery.data;
-  const maxChartValue = Math.max(1, ...summary.consultation_inflow.map((item) => item.count));
-
   return (
     <div className="adminx-page-body">
       <div className="adminx-alert-stack">
@@ -84,26 +82,27 @@ export function AdminDashboardPage() {
 
       <div className="admin-grid">
         <AdminSectionCard
-          title="Consultation Inflow"
-          description="Daily request volume over the last 14 days."
+          title="Content Pipeline"
+          description="Posts and pages waiting for better SEO or publication."
         >
-          {summary.consultation_inflow.length ? (
-            <div className="adminx-chart" aria-label="Consultation inflow chart">
-              {summary.consultation_inflow.map((point) => (
-                <div key={point.label} className="adminx-chart__bar">
-                  <div
-                    className="adminx-chart__bar-fill"
-                    style={{ height: `${Math.max((point.count / maxChartValue) * 180, 12)}px` }}
-                    title={`${point.count} consultations`}
-                  ></div>
-                  <span className="adminx-chart__label">{point.label}</span>
-                </div>
+          {summary.content_pipeline.length ? (
+            <div className="adminx-activity-list">
+              {summary.content_pipeline.map((item) => (
+                <article key={item.id} className="adminx-activity-item">
+                  <span className="adminx-activity-item__title">{item.title}</span>
+                  <span className="adminx-activity-item__meta">
+                    /{item.kind === "blog_post" ? "blog" : "pages"}/{item.slug} | {item.status}
+                  </span>
+                  <span className="adminx-activity-item__meta">
+                    SEO: {item.seo_health} | Completion: {item.completion_percent}%
+                  </span>
+                </article>
               ))}
             </div>
           ) : (
             <AdminEmptyState
-              title="No inflow data"
-              description="Consultation volume will appear here once requests start arriving."
+              title="No content items"
+              description="Draft posts and pages with SEO gaps will appear here."
             />
           )}
         </AdminSectionCard>
@@ -132,7 +131,7 @@ export function AdminDashboardPage() {
           ) : (
             <AdminEmptyState
               title="No recent activity"
-              description="Publishing, consultation, and settings events will appear here."
+              description="Publishing, content, and settings events will appear here."
             />
           )}
         </AdminSectionCard>
@@ -140,39 +139,12 @@ export function AdminDashboardPage() {
 
       <div className="adminx-card-grid adminx-card-grid--two">
         <AdminSectionCard
-          title="Recent Consultations"
-          description="Newest requests across the operations queue."
-        >
-          {summary.recent_consultations.length ? (
-            <div className="adminx-activity-list">
-              {summary.recent_consultations.map((item) => (
-                <article key={item.id} className="adminx-activity-item">
-                  <span className="adminx-activity-item__title">{item.client_name}</span>
-                  <span className="adminx-activity-item__meta">
-                    {item.tracking_id} | {item.subject}
-                  </span>
-                  <span className="adminx-activity-item__meta">
-                    {item.status}
-                    {item.assignee_name ? ` | ${item.assignee_name}` : ""}
-                  </span>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <AdminEmptyState
-              title="No consultations"
-              description="Consultation records will appear here as soon as new requests are created."
-            />
-          )}
-        </AdminSectionCard>
-
-        <AdminSectionCard
-          title="Content Pipeline"
-          description="Posts and pages waiting for better SEO or publication."
+          title="Publishing Focus"
+          description="Recent content items that still need review or refinement."
         >
           {summary.content_pipeline.length ? (
             <div className="adminx-activity-list">
-              {summary.content_pipeline.map((item) => (
+              {summary.content_pipeline.slice(0, 5).map((item) => (
                 <article key={item.id} className="adminx-activity-item">
                   <span className="adminx-activity-item__title">{item.title}</span>
                   <span className="adminx-activity-item__meta">
@@ -186,8 +158,8 @@ export function AdminDashboardPage() {
             </div>
           ) : (
             <AdminEmptyState
-              title="No content items"
-              description="Draft posts and pages with SEO gaps will appear here."
+              title="No items need attention"
+              description="Posts and pages needing more work will appear here."
             />
           )}
         </AdminSectionCard>

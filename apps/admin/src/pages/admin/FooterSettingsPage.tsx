@@ -7,6 +7,7 @@ import {
   getFooterSetting,
   upsertFooterSetting,
 } from "../../services/adminStructuredSettingsService";
+import type { SiteSettingSocialLinkValue } from "../../types/api";
 import { getAdminErrorMessage } from "../../utils/admin";
 
 function stringifyLinks(value: Array<{ label: string; href: string }>) {
@@ -28,6 +29,17 @@ function parseLinks(value: string) {
     .filter((item) => item.label && item.href);
 }
 
+function createFooterSocialLink(
+  platform: SiteSettingSocialLinkValue["platform"]
+): SiteSettingSocialLinkValue {
+  return {
+    platform,
+    label: "",
+    url: "",
+    isActive: true,
+  };
+}
+
 export function FooterSettingsPage() {
   const queryClient = useQueryClient();
   const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(
@@ -39,6 +51,11 @@ export function FooterSettingsPage() {
     primaryCtaHref: "",
     quickLinks: "",
     otherResources: "",
+    socialLinks: [
+      createFooterSocialLink("linkedin"),
+      createFooterSocialLink("instagram"),
+      createFooterSocialLink("x"),
+    ] as SiteSettingSocialLinkValue[],
     copyright: "",
   });
 
@@ -58,6 +75,14 @@ export function FooterSettingsPage() {
       primaryCtaHref: footerQuery.data.value.primary_cta.href,
       quickLinks: stringifyLinks(footerQuery.data.value.quick_links),
       otherResources: stringifyLinks(footerQuery.data.value.other_resources),
+      socialLinks:
+        footerQuery.data.value.social_links?.length
+          ? footerQuery.data.value.social_links
+          : [
+              createFooterSocialLink("linkedin"),
+              createFooterSocialLink("instagram"),
+              createFooterSocialLink("x"),
+            ],
       copyright: footerQuery.data.value.copyright,
     });
   }, [footerQuery.data]);
@@ -72,6 +97,13 @@ export function FooterSettingsPage() {
         },
         quick_links: parseLinks(values.quickLinks),
         other_resources: parseLinks(values.otherResources),
+        social_links: values.socialLinks
+          .filter((item) => item.url.trim())
+          .map((item) => ({
+            ...item,
+            label: item.label.trim(),
+            url: item.url.trim(),
+          })),
         copyright: values.copyright,
       }),
     onSuccess: async () => {
@@ -102,7 +134,10 @@ export function FooterSettingsPage() {
       <div className="admin-card__header">
         <div>
           <h2>Footer Content</h2>
-          <p>Keep the public footer shape intact while editing it from a structured screen.</p>
+          <p>Edit the content visitors see in the footer, including the main call to action, support links, and legal copy.</p>
+          <p style={{ marginTop: ".5rem" }}>
+            Social accounts shown under the footer CTA are managed here and use the account name you enter.
+          </p>
         </div>
       </div>
       <div className="admin-card__body">
@@ -165,6 +200,61 @@ export function FooterSettingsPage() {
                   setValues((current) => ({ ...current, otherResources: event.target.value }))
                 }
               />
+            </div>
+            <div className="admin-form__field admin-form__field--full">
+              <label>Footer Social Accounts</label>
+              <div className="admin-list-grid">
+                {values.socialLinks.map((link, index) => (
+                  <article key={`${link.platform}-${index}`} className="admin-tree__item">
+                    <div className="admin-toolbar">
+                      <strong>
+                        {link.platform === "linkedin"
+                          ? "LinkedIn"
+                          : link.platform === "instagram"
+                            ? "Instagram"
+                            : "X"}
+                      </strong>
+                    </div>
+                    <div className="admin-form__grid">
+                      <div className="admin-form__field">
+                        <label>Account Name / Handle</label>
+                        <input
+                          type="text"
+                          placeholder="@exxonim or Exxonim Tanzania"
+                          value={link.label}
+                          onChange={(event) =>
+                            setValues((current) => ({
+                              ...current,
+                              socialLinks: current.socialLinks.map((item, itemIndex) =>
+                                itemIndex === index ? { ...item, label: event.target.value } : item
+                              ),
+                            }))
+                          }
+                        />
+                        <small style={{ color: "var(--admin-text-soft)" }}>
+                          This text is shown next to the icon in the public footer.
+                        </small>
+                      </div>
+                      <div className="admin-form__field admin-form__field--full">
+                        <label>Profile URL</label>
+                        <input
+                          type="text"
+                          placeholder="https://linkedin.com/company/exxonim"
+                          value={link.url}
+                          onChange={(event) =>
+                            setValues((current) => ({
+                              ...current,
+                              socialLinks: current.socialLinks.map((item, itemIndex) =>
+                                itemIndex === index ? { ...item, url: event.target.value } : item
+                              ),
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
             <div className="admin-form__field admin-form__field--full">
               <label htmlFor="footer-copyright">Copyright</label>

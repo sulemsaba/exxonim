@@ -1,52 +1,52 @@
 export const apiRoutes = {
   admin: {
     auth: {
-      login: "/admin/login",
-      refresh: "/admin/refresh",
-      me: "/admin/me",
+      login: "/admin/auth/login",
+      refresh: "/admin/auth/refresh",
+      me: "/admin/auth/me",
     },
-    blogPosts: {
-      list: "/admin/blog/posts",
-      detail: (id: number) => `/admin/blog/posts/${id}`,
-      previewToken: (id: number) => `/admin/blog/posts/${id}/preview-token`,
-    },
-    blogCategories: {
-      list: "/admin/blog/categories",
-      detail: (id: number) => `/admin/blog/categories/${id}`,
-    },
-    blogAuthors: {
-      list: "/admin/blog/authors",
-      detail: (id: number) => `/admin/blog/authors/${id}`,
+    blog: {
+      posts: {
+        list: "/admin/blog/posts",
+        byId: (id: number) => `/admin/blog/posts/${id}`,
+        previewToken: (id: number) => `/admin/blog/posts/${id}/preview-token`,
+      },
+      categories: {
+        list: "/admin/blog/categories",
+        byId: (id: number) => `/admin/blog/categories/${id}`,
+      },
+      authors: {
+        list: "/admin/blog/authors",
+        byId: (id: number) => `/admin/blog/authors/${id}`,
+        me: "/admin/blog/authors/me",
+      },
     },
     media: {
       list: "/admin/media",
-      detail: (id: number) => `/admin/media/${id}`,
+      byId: (id: number) => `/admin/media/${id}`,
       upload: "/admin/media/upload",
     },
     pages: {
       list: "/admin/pages",
-      detail: (id: number) => `/admin/pages/${id}`,
+      byId: (id: number) => `/admin/pages/${id}`,
     },
     navigation: {
       list: "/admin/navigation",
-      detail: (id: number) => `/admin/navigation/${id}`,
+      byId: (id: number) => `/admin/navigation/${id}`,
     },
     pricing: {
-      list: "/admin/pricing/plans",
-      detail: (id: number) => `/admin/pricing/plans/${id}`,
+      plans: {
+        list: "/admin/pricing/plans",
+        byId: (id: number) => `/admin/pricing/plans/${id}`,
+      },
     },
     testimonials: {
       list: "/admin/testimonials",
-      detail: (id: number) => `/admin/testimonials/${id}`,
+      byId: (id: number) => `/admin/testimonials/${id}`,
     },
     jobs: {
       list: "/admin/jobs",
-      detail: (slug: string) => `/admin/jobs/${slug}`,
-    },
-    consultations: {
-      list: "/admin/consultations",
-      detail: (id: number) => `/admin/consultations/${id}`,
-      notify: (id: number) => `/admin/consultations/${id}/notify`,
+      bySlug: (slug: string) => `/admin/jobs/${slug}`,
     },
     staff: "/admin/staff",
     dashboard: {
@@ -54,36 +54,49 @@ export const apiRoutes = {
     },
     siteSettings: {
       list: "/admin/site-settings",
-      detail: (id: number) => `/admin/site-settings/${id}`,
-      byKey: (key: string) => `/admin/site-settings/key/${key}`,
+      byKey: (key: string) => `/admin/site-settings/${key}`,
     },
     access: {
-      users: "/admin/users",
-      userDetail: (id: number) => `/admin/users/${id}`,
-      userRole: (id: number) => `/admin/users/${id}/role`,
-      userStatus: (id: number) => `/admin/users/${id}/status`,
+      users: {
+        list: "/admin/users",
+        byId: (id: number) => `/admin/users/${id}`,
+        role: (id: number) => `/admin/users/${id}/role`,
+        status: (id: number) => `/admin/users/${id}/status`,
+      },
       roles: "/admin/roles",
     },
   },
   public: {
-    blogPosts: {
-      list: "/blog/posts",
-      detail: (slug: string) => `/blog/posts/${slug}`,
+    blog: {
+      posts: {
+        list: "/blog/posts",
+        bySlug: (slug: string) => `/blog/posts/${slug}`,
+      },
+      categories: {
+        list: "/blog/categories",
+      },
+      authors: {
+        list: "/blog/authors",
+        bySlug: (slug: string) => `/blog/authors/${slug}`,
+      },
     },
-    blogCategories: "/blog/categories",
     pages: {
-      detail: (slug: string) => `/pages/${slug}`,
+      list: "/pages",
+      bySlug: (slug: string) => `/pages/${slug}`,
     },
-    navigation: "/navigation/",
-    pricing: "/pricing/plans",
-    testimonials: "/testimonials/",
+    navigation: {
+      list: "/navigation",
+    },
+    pricing: {
+      plans: {
+        list: "/pricing/plans",
+      },
+    },
+    testimonials: {
+      list: "/testimonials",
+    },
     siteSettings: {
-      detail: (key: string) => `/site-settings/${key}`,
-    },
-    consultations: {
-      create: "/public/consultations",
-      magicLink: "/public/consultations/magic-link",
-      detail: (trackingId: string) => `/public/consultations/${trackingId}`,
+      byKey: (key: string) => `/site-settings/${key}`,
     },
   },
 } as const;

@@ -8,8 +8,8 @@ import type {
 } from "../types/api";
 import {
   createAdminSiteSetting,
-  getAdminSiteSettings,
-  updateAdminSiteSetting,
+  listAdminSiteSettings,
+  updateAdminSiteSettingByKey,
 } from "./adminSiteSettingsService";
 
 type StructuredSettingValue =
@@ -20,7 +20,7 @@ type StructuredSettingValue =
   | SiteSettingSeoDefaultsValue;
 
 async function findSetting<TValue = StructuredSettingValue>(key: string) {
-  const settings = await getAdminSiteSettings();
+  const settings = await listAdminSiteSettings();
   return (settings.find((setting) => setting.key === key) as ApiSiteSetting<TValue> | undefined) ?? null;
 }
 
@@ -28,7 +28,7 @@ async function upsertSetting<TValue extends StructuredSettingValue>(key: string,
   const existing = await findSetting<TValue>(key);
 
   if (existing) {
-    return updateAdminSiteSetting(existing.id, { key, value });
+    return updateAdminSiteSettingByKey(existing.key, { key, value });
   }
 
   return createAdminSiteSetting({ key, value });
@@ -73,4 +73,3 @@ export function getSeoDefaultsSetting() {
 export function upsertSeoDefaultsSetting(value: SiteSettingSeoDefaultsValue) {
   return upsertSetting("seo_defaults", value);
 }
-

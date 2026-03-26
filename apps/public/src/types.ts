@@ -107,6 +107,7 @@ export interface BlogArticleContent {
   introduction: string;
   highlights: string[];
   sections: BlogArticleSection[];
+  html?: string;
 }
 
 export interface BlogPost {

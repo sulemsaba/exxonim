@@ -5,8 +5,6 @@ export const routes = {
   about: "/about/",
   faq: "/faq/",
   services: "/services/",
-  requestConsultation: "/request-consultation/",
-  tracking: "/track-consultation/",
   resources: "/resources/",
   career: "/career/",
   contact: "/contact/",

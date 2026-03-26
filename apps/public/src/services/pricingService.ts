@@ -5,6 +5,6 @@ import type { PricingPlan } from "../types";
 import type { ApiPricingPlan } from "../types/api";
 
 export async function getPricingPlans() {
-  const response = await api.get<ApiPricingPlan[]>(apiRoutes.public.pricing);
+  const response = await api.get<ApiPricingPlan[]>(apiRoutes.public.pricing.plans.list);
   return response.data.map(mapPricingPlan) as PricingPlan[];
 }
