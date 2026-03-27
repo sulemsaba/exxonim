@@ -11,6 +11,7 @@ export default defineConfig(({ command }) => ({
   resolve: {
     alias: {
       "@": resolve(rootDir, "src"),
+      "@exxonim/admin-core": resolve(rootDir, "../../packages/admin-core/src"),
       "@exxonim/shared": resolve(rootDir, "../../packages/shared/src"),
     },
   },

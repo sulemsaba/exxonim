@@ -10,8 +10,10 @@
   "scripts": {
     "dev:public": "npm run dev --workspace @exxonim/public",
     "dev:admin": "npm run dev --workspace @exxonim/admin",
+    "dev:admin-next": "npm run dev --workspace @exxonim/admin-next",
     "build:public": "npm run build --workspace @exxonim/public",
     "build:admin": "npm run build --workspace @exxonim/admin",
+    "build:admin-next": "npm run build --workspace @exxonim/admin-next",
     "preview:public": "npm run preview --workspace @exxonim/public",
     "preview:admin": "npm run preview --workspace @exxonim/admin",
     "typecheck": "npm run typecheck --workspaces --if-present",

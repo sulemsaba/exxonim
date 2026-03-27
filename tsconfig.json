@@ -3,6 +3,8 @@
   "references": [
     { "path": "./apps/public" },
     { "path": "./apps/admin" },
+    { "path": "./apps/admin-next" },
+    { "path": "./packages/admin-core" },
     { "path": "./packages/shared" }
   ]
 }

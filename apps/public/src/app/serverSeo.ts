@@ -103,9 +103,12 @@ export async function resolveServerSeo(pathname: string | undefined): Promise<Pa
     }
   }
 
-  return createFallbackSeo(pathname, {
+  return createFallbackSeo(routes.notFound, {
     canonicalBaseUrl,
     image: defaultImage,
+    robots: "noindex,follow",
+    title: "Page not found | Exxonim",
+    description: "The Exxonim page you requested could not be found.",
   });
 }
 

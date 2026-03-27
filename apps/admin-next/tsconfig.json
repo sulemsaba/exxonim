@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "allowJs": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "incremental": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@exxonim/admin-core": ["../../packages/admin-core/src/index.ts"],
+      "@exxonim/admin-core/*": ["../../packages/admin-core/src/*"],
+      "@exxonim/shared/*": ["../../packages/shared/src/*"],
+      "src/*": ["src/*"]
+    }
+  },
+  "include": ["src", "../../packages/admin-core/src", "../../packages/shared/src"],
+  "exclude": ["node_modules"],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}

@@ -16,6 +16,8 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
+      "@exxonim/admin-core": ["packages/admin-core/src/index.ts"],
+      "@exxonim/admin-core/*": ["packages/admin-core/src/*"],
       "@exxonim/shared/*": ["packages/shared/src/*"]
     }
   }

@@ -158,7 +158,7 @@ export default function App({ initialPathname }: AppProps) {
   ) : articleSlug ? (
     <ResourceArticlePage slug={articleSlug} />
   ) : (
-    <NotFoundPage />
+    <NotFoundPage pathname={pathname} />
   );
 
   return (
