@@ -51,13 +51,13 @@
   --mouse-x: 50vw;
   --mouse-y: 50vh;
   --scroll-y: 0px;
-  --cinematic-bg-start: rgba(127, 188, 193, 0.08);
+  --cinematic-bg-start: rgba(127, 188, 193, 0.04);
   --cinematic-bg-end: var(--color-page);
-  --cinematic-orb-one: rgba(15, 92, 99, 0.08);
-  --cinematic-orb-two: rgba(127, 188, 193, 0.16);
-  --cinematic-glow-bright: rgba(8, 24, 27, 0.34);
-  --cinematic-glow-deep: rgba(15, 92, 99, 0.16);
-  --cinematic-glow-opacity: 0.64;
+  --cinematic-orb-one: rgba(15, 92, 99, 0.04);
+  --cinematic-orb-two: rgba(127, 188, 193, 0.08);
+  --cinematic-glow-bright: rgba(8, 24, 27, 0.16);
+  --cinematic-glow-deep: rgba(15, 92, 99, 0.08);
+  --cinematic-glow-opacity: 0.28;
   --cinematic-glow-blend: multiply;
   --cinematic-card-bg: rgba(248, 249, 246, 0.72);
   --cinematic-card-border: rgba(255, 255, 255, 0.54);
@@ -119,10 +119,11 @@ pre {
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
-  background:
-    radial-gradient(circle at top center, var(--cinematic-bg-start) 0%, transparent 42%),
-    radial-gradient(circle at 18% 72%, rgba(127, 188, 193, 0.06), transparent 30%),
-    linear-gradient(180deg, var(--cinematic-bg-end) 0%, var(--color-page-strong) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--cinematic-bg-end) 0%,
+    var(--color-page-strong) 100%
+  );
 }
 
 .cinematic-bg__orb,
@@ -133,8 +134,8 @@ pre {
 }
 
 .cinematic-bg__orb {
-  filter: blur(90px);
-  opacity: 0.5;
+  filter: blur(110px);
+  opacity: 0.22;
 }
 
 .cinematic-bg__orb--one {
@@ -162,7 +163,7 @@ pre {
   height: min(60vw, 43.75rem);
   transform: translate(calc(var(--mouse-x) - 50%), calc(var(--mouse-y) - 50%));
   background: radial-gradient(circle, var(--cinematic-glow-bright) 0%, var(--cinematic-glow-deep) 40%, transparent 70%);
-  filter: blur(68px);
+  filter: blur(92px);
   mix-blend-mode: var(--cinematic-glow-blend);
   opacity: var(--cinematic-glow-opacity);
   will-change: transform;
@@ -1489,13 +1490,13 @@ html[data-theme="dark"] {
   --glass: var(--color-surface-elevated);
   --hero-shadow: 0 38px 110px rgba(0, 0, 0, 0.38);
   --panel-shadow: var(--shadow-panel);
-  --cinematic-bg-start: rgba(127, 188, 193, 0.04);
+  --cinematic-bg-start: rgba(127, 188, 193, 0.02);
   --cinematic-bg-end: var(--color-page);
-  --cinematic-orb-one: rgba(127, 188, 193, 0.12);
-  --cinematic-orb-two: rgba(15, 92, 99, 0.22);
-  --cinematic-glow-bright: rgba(237, 244, 242, 0.42);
-  --cinematic-glow-deep: rgba(127, 188, 193, 0.16);
-  --cinematic-glow-opacity: 0.86;
+  --cinematic-orb-one: rgba(127, 188, 193, 0.05);
+  --cinematic-orb-two: rgba(15, 92, 99, 0.1);
+  --cinematic-glow-bright: rgba(237, 244, 242, 0.18);
+  --cinematic-glow-deep: rgba(127, 188, 193, 0.08);
+  --cinematic-glow-opacity: 0.34;
   --cinematic-glow-blend: screen;
   --cinematic-card-bg: rgba(15, 34, 38, 0.72);
   --cinematic-card-border: rgba(127, 188, 193, 0.16);

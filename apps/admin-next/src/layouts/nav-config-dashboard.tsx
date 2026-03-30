@@ -13,6 +13,7 @@ import { Iconify } from 'src/components/iconify';
 
 const iconMap: Record<AdminNavItem['icon'], string> = {
   dashboard: 'solar:widget-5-bold',
+  consultations: 'solar:chat-round-call-bold',
   posts: 'solar:document-text-bold',
   analytics: 'solar:chart-square-bold',
   categories: 'solar:tag-bold',
@@ -51,6 +52,10 @@ const navBlueprint: Array<{
     items: ['dashboard'],
   },
   {
+    subheader: 'Operations',
+    items: ['consultations'],
+  },
+  {
     subheader: 'Editorial',
     items: ['blog-posts', 'blog-analytics', 'blog-categories', 'blog-authors'],
   },
@@ -60,7 +65,7 @@ const navBlueprint: Array<{
       {
         section: 'pages',
         description: 'Index plus shortcuts for the main Exxonim public pages.',
-        children: ['page-home', 'page-services', 'page-about', 'page-faq', 'page-contact', 'page-careers'],
+        children: ['page-home', 'page-services', 'page-about', 'page-faq', 'page-contact'],
       },
       'jobs',
       'navigation',

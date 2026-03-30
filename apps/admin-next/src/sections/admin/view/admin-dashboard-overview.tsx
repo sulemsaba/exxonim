@@ -93,9 +93,9 @@ const pageShortcuts: ShortcutItem[] = [
     icon: 'solar:phone-calling-rounded-bold',
   },
   {
-    title: 'Career Page',
-    description: 'Hiring narrative and recruiting landing copy.',
-    href: adminRoutes.pageShortcut('careers'),
+    title: 'Careers',
+    description: 'Hiring narrative, recruiting copy, and live positions.',
+    href: adminRoutes.jobs,
     icon: 'solar:case-round-bold',
   },
 ];
@@ -176,19 +176,21 @@ function getMetric(summary: ApiAdminDashboardSummary, key: string, fallbackLabel
 
 function timelineTypeFor(activity: ApiActivityEvent) {
   switch (activity.resource_type) {
+    case 'consultation':
+      return 'order3';
     case 'blog_post':
       return 'order1';
     case 'page':
       return 'order2';
     case 'job':
-      return 'order3';
+      return 'order4';
     case 'setting':
     case 'navigation':
     case 'pricing':
     case 'testimonial':
-      return 'order4';
-    default:
       return 'order5';
+    default:
+      return 'order2';
   }
 }
 
@@ -293,7 +295,7 @@ function DashboardHero({ summary }: { summary: ApiAdminDashboardSummary }) {
                 Dashboard
               </Typography>
               <Typography variant="body1" sx={{ mt: 1.25, maxWidth: 460, opacity: 0.88 }}>
-                Live content, site, and settings.
+                Live Exxonim publishing, consultation follow-up, and site operations.
               </Typography>
             </Box>
 
@@ -307,7 +309,7 @@ function DashboardHero({ summary }: { summary: ApiAdminDashboardSummary }) {
                 sx={{ bgcolor: varAlpha(theme.vars.palette.common.whiteChannel, 0.14), color: 'inherit' }}
               />
               <Chip
-                label={`${summary.open_jobs.length} open roles`}
+                label={`${summary.consultations.filter((item) => item.status === 'pending').length} pending consultations`}
                 sx={{ bgcolor: varAlpha(theme.vars.palette.common.whiteChannel, 0.14), color: 'inherit' }}
               />
             </Stack>
@@ -315,27 +317,27 @@ function DashboardHero({ summary }: { summary: ApiAdminDashboardSummary }) {
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <Button
                 component={RouterLink}
-                href={adminRoutes.blogPosts}
+                href={adminRoutes.consultations}
                 variant="contained"
                 color="secondary"
                 endIcon={<Iconify icon="eva:arrow-ios-forward-fill" width={18} />}
                 sx={{ alignSelf: { xs: 'stretch', sm: 'flex-start' } }}
               >
-                Posts
+                Consultations
               </Button>
 
               <Button
                 component={RouterLink}
-                href={adminRoutes.pages}
+                href={adminRoutes.blogPosts}
                 variant="outlined"
                 color="inherit"
-                endIcon={<Iconify icon="solar:documents-bold" width={18} />}
+                endIcon={<Iconify icon="solar:document-text-bold" width={18} />}
                 sx={{
                   alignSelf: { xs: 'stretch', sm: 'flex-start' },
                   borderColor: varAlpha(theme.vars.palette.common.whiteChannel, 0.32),
                 }}
               >
-                Pages
+                Posts
               </Button>
 
               <Button
@@ -362,7 +364,7 @@ function DashboardHero({ summary }: { summary: ApiAdminDashboardSummary }) {
             }}
           >
             <Typography variant="overline" sx={{ opacity: 0.8 }}>
-              Focus
+              Needs Attention
             </Typography>
 
             <Stack spacing={1.5} sx={{ mt: 2 }}>
@@ -418,7 +420,7 @@ function DashboardHero({ summary }: { summary: ApiAdminDashboardSummary }) {
                 >
                   <Typography variant="subtitle2">Queue clear</Typography>
                   <Typography variant="caption" sx={{ display: 'block', mt: 0.75, opacity: 0.8 }}>
-                    No active focus items.
+                    No queued items need attention right now.
                   </Typography>
                 </Paper>
               )}
@@ -459,7 +461,7 @@ function AlertsStrip({ alerts }: { alerts: ApiAdminDashboardAlert[] }) {
           <Box>
             <Typography variant="subtitle2">No urgent alerts</Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              All clear.
+              Exxonim admin is clear right now.
             </Typography>
           </Box>
         </Stack>
@@ -496,7 +498,7 @@ function FocusQueueCard({ summary }: { summary: ApiAdminDashboardSummary }) {
     <Card>
       <CardHeader
         title="Publishing focus"
-        subheader="Items needing review."
+        subheader="Posts and pages that still need work before they are fully ready."
       />
       <Divider />
       <CardContent>
@@ -554,7 +556,7 @@ function PageShortcutsCard() {
     <Card>
       <CardHeader
         title="Page shortcuts"
-        subheader="Core public pages."
+        subheader="Exxonim public pages."
       />
       <Divider />
       <CardContent>
@@ -614,19 +616,22 @@ function PageShortcutsCard() {
   );
 }
 
-function OpenJobsCard({ summary }: { summary: ApiAdminDashboardSummary }) {
+function ConsultationInboxCard({ summary }: { summary: ApiAdminDashboardSummary }) {
   return (
     <Card>
-      <CardHeader title="Open job listings" subheader="Published roles." />
+      <CardHeader
+        title="Consultation inbox"
+        subheader="New and in-progress Exxonim consultation requests."
+      />
       <Divider />
       <Box sx={{ p: 1.5 }}>
-        {summary.open_jobs.length ? (
-          summary.open_jobs.map((job) => (
+        {summary.consultations.length ? (
+          summary.consultations.map((item) => (
             <ListItem
-              key={job.id}
+              key={item.id}
               secondaryAction={
-                job.href ? (
-                  <Button component={RouterLink} href={job.href} size="small" color="inherit">
+                item.href ? (
+                  <Button component={RouterLink} href={item.href} size="small" color="inherit">
                     Open
                   </Button>
                 ) : null
@@ -643,17 +648,17 @@ function OpenJobsCard({ summary }: { summary: ApiAdminDashboardSummary }) {
               }}
             >
               <ListItemText
-                primary={job.title}
-                secondary={`${job.department} • ${job.employment_type} • ${job.location || 'Location pending'}${
-                  job.posted_at ? ` • ${formatDateTime(job.posted_at)}` : ''
-                }`}
+                primary={item.full_name}
+                secondary={`${item.tracking_id} • ${item.company || 'Independent inquiry'} • ${
+                  item.assigned_admin_label || 'Unassigned'
+                } • ${formatDateTime(item.updated_at)}`}
                 primaryTypographyProps={{ variant: 'subtitle2' }}
                 secondaryTypographyProps={{ variant: 'body2', sx: { mt: 0.5 } }}
               />
               <Chip
                 size="small"
-                label={job.status}
-                color={statusColor(job.status)}
+                label={item.status}
+                color={statusColor(item.status)}
                 variant="outlined"
                 sx={{ mr: 1.5, mt: 0.25 }}
               />
@@ -661,7 +666,7 @@ function OpenJobsCard({ summary }: { summary: ApiAdminDashboardSummary }) {
           ))
         ) : (
           <Box sx={{ p: 2 }}>
-            <Alert severity="info">No published job listings are visible in the current summary.</Alert>
+            <Alert severity="info">No consultation requests are visible in the current summary.</Alert>
           </Box>
         )}
       </Box>
@@ -685,7 +690,7 @@ export function AdminDashboardOverview() {
     const draftPosts = getMetric(summary, 'draft_posts', 'Draft Posts');
     const publishedPages = getMetric(summary, 'published_pages', 'Published Pages');
     const publishedPosts = getMetric(summary, 'published_posts', 'Published Posts');
-    const openJobs = getMetric(summary, 'open_jobs', 'Open Job Listings');
+    const pendingConsultations = getMetric(summary, 'pending_consultations', 'Pending Consultations');
 
     return {
       summary,
@@ -693,14 +698,18 @@ export function AdminDashboardOverview() {
         { metric: publishedPosts, color: 'primary' as const, icon: 'solar:document-text-bold' },
         { metric: draftPosts, color: 'warning' as const, icon: 'solar:pen-bold' },
         { metric: publishedPages, color: 'info' as const, icon: 'solar:documents-bold' },
-        { metric: openJobs, color: 'secondary' as const, icon: 'solar:case-bold' },
+        {
+          metric: pendingConsultations,
+          color: 'secondary' as const,
+          icon: 'solar:chat-round-call-bold',
+        },
       ],
       mixChart: {
         series: [
           { label: 'Published posts', value: publishedPosts.value },
           { label: 'Draft posts', value: draftPosts.value },
           { label: 'Live pages', value: publishedPages.value },
-          { label: 'Open roles', value: openJobs.value },
+          { label: 'Pending consultations', value: pendingConsultations.value },
         ],
       },
       readinessChart: {
@@ -756,7 +765,7 @@ export function AdminDashboardOverview() {
           <Grid size={{ xs: 12, lg: 8 }}>
             <AnalyticsWebsiteVisits
               title="Content readiness"
-              subheader="Completion versus SEO readiness across the current publishing queue"
+              subheader="Completion versus SEO readiness across live Exxonim posts and pages"
               chart={{
                 categories: dashboard.readinessChart.categories,
                 colors: [hexAlpha(theme.palette.primary.dark, 0.88), hexAlpha(theme.palette.secondary.dark, 0.78)],
@@ -768,7 +777,7 @@ export function AdminDashboardOverview() {
           <Grid size={{ xs: 12, lg: 4 }}>
             <AnalyticsCurrentVisits
               title="Operational mix"
-              subheader="Live distribution of the dashboard summary totals"
+              subheader="Live Exxonim content and consultation totals"
               chart={{
                 colors: [
                   theme.palette.primary.main,
@@ -790,7 +799,7 @@ export function AdminDashboardOverview() {
           <Grid size={{ xs: 12, lg: 5 }}>
             <AnalyticsOrderTimeline
               title="Recent activity"
-              subheader="Latest events coming back from the dashboard service"
+              subheader="Latest Exxonim admin changes from the dashboard service"
               list={dashboard.activityList}
             />
           </Grid>
@@ -802,7 +811,7 @@ export function AdminDashboardOverview() {
           </Grid>
 
           <Grid size={{ xs: 12, lg: 5 }}>
-            <OpenJobsCard summary={dashboard.summary} />
+            <ConsultationInboxCard summary={dashboard.summary} />
           </Grid>
         </Grid>
       </Stack>

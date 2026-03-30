@@ -1,16 +1,17 @@
 import type { Breakpoint } from '@mui/material/styles';
 
-import { useState } from 'react';
 import { merge } from 'es-toolkit';
+import { useLocation } from 'react-router';
+import { useQuery } from '@tanstack/react-query';
 import { useBoolean } from 'minimal-shared/hooks';
 import { routes } from '@exxonim/admin-core/routes';
+import { useMemo, useState, useEffect } from 'react';
 import { useAuth } from '@exxonim/admin-core/contexts/AuthContext';
+import { getAdminDashboardSummary } from '@exxonim/admin-core/services/adminDashboardService';
 
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
-
-import { _notifications } from 'src/_mock';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -25,6 +26,7 @@ import { HeaderSection } from '../core/header-section';
 import { LayoutSection } from '../core/layout-section';
 import { ThemeToggleButton } from '../components/theme-toggle-button';
 import { NotificationsPopover } from '../components/notifications-popover';
+import { mapDashboardNotifications } from '../components/map-dashboard-notifications';
 
 import type { MainSectionProps } from '../core/main-section';
 import type { HeaderSectionProps } from '../core/header-section';
@@ -42,6 +44,19 @@ export type DashboardLayoutProps = LayoutBaseProps & {
   };
 };
 
+function isBlogEditorFocusMode(pathname: string, search: string) {
+  const normalizedPath = pathname.endsWith('/') ? pathname : `${pathname}/`;
+  const isEditorRoute =
+    normalizedPath === '/admin/blog/posts/new/' ||
+    /^\/admin\/blog\/posts\/\d+\/edit\/$/.test(normalizedPath);
+
+  if (!isEditorRoute) {
+    return false;
+  }
+
+  return new URLSearchParams(search).get('focus') === '1';
+}
+
 export function DashboardLayout({
   sx,
   cssVars,
@@ -50,10 +65,31 @@ export function DashboardLayout({
   layoutQuery = 'lg',
 }: DashboardLayoutProps) {
   const theme = useTheme();
+  const location = useLocation();
   const { logout, admin } = useAuth();
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
   const [navCollapsed, setNavCollapsed] = useState(false);
   const navData = getNavData(admin?.role);
+  const isFocusMode = useMemo(
+    () => isBlogEditorFocusMode(location.pathname, location.search),
+    [location.pathname, location.search]
+  );
+  const dashboardQuery = useQuery({
+    queryKey: ['admin-next', 'dashboard'],
+    queryFn: getAdminDashboardSummary,
+    staleTime: 30000,
+  });
+  const notifications = useMemo(
+    () => mapDashboardNotifications(dashboardQuery.data),
+    [dashboardQuery.data]
+  );
+  const effectiveNavCollapsed = isFocusMode || navCollapsed;
+
+  useEffect(() => {
+    if (isFocusMode) {
+      setNavCollapsed(true);
+    }
+  }, [isFocusMode]);
 
   const renderHeader = () => {
     const headerSlotProps: HeaderSectionProps['slotProps'] = {
@@ -67,15 +103,20 @@ export function DashboardLayout({
         <>
           <MenuButton
             onClick={onOpen}
-            sx={{ mr: 1, ml: -1, [theme.breakpoints.up(layoutQuery)]: { display: 'none' } }}
+            sx={{
+              mr: 1,
+              ml: -1,
+              [theme.breakpoints.up(layoutQuery)]: { display: 'none' },
+              ...(isFocusMode && { display: 'none' }),
+            }}
           />
           <NavMobile data={navData} open={open} onClose={onClose} />
         </>
       ),
       rightArea: (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 0.75 } }}>
-          <Searchbar />
-          <NotificationsPopover data={_notifications} />
+          {!isFocusMode ? <Searchbar /> : null}
+          {!isFocusMode ? <NotificationsPopover data={notifications} viewAllHref={routes.admin} /> : null}
           <ThemeToggleButton />
           <IconButton
             aria-label="Sign out"
@@ -113,14 +154,18 @@ export function DashboardLayout({
         <NavDesktop
           data={navData}
           layoutQuery={layoutQuery}
-          collapsed={navCollapsed}
+          collapsed={effectiveNavCollapsed}
+          collapseLocked={isFocusMode}
           onToggleCollapse={() => setNavCollapsed((current) => !current)}
         />
       }
       footerSection={renderFooter()}
       cssVars={{
         ...dashboardLayoutVars(theme),
-        '--layout-nav-vertical-width': navCollapsed ? '96px' : '280px',
+        '--layout-nav-vertical-width': effectiveNavCollapsed ? '72px' : '280px',
+        '--layout-dashboard-content-pt': isFocusMode ? theme.spacing(0.5) : theme.spacing(1),
+        '--layout-dashboard-content-pb': isFocusMode ? theme.spacing(3) : theme.spacing(8),
+        '--layout-dashboard-content-px': isFocusMode ? theme.spacing(2) : theme.spacing(5),
         ...cssVars,
       }}
       sx={[

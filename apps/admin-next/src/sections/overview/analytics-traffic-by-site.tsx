@@ -44,6 +44,10 @@ export function AnalyticsTrafficBySite({ title, subheader, list, sx, ...other }:
               border: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)}`,
             })}
           >
+            {site.value === 'website' && <Iconify width={32} icon="solar:global-bold" />}
+            {site.value === 'whatsapp' && <Iconify width={32} icon="logos:whatsapp-icon" />}
+            {site.value === 'email' && <Iconify width={32} icon="solar:letter-bold" />}
+            {site.value === 'referral' && <Iconify width={32} icon="solar:users-group-rounded-bold" />}
             {site.value === 'twitter' && <Iconify width={32} icon="socials:twitter" />}
             {site.value === 'facebook' && <Iconify width={32} icon="socials:facebook" />}
             {site.value === 'google' && <Iconify width={32} icon="socials:google" />}

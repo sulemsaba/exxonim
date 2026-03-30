@@ -7,11 +7,13 @@ export interface ApiActivityEvent {
     | "published"
     | "draft_created"
     | "updated"
+    | "consultation_received"
     | "settings_updated"
     | "job_posted"
     | "seo_warning";
   resource_type:
     | "blog_post"
+    | "consultation"
     | "page"
     | "setting"
     | "job"
@@ -70,11 +72,23 @@ export interface ApiAdminDashboardJobItem {
   href?: string | null;
 }
 
+export interface ApiAdminDashboardConsultationItem {
+  id: number;
+  tracking_id: string;
+  full_name: string;
+  company?: string | null;
+  status: string;
+  assigned_admin_label?: string | null;
+  created_at: string;
+  updated_at: string;
+  href?: string | null;
+}
+
 export interface ApiAdminDashboardSummary {
-  metrics: ApiAdminDashboardMetric[];
+  metrics: ApiAdminDashboardMetric[]; 
   alerts: ApiAdminDashboardAlert[];
   recent_activity: ApiActivityEvent[];
   content_pipeline: ApiAdminDashboardPipelineItem[];
+  consultations: ApiAdminDashboardConsultationItem[];
   open_jobs: ApiAdminDashboardJobItem[];
 }
-

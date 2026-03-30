@@ -1,6 +1,7 @@
 export * from "./auth";
 export * from "./blog";
 export * from "./content";
+export * from "./consultations";
 export * from "./dashboard";
 export * from "./access";
 export * from "./jobs";

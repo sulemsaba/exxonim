@@ -35,6 +35,7 @@ export type NavContentProps = {
   sx?: SxProps<Theme>;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
+  collapseLocked?: boolean;
 };
 
 function normalizePath(pathname: string) {
@@ -52,8 +53,8 @@ function isItemActive(pathname: string, item: Pick<NavItem | NavChildItem, 'path
   return prefixes.some((prefix) => {
     const normalizedPrefix = normalizePath(prefix);
 
-    if (normalizedPrefix === '/admin' && currentPath === '/admin') {
-      return true;
+    if (normalizedPrefix === '/admin') {
+      return currentPath === '/admin';
     }
 
     return currentPath === normalizedPrefix || currentPath.startsWith(`${normalizedPrefix}/`);
@@ -71,6 +72,7 @@ export function NavDesktop({
   layoutQuery,
   collapsed = false,
   onToggleCollapse,
+  collapseLocked = false,
 }: NavContentProps & { layoutQuery: Breakpoint }) {
   const theme = useTheme();
 
@@ -78,7 +80,7 @@ export function NavDesktop({
     <Box
       sx={{
         pt: 2.5,
-        px: collapsed ? 1.5 : 2.5,
+        px: collapsed ? 1.25 : 2.5,
         top: 0,
         left: 0,
         height: 1,
@@ -100,6 +102,7 @@ export function NavDesktop({
         slots={slots}
         collapsed={collapsed}
         onToggleCollapse={onToggleCollapse}
+        collapseLocked={collapseLocked}
       />
     </Box>
   );
@@ -142,6 +145,7 @@ export function NavContent({
   sx,
   collapsed = false,
   onToggleCollapse,
+  collapseLocked = false,
 }: NavContentProps) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -181,15 +185,15 @@ export function NavContent({
         sx={{
           mb: 2,
           display: 'flex',
-          flexDirection: collapsed ? 'column' : 'row',
+          flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 1,
+          gap: 0.75,
         }}
       >
         <Logo inverted isSingle={collapsed} />
 
-        {onToggleCollapse ? (
+        {onToggleCollapse && !collapseLocked ? (
           <Tooltip title={collapsed ? 'Expand navigation' : 'Collapse navigation'} placement="right">
             <IconButton
               size="small"

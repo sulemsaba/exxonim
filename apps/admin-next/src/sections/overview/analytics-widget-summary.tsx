@@ -21,6 +21,7 @@ type Props = CardProps & {
   title: string;
   total: number;
   percent: number;
+  subtitle?: string;
   color?: PaletteColorKey;
   icon: ReactNode;
   chart: {
@@ -35,6 +36,7 @@ export function AnalyticsWidgetSummary({
   icon,
   title,
   total,
+  subtitle,
   chart,
   percent,
   color = 'primary',
@@ -88,9 +90,14 @@ export function AnalyticsWidgetSummary({
     <Card
       sx={[
         () => ({
-          p: 3,
+          p: 2.5,
+          height: 1,
           boxShadow: 'none',
+          minHeight: 192,
+          display: 'flex',
           position: 'relative',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
           color: `${color}.darker`,
           backgroundColor: 'common.white',
           backgroundImage: `linear-gradient(135deg, ${varAlpha(theme.vars.palette[color].lighterChannel, 0.48)}, ${varAlpha(theme.vars.palette[color].lightChannel, 0.48)})`,
@@ -99,7 +106,7 @@ export function AnalyticsWidgetSummary({
       ]}
       {...other}
     >
-      <Box sx={{ width: 48, height: 48, mb: 3 }}>{icon}</Box>
+      <Box sx={{ width: 44, height: 44, mb: 2 }}>{icon}</Box>
 
       {renderTrending()}
 
@@ -112,16 +119,20 @@ export function AnalyticsWidgetSummary({
         }}
       >
         <Box sx={{ flexGrow: 1, minWidth: 112 }}>
-          <Box sx={{ mb: 1, typography: 'subtitle2' }}>{title}</Box>
+          <Box sx={{ mb: 0.5, minHeight: 36, typography: 'subtitle2' }}>{title}</Box>
 
           <Box sx={{ typography: 'h4' }}>{fShortenNumber(total)}</Box>
+
+          {subtitle ? (
+            <Box sx={{ mt: 0.25, typography: 'body2', color: 'text.secondary' }}>{subtitle}</Box>
+          ) : null}
         </Box>
 
         <Chart
           type="line"
           series={[{ data: chart.series }]}
           options={chartOptions}
-          sx={{ width: 84, height: 56 }}
+          sx={{ width: 80, height: 52 }}
         />
       </Box>
 

@@ -48,6 +48,10 @@ export const apiRoutes = {
       list: "/admin/jobs",
       bySlug: (slug: string) => `/admin/jobs/${slug}`,
     },
+    consultations: {
+      list: "/admin/consultations",
+      byId: (id: number) => `/admin/consultations/${id}`,
+    },
     staff: "/admin/staff",
     dashboard: {
       summary: "/admin/dashboard/summary",
@@ -83,6 +87,10 @@ export const apiRoutes = {
     pages: {
       list: "/pages",
       bySlug: (slug: string) => `/pages/${slug}`,
+    },
+    jobs: {
+      list: "/jobs",
+      bySlug: (slug: string) => `/jobs/${slug}`,
     },
     navigation: {
       list: "/navigation",

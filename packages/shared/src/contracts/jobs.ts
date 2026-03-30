@@ -20,6 +20,7 @@ export interface ApiCareerJob {
   requirements: string[];
   responsibilities: string[];
   status?: ApiContentStatus;
+  is_published?: boolean;
   published_at?: string | null;
   created_at: string;
   updated_at: string;

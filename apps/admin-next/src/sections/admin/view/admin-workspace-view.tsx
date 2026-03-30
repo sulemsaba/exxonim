@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import type {
   ApiPage,
   ApiAdminRole,
-  ApiCareerJob,
   ApiBlogAuthor,
   ApiPricingPlan,
   ApiTestimonial,
@@ -17,7 +16,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@exxonim/admin-core/contexts/AuthContext';
 import { getAdminPricingPlans } from '@exxonim/admin-core/services/adminPricingService';
 import { getAdminNavigation } from '@exxonim/admin-core/services/adminNavigationService';
-import { getAdminJob, getAdminJobs } from '@exxonim/admin-core/services/adminJobsService';
 import { getAdminPage, getAdminPages } from '@exxonim/admin-core/services/adminPageService';
 import { getAdminTestimonials } from '@exxonim/admin-core/services/adminTestimonialService';
 import { getAdminDashboardSummary } from '@exxonim/admin-core/services/adminDashboardService';
@@ -71,6 +69,8 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { NotFoundView } from 'src/sections/error';
 import { OverviewAnalyticsView } from 'src/sections/overview/view';
 import { BlogPostsRoutePanel } from 'src/sections/admin/view/admin-blog-panels';
+import { CareersRoutePanel } from 'src/sections/admin/view/admin-careers-panels';
+import { ConsultationsRoutePanel } from 'src/sections/admin/view/admin-consultation-panels';
 import {
   BrandSettingsPanel,
   ContactSettingsPanel,
@@ -196,32 +196,44 @@ function MigrationNotice({ match, title, detail }: { match: AdminRouteMatch; tit
   );
 }
 
-function PageShell({ match, children }: { match: AdminRouteMatch; children: ReactNode }) {
+function PageShell({
+  match,
+  children,
+  hideIntro = false,
+  fullWidth = false,
+}: {
+  match: AdminRouteMatch;
+  children: ReactNode;
+  hideIntro?: boolean;
+  fullWidth?: boolean;
+}) {
   return (
-    <DashboardContent maxWidth="xl">
+    <DashboardContent maxWidth={fullWidth ? false : 'xl'}>
       <Stack spacing={3}>
-        <Stack spacing={1}>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, color: 'text.secondary' }}>
-            {match.breadcrumbs.map((breadcrumb, index) => (
-              <Box key={`${breadcrumb.label}-${index}`} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                {breadcrumb.href ? (
-                  <Link component={RouterLink} href={breadcrumb.href} color="inherit" underline="hover">
-                    {breadcrumb.label}
-                  </Link>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    {breadcrumb.label}
-                  </Typography>
-                )}
-                {index < match.breadcrumbs.length - 1 ? <Typography variant="body2">/</Typography> : null}
-              </Box>
-            ))}
-          </Box>
-          <Typography variant="h3">{match.title}</Typography>
-          <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 900 }}>
-            {match.description}
-          </Typography>
-        </Stack>
+        {!hideIntro ? (
+          <Stack spacing={1}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, color: 'text.secondary' }}>
+              {match.breadcrumbs.map((breadcrumb, index) => (
+                <Box key={`${breadcrumb.label}-${index}`} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  {breadcrumb.href ? (
+                    <Link component={RouterLink} href={breadcrumb.href} color="inherit" underline="hover">
+                      {breadcrumb.label}
+                    </Link>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      {breadcrumb.label}
+                    </Typography>
+                  )}
+                  {index < match.breadcrumbs.length - 1 ? <Typography variant="body2">/</Typography> : null}
+                </Box>
+              ))}
+            </Box>
+            <Typography variant="h3">{match.title}</Typography>
+            <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 900 }}>
+              {match.description}
+            </Typography>
+          </Stack>
+        ) : null}
         {children}
       </Stack>
     </DashboardContent>
@@ -382,54 +394,6 @@ function PagesPanel({ match }: { match: AdminRouteMatch }) {
         { header: 'Slug', render: (row) => row.slug },
         { header: 'Status', render: (row) => <StatusChip status={row.status} /> },
         { header: 'Updated', render: (row) => formatDateTime(row.updated_at), align: 'right' },
-      ]}
-    />
-  );
-}
-
-function JobsPanel({ match }: { match: AdminRouteMatch }) {
-  const jobsQuery = useQuery({
-    queryKey: ['admin-next', 'jobs'],
-    queryFn: getAdminJobs,
-    enabled: match.mode === 'index',
-  });
-  const jobQuery = useQuery({
-    queryKey: ['admin-next', 'job', match.entitySlug],
-    queryFn: () => getAdminJob(match.entitySlug!),
-    enabled: match.mode === 'edit' && Boolean(match.entitySlug),
-  });
-
-  if (match.mode === 'new') {
-    return <MigrationNotice match={match} title="New job form pending." detail="The listing route is reserved in Material Kit, but the full form is still on the migration backlog." />;
-  }
-
-  if (match.mode === 'edit') {
-    if (jobQuery.isLoading) return <LoadingState label="Loading job listing..." />;
-    if (jobQuery.isError) return <ErrorState error={jobQuery.error} />;
-    if (!jobQuery.data) return <LoadingState label="Job listing unavailable." />;
-
-    return (
-      <Stack spacing={3}>
-        <MigrationNotice match={match} title="Job editor pending." detail="The live record is loaded so you can inspect data shape before rebuilding the full form." />
-        <JsonCard title={jobQuery.data.title} subtitle={jobQuery.data.slug} value={jobQuery.data} />
-      </Stack>
-    );
-  }
-
-  if (jobsQuery.isLoading) return <LoadingState label="Loading job listings..." />;
-  if (jobsQuery.isError) return <ErrorState error={jobsQuery.error} />;
-  if (!jobsQuery.data) return <LoadingState label="Job listings unavailable." />;
-
-  return (
-    <RecordsCard<ApiCareerJob>
-      title="Job listings"
-      subtitle="Roles currently available in the Exxonim admin API"
-      rows={jobsQuery.data}
-      columns={[
-        { header: 'Title', render: (row) => row.title },
-        { header: 'Department', render: (row) => row.department },
-        { header: 'Location', render: (row) => [row.city, row.country].filter(Boolean).join(', ') || '-' },
-        { header: 'Status', render: (row) => <StatusChip status={row.status} /> },
       ]}
     />
   );
@@ -604,6 +568,8 @@ export function AdminWorkspaceView() {
 
   if (match.section === 'blog-posts') {
     content = <BlogPostsRoutePanel match={match} />;
+  } else if (match.section === 'consultations') {
+    content = <ConsultationsRoutePanel match={match} />;
   } else if (match.section === 'blog-analytics') {
     content = <BlogAnalyticsPanel />;
   } else if (match.section === 'blog-categories') {
@@ -611,11 +577,11 @@ export function AdminWorkspaceView() {
   } else if (match.section === 'blog-authors') {
     content = <BlogAuthorsPanel />;
   } else if (
-    ['page-home', 'page-services', 'page-about', 'page-faq', 'page-contact', 'page-careers', 'pages'].includes(match.section)
+    ['page-home', 'page-services', 'page-about', 'page-faq', 'page-contact', 'pages'].includes(match.section)
   ) {
     content = <PagesPanel match={match} />;
-  } else if (match.section === 'jobs') {
-    content = <JobsPanel match={match} />;
+  } else if (match.section === 'jobs' || match.section === 'page-careers') {
+    content = <CareersRoutePanel match={match} />;
   } else if (match.section === 'brand-settings') {
     content = <BrandSettingsPanel />;
   } else if (match.section === 'contact-settings') {
@@ -634,5 +600,13 @@ export function AdminWorkspaceView() {
     content = <AccessRolesPanel />;
   }
 
-  return <PageShell match={match}>{content}</PageShell>;
+  return (
+    <PageShell
+      match={match}
+      fullWidth={match.section === 'blog-posts' && match.mode !== 'index'}
+      hideIntro={match.section === 'blog-posts' && match.mode !== 'index'}
+    >
+      {content}
+    </PageShell>
+  );
 }

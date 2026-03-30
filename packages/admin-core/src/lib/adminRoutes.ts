@@ -2,6 +2,7 @@ import { normalizePathname, routes } from "../routes";
 
 export type AdminSection =
   | "dashboard"
+  | "consultations"
   | "blog-posts"
   | "blog-analytics"
   | "blog-categories"
@@ -37,6 +38,7 @@ export interface AdminNavItem {
   description: string;
   icon:
     | "dashboard"
+      | "consultations"
       | "posts"
     | "analytics"
     | "categories"
@@ -78,6 +80,8 @@ export interface AdminRouteMatch {
 
 export const adminRoutes = {
   dashboard: routes.admin,
+  consultations: "/admin/consultations/",
+  consultationDetail: (id: number) => `/admin/consultations/${id}/`,
   blogPosts: "/admin/blog/posts/",
   blogPostsNew: "/admin/blog/posts/new/",
   blogPostEdit: (id: number) => `/admin/blog/posts/${id}/edit/`,
@@ -114,6 +118,7 @@ export const editorRestrictedSections: AdminSection[] = [
   "page-careers",
   "pages",
   "jobs",
+  "consultations",
   "navigation",
   "pricing",
   "testimonials",
@@ -174,8 +179,8 @@ const pageShortcuts = {
   },
   careers: {
     section: "page-careers",
-    title: "Career Page",
-    description: "Edit the public career page copy only. Job records live in Job Listings.",
+    title: "Careers",
+    description: "Manage the public careers page copy and live job positions in one workspace.",
   },
 } as const satisfies Record<
   string,
@@ -201,17 +206,17 @@ export const adminNavGroups: AdminNavGroup[] = [
     label: "Content Management",
     items: [
       {
-        section: "page-careers",
-        label: "Career Page",
-        href: adminRoutes.pageShortcut("careers"),
-        description: "Edit the public career page content and supporting copy.",
-        icon: "careers",
+        section: "consultations",
+        label: "Consultations",
+        href: adminRoutes.consultations,
+        description: "Track client requests, assignments, and follow-up status.",
+        icon: "consultations",
       },
       {
         section: "jobs",
-        label: "Job Listings",
+        label: "Careers",
         href: adminRoutes.jobs,
-        description: "Create, publish, and archive open roles.",
+        description: "Edit the public careers page and manage open positions in one place.",
         icon: "jobs",
       },
       {
@@ -509,6 +514,34 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
     );
   }
 
+  if (segments[1] === "consultations") {
+    const consultationId = matchNumericId(segments[2]);
+
+    if (consultationId) {
+      return buildMatch(
+        normalizedPathname,
+        "consultations",
+        "edit",
+        "Consultation Detail",
+        "Review the request, update status, assign ownership, and track follow-up notes.",
+        [
+          { label: "Dashboard", href: adminRoutes.dashboard },
+          { label: "Consultations", href: adminRoutes.consultations },
+          { label: `Request #${consultationId}` },
+        ],
+        { entityId: consultationId }
+      );
+    }
+
+    return directMatch(
+      normalizedPathname,
+      "consultations",
+      "Consultations",
+      "Track incoming consultation requests, assign owners, and move each request through follow-up.",
+      adminRoutes.consultations
+    );
+  }
+
 
   if (segments[1] === "pages") {
     if (segments[2] === "new") {
@@ -554,8 +587,7 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
         config.description,
         [
           { label: "Dashboard", href: adminRoutes.dashboard },
-          { label: "Content Management", href: adminRoutes.pages },
-          { label: config.title, href: adminRoutes.pageShortcut(shortcut) },
+          { label: config.title, href: adminRoutes.jobs },
         ],
         { pageSlug: shortcut }
       );
@@ -576,12 +608,12 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
         normalizedPathname,
         "jobs",
         "new",
-        "New Job Listing",
-        "Create a new role with slug, publishing status, and hiring details.",
+        "New Position",
+        "Create a new role inside the unified careers workspace.",
         [
           { label: "Dashboard", href: adminRoutes.dashboard },
-          { label: "Job Listings", href: adminRoutes.jobs },
-          { label: "New Job" },
+          { label: "Careers", href: adminRoutes.jobs },
+          { label: "New Position" },
         ]
       );
     }
@@ -591,11 +623,11 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
         normalizedPathname,
         "jobs",
         "edit",
-        "Edit Job Listing",
-        "Update role details, slug, publishing state, and hiring metadata.",
+        "Edit Position",
+        "Update role details, publishing state, and hiring metadata inside Careers.",
         [
           { label: "Dashboard", href: adminRoutes.dashboard },
-          { label: "Job Listings", href: adminRoutes.jobs },
+          { label: "Careers", href: adminRoutes.jobs },
           { label: segments[2] },
         ],
         { entitySlug: segments[2] }
@@ -605,8 +637,8 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
     return directMatch(
       normalizedPathname,
       "jobs",
-      "Job Listings",
-      "Create, publish, and archive open roles while keeping careers page content separate.",
+      "Careers",
+      "Edit the public careers page and manage published job positions without leaving the same workspace.",
       adminRoutes.jobs
     );
   }
