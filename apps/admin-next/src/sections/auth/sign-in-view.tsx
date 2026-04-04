@@ -1,4 +1,4 @@
-import type { FormEvent} from 'react';
+import type { FormEvent } from 'react';
 
 import { useMemo, useState } from 'react';
 import { useLocation } from 'react-router';
@@ -13,8 +13,12 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
 
 import { useRouter } from 'src/routes/hooks';
+
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -24,6 +28,7 @@ export function SignInView() {
   const { isAuthenticated, login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,12 +87,28 @@ export function SignInView() {
         <TextField
           fullWidth
           name="password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           label="Password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           autoComplete="current-password"
-          slotProps={{ inputLabel: { shrink: true } }}
+          slotProps={{
+            inputLabel: { shrink: true },
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    edge="end"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    onMouseDown={(event) => event.preventDefault()}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    <Iconify icon={showPassword ? 'solar:eye-closed-bold' : 'solar:eye-bold'} />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+          }}
         />
 
         <Button fullWidth size="large" type="submit" color="inherit" variant="contained" disabled={submitting}>

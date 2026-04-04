@@ -68,6 +68,39 @@ export function getAdminErrorMessage(
         return issues.join(" ");
       }
     }
+
+    if (Array.isArray(detail)) {
+      const messages = detail
+        .map((item) => {
+          if (!item || typeof item !== "object") {
+            return null;
+          }
+
+          const message =
+            "msg" in item && typeof item.msg === "string" ? item.msg : null;
+          const rawLocation = "loc" in item ? item.loc : null;
+          const location =
+            Array.isArray(rawLocation)
+              ? rawLocation
+                  .filter(
+                    (part: unknown): part is string | number =>
+                      typeof part === "string" || typeof part === "number"
+                  )
+                  .join(".")
+              : null;
+
+          if (location && message) {
+            return `${location}: ${message}`;
+          }
+
+          return message;
+        })
+        .filter((value): value is string => Boolean(value));
+
+      if (messages.length) {
+        return messages.join(" ");
+      }
+    }
   }
 
   if (error instanceof Error && error.message) {

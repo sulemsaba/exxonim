@@ -1,28 +1,45 @@
 # Exxonim Monorepo
 
-Exxonim now uses a workspace split with two frontend apps and one shared package:
+This repository is in an active admin migration.
 
-- `apps/public`: public website with Vite client build, SSR entry, and prerender output
-- `apps/admin`: admin panel served from `/admin/`
-- `packages/shared`: shared API contracts, low-level HTTP helpers, auth session primitives, and generic utilities
+Current product direction:
 
-The public site and admin panel still target the same backend API. Content remains API-backed; the old static content files are no longer part of the architecture.
+- `apps/public`: public website
+- `apps/admin-next`: Material Kit based admin rewrite and intended future admin
+- `apps/admin`: legacy admin kept temporarily during migration
+- `packages/shared`: shared contracts, API helpers, auth/session primitives, utilities
+- `packages/admin-core`: shared admin domain layer used by the new admin
+- `material-kit-react`: temporary reference/template source; planned for removal after the new admin is complete
 
-Additional scope documentation:
+## Current Migration Status
 
-- `ADMIN_PANEL_FRONTEND_README.md`: admin panel modules, public frontend capabilities, and recommended UI expansion areas
+The repo is not fully cut over yet.
+
+Important reality today:
+
+- the intended admin is `apps/admin-next`
+- the legacy admin still exists in `apps/admin`
+- some root scripts and deploy flow still target the legacy admin
+
+This means the repository currently has both:
+
+- target-state code
+- transition-state code
+
+If you are working on the future admin, use `apps/admin-next`.
 
 ## Workspace Layout
 
 ```text
 apps/
   public/
-  admin/
+  admin-next/
+  admin/          # legacy, planned for removal
 packages/
   shared/
+  admin-core/
+material-kit-react/  # temporary reference, planned for removal
 scripts/
-  build-deploy.mjs
-  preview-deploy.mjs
 ```
 
 ## Local Development
@@ -39,54 +56,80 @@ Run the public site:
 npm run dev:public
 ```
 
-Run the admin app:
+Run the future admin rewrite:
 
 ```bash
 npm run dev:admin
 ```
 
-Expected development URLs:
-
-- Public: `http://localhost:5173`
-- Admin: `http://localhost:5174`
-
-Each app has its own env example:
-
-- `apps/public/.env.example`
-- `apps/admin/.env.example`
-
-Both define `VITE_API_URL`.
-
-## Quality Checks
-
-Typecheck every workspace:
+Run the legacy admin only if you are working on the old surface during migration:
 
 ```bash
-npm run typecheck
+npm run dev:admin-legacy
 ```
 
-Build the public app:
+You can still run the explicit new-admin alias if you want:
+
+```bash
+npm run dev:admin-next
+```
+
+Current development URLs:
+
+- Public: `http://localhost:5173`
+- Admin Next: `http://localhost:3039`
+- Legacy Admin: `http://localhost:5174`
+
+## Build Commands
+
+Public app:
 
 ```bash
 npm run build:public
 ```
 
-Build the admin app:
+Future admin rewrite:
 
 ```bash
 npm run build:admin
 ```
 
-Assemble the production deploy artifact:
+Legacy admin:
+
+```bash
+npm run build:admin-legacy
+```
+
+Typecheck all workspaces:
+
+```bash
+npm run typecheck
+```
+
+## Deploy Status
+
+The current deploy assembly script still packages the legacy admin.
+
+Command:
 
 ```bash
 npm run build:deploy
 ```
 
-This produces a root `dist/` directory where:
+Current behavior:
 
-- the public app is served from `/`
-- the admin app is mounted under `/admin/`
+- builds `apps/public`
+- builds `apps/admin`
+- assembles the root `dist/` artifact with the legacy admin mounted under `/admin/`
+
+This is a transition-state behavior, not the intended final state.
+
+Planned final state:
+
+- `apps/public` served from `/`
+- `apps/admin-next` served from `/admin/`
+- `apps/admin` removed
+- `material-kit-react` removed
 
 ## Preview
 
@@ -96,7 +139,13 @@ Preview the public production build:
 npm run preview:public
 ```
 
-Preview the admin production build:
+Preview the legacy admin production build:
+
+```bash
+npm run preview:admin-legacy
+```
+
+Preview the future admin production build:
 
 ```bash
 npm run preview:admin
@@ -122,22 +171,76 @@ npm run preview:deploy
 - `/terms/`
 - `/privacy/`
 
-## Deployment Notes
+## Architecture Notes
 
-- Deploy the generated root `dist/` directory.
-- The admin build uses `base: '/admin/'`, so admin assets resolve under `/admin/assets/...`.
-- The public build still generates `404.html`, `sitemap.xml`, and `robots.txt`.
-- If the backend runs cross-origin in development, allow both `http://localhost:5173` and `http://localhost:5174` in CORS.
+### Public site
 
-# Content API Notes
+The public site is API-backed.
 
-- Homepage content comes from `/api/v1/pages/home`, not a dedicated `/api/home` endpoint.
-- Public blog content comes from:
+Main data sources include:
+
+- pages
+- blog/resources
+- navigation
+- pricing
+- testimonials
+- site settings
+
+### Admin next
+
+`apps/admin-next` is the intended admin platform and uses:
+
+- `packages/admin-core` for shared admin routes, auth, services, and utilities
+- `packages/shared` for shared contracts and API helpers
+
+### Legacy admin
+
+`apps/admin` is still present because the migration is not complete yet.
+
+It should be treated as temporary.
+
+### Template reference
+
+`material-kit-react` is not the intended long-term product app.
+
+It is kept temporarily as a migration/reference source and should be removed after the new admin no longer depends on it for comparison or extraction.
+
+## Environment
+
+Each app has its own env file pattern.
+
+At minimum the frontend apps use:
+
+- `VITE_API_URL`
+
+Default API assumption in shared helpers:
+
+- `http://localhost:8000/api/v1`
+
+## Content API Notes
+
+- Homepage content comes from `/api/v1/pages/home`
+- Public blog/resources content comes from:
   - `/api/v1/blog/posts`
   - `/api/v1/blog/posts/:slug`
   - `/api/v1/blog/categories`
   - `/api/v1/blog/authors`
-- The public `Resources` page keeps its hero/top-rail/grid layout in the frontend, but it relies on admin-controlled editorial fields:
-  - `featured_slot`
-  - `featured_on_home`
-- If no explicit hero/top-rail posts are assigned, the public blog falls back to newest published posts so valid content is never hidden.
+- Admin endpoints are under `/api/v1/admin/...`
+
+## Project Documents
+
+- `ADMIN_PANEL_FRONTEND_README.md`: original product blueprint
+- `API_TRANSPARENCY.md`: backend/frontend API alignment reference
+- `BLOG_SYSTEM_AUDIT.md`: blog-specific audit
+- `PROJECT_AUDIT_TRAIL.md`: current repo audit
+- `PROJECT_AUDIT_SOLUTIONS.md`: current solution plan based on the audit
+- `PROJECT_ARCHITECTURE_DIAGRAM.md`: illustrated architecture and design map of the cleaned project state
+
+## Recommended Working Rule
+
+During migration:
+
+- build new admin features in `apps/admin-next`
+- avoid adding new product work to `apps/admin` unless it is a short-lived migration necessity
+- keep shared admin logic in `packages/admin-core`
+- remove template/legacy code once the replacement path is proven

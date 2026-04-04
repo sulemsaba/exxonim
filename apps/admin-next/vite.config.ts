@@ -9,6 +9,9 @@ const PORT = 3039;
 
 export default defineConfig(({ command }) => ({
   base: command === 'serve' ? '/' : '/admin/',
+  // Keep the Vite cache in the repo-root node_modules so dev does not depend on
+  // write access inside this workspace-local node_modules directory.
+  cacheDir: path.resolve(process.cwd(), '../../node_modules/.vite/admin-next'),
   plugins: [
     react(),
     checker({
