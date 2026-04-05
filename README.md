@@ -10,16 +10,26 @@ Exxonim is a split-platform product with:
 
 This repository is local-first today. The public site, the new admin, and the backend integration are actively being completed and hardened before final server deployment.
 
-## Canonical Project Documents
+## Core Project Documents
 
-This repo keeps only two top-level project documents on purpose:
+The main project documents are:
 
 - `README.md`
 - `PROJECT_ARCHITECTURE_DIAGRAM.md`
 
-`README.md` is the quick orientation guide.
+Useful supporting documents are also available:
 
-`PROJECT_ARCHITECTURE_DIAGRAM.md` is the deep reference for architecture, runtime flow, RBAC, publishing workflow, public-site resilience, and deployment handoff expectations.
+- `DEPLOYMENT_HANDOFF.md`
+- `docs/permission-matrix.md`
+- `apps/admin/DEPRECATED.md`
+
+Use them like this:
+
+- `README.md`: quick orientation
+- `PROJECT_ARCHITECTURE_DIAGRAM.md`: full architecture and planning reference
+- `DEPLOYMENT_HANDOFF.md`: deployer checklist and server-facing handoff requirements
+- `docs/permission-matrix.md`: standalone RBAC reference
+- `apps/admin/DEPRECATED.md`: legacy-admin migration rule
 
 ## Current Product State
 
@@ -121,7 +131,7 @@ npm run preview:deploy
 - Keep shared admin logic in `packages/admin-core`.
 - Keep shared public/API contracts in `packages/shared`.
 - Prefer meaningful, descriptive filenames and remove throwaway exports, temporary notes, and stray audit files instead of letting them accumulate.
-- Keep durable project documentation in the two canonical docs above rather than scattering product decisions across many separate markdown files.
+- Keep durable project documentation in the core docs above rather than scattering product decisions across throwaway notes and one-off audits.
 
 ## API And Content Notes
 
@@ -146,4 +156,4 @@ The default API base used by shared frontend helpers is:
 
 - `http://localhost:8000/api/v1`
 
-For the full environment, RBAC, workflow, and deployment handoff details, use `PROJECT_ARCHITECTURE_DIAGRAM.md`.
+For the full environment, RBAC, workflow, and deployment handoff details, use the architecture guide plus the supporting docs listed above.

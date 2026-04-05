@@ -895,6 +895,8 @@ It should read as:
 
 - "these are the requirements the future Contabo deployer should satisfy"
 
+The standalone operational checklist also lives in `DEPLOYMENT_HANDOFF.md`.
+
 ### Recommended deployment target
 
 | Area | Requirement |
@@ -1009,7 +1011,7 @@ That makes retention a future hardening concern, not a blocker for current appli
 
 ## 23. Detailed Permission Reference
 
-This section replaces the removed standalone permission matrix file.
+This section mirrors the standalone permission reference in `docs/permission-matrix.md`.
 
 It is the documentation-level reference for which roles are supposed to do what. The backend remains the real enforcement layer.
 
