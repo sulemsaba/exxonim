@@ -103,7 +103,7 @@ export function BrandSettingsPage() {
     return (
       <ErrorMessage
         title="Unable to load brand settings."
-        detail="Check that the site settings endpoint is available."
+        detail="Brand settings could not be loaded right now."
       />
     );
   }

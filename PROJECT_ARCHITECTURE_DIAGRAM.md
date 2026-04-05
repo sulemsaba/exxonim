@@ -1,8 +1,8 @@
 # Exxonim Architecture, Runtime, and Deployment Guide
 
-Date: 2026-04-04
+Date: 2026-04-05
 Project: `exxonim`
-State: verified against the frontend repo in `exxonim/`, the sibling backend repo in `../exxonim_backend/`, and the local stack started on April 4, 2026.
+State: verified against the frontend repo in `exxonim/`, the sibling backend repo in `../exxonim_backend/`, and the local runtime confirmed on April 4, 2026, with the documentation consolidated on April 5, 2026.
 
 ## Verified Runtime On 2026-04-04
 
@@ -26,9 +26,9 @@ That matters because it proves the public site is not using hardcoded content on
 
 ## 1. Executive Summary
 
-Professor-style version, in one paragraph:
+Plain summary in one paragraph:
 
-This project is a content platform split into two major parts: a frontend monorepo and a separate backend API. The frontend monorepo contains the public website, the new admin panel, the legacy admin still being phased out, and shared frontend packages. The backend is a FastAPI application connected to PostgreSQL. The public site reads content from the API. The admin writes content to the API, and the backend persists that content in PostgreSQL. Local development works only when the database, backend, and frontend apps are all running. Deployment is not fully aligned yet, because the current deploy assembly still packages the legacy admin instead of `apps/admin-next`.
+This project is a content platform split into two major parts: a frontend monorepo and a separate backend API. The frontend monorepo contains the public website, the new admin panel, the legacy admin still being phased out, and shared frontend packages. The backend is a FastAPI application connected to PostgreSQL. The public site reads content from the API. The admin writes content to the API, and the backend persists that content in PostgreSQL. Local development works only when the database, backend, and frontend apps are all running. The frontend deploy assembly is now aligned to package `apps/admin-next`, but the rest of the roadmap should be read as local-first application work plus future deployment handoff requirements, not as a claim that this project is already being operated as a fully hardened production platform today.
 
 ## 2. Why This Architecture Exists
 
@@ -146,8 +146,8 @@ Local development is not "start one thing and it works."
 
 It is a chain:
 
-1. Start PostgreSQL.
-2. Apply migrations.
+1. Ensure PostgreSQL is available.
+2. Apply migrations and seed foundational data.
 3. Start the backend API.
 4. Start the public frontend.
 5. Start the admin frontend.
@@ -180,6 +180,18 @@ flowchart TD
 - Alembic must run before real API usage so the tables and schema match the code.
 - The backend must run before the frontends can load live content correctly.
 - The frontends can technically start before the backend, but the public site will show loading and error states instead of real content.
+
+### Local scripts that now support this flow
+
+The repo now has non-Docker helper scripts for the normal local workflow:
+
+- `./scripts/setup-db.sh`
+- `./scripts/start-backend.sh`
+- `./scripts/start-public.sh`
+- `./scripts/start-admin.sh`
+- `./scripts/dev.sh`
+
+These matter more than any one machine's `systemctl` command because they express the project-level startup contract instead of assuming one specific workstation setup.
 
 ## 7. The Public Read Path, Step By Step
 
@@ -356,12 +368,15 @@ That is a machine-local storage location. It is not part of your Git push.
 
 ### Important extra detail
 
-There is also a naming mismatch in the backend materials:
+The repo examples are now aligned around the local database name `Exxonim`, which removes one source of confusion.
 
-- `../exxonim_backend/.env.example` and the backend README refer to `marketing_site_dev`
-- the actual Linux `.env` currently points to `Exxonim`
+But the deeper cross-device reality is still the same:
 
-So two different devices can easily end up talking to different local databases even if the codebase looks the same.
+- each machine can have its own local `.env`
+- each machine can have its own local PostgreSQL cluster
+- Git still does not move database rows between them
+
+So two different devices can still end up talking to different local databases even if the codebase looks the same.
 
 ### What the verified data suggests
 
@@ -612,14 +627,13 @@ Even the public build process depends on API-backed content for route SEO and pa
 So this project is not purely static.
 It is a database-backed public platform that also prerenders.
 
-## 14. Current Deployment Reality
+## 14. Deployment Alignment Update
 
-This is one of the most important migration facts.
+This was one of the most important migration mismatches.
 
-The root development aliases now point to `apps/admin-next`.
-But the deploy assembly still packages the legacy admin.
+The root development aliases already pointed to `apps/admin-next`, and the deploy script has now been corrected to package `apps/admin-next` instead of the legacy admin.
 
-### Current deploy diagram
+### Historical mismatch diagram
 
 ```mermaid
 flowchart LR
@@ -634,7 +648,7 @@ flowchart LR
     LegacyAdminBuild --> Dist
 ```
 
-### Target deploy diagram
+### Correct deploy diagram
 
 ```mermaid
 flowchart LR
@@ -651,13 +665,13 @@ flowchart LR
 
 ### Why this matters
 
-It means there is currently a migration mismatch between:
+This closes one real migration bug:
 
-- what developers are supposed to build on
-- what local dev uses
-- what the deploy artifact still packages
+- developers build on `apps/admin-next`
+- local development uses `apps/admin-next`
+- deploy packaging now also uses `apps/admin-next`
 
-Until this is corrected, the architecture is only partially aligned.
+That does not mean the full platform roadmap is complete. It only means the frontend deploy target is now aligned with the intended admin surface.
 
 ## 15. What "Launch" Means In This Project
 
@@ -727,11 +741,372 @@ Here is the honest, plain-language conclusion.
 - Yes, this explains why code can appear on the second machine while the actual content does not.
 - The current public site is visually strong, but architecturally too dependent on a live backend for basic shell content.
 - It is acceptable to have more than one loading state, but the current public loading strategy is more fragmented than ideal.
-- The deployment story is still transitional because `build:deploy` packages the legacy admin instead of `apps/admin-next`.
+- The frontend deploy packaging is now aligned to `apps/admin-next`, which removes one real migration mismatch.
 
 If you want the system to feel production-strong, the next big improvements should be:
 
 1. Move to a shared or exportable database workflow across devices.
 2. Make the public shell resilient when the backend or DB is down.
 3. Simplify loading states into a more intentional hierarchy.
-4. Align deployment so the new admin is the one actually shipped.
+4. Finish RBAC, publishing workflow, and audit foundations, then prepare a clean deployment handoff for the future Contabo deployer instead of treating production operations as "done now".
+
+## 18. Realistic Action Plan For Current Stage
+
+This section replaces the earlier "production now" tone with a more honest one.
+
+Current operating reality:
+
+- Exxonim is still being developed and verified locally first.
+- Another person is expected to deploy it later to a Contabo server.
+- Because of that, the plan should be split into:
+  1. core app work
+  2. public resilience work
+  3. deployment handoff requirements
+  4. post-launch hardening
+
+This means the main document should describe what the application must become, while detailed server bootstrapping and operator-specific commands should be kept lighter here and moved into deployer-facing notes.
+
+### Current status snapshot on 2026-04-05
+
+| Item | Status in the current system |
+| --- | --- |
+| Deploy packages `apps/admin-next` | Done. The deploy assembly now packages `apps/admin-next`. |
+| Health endpoints | Done in the backend. `/health/live` and `/health/ready` exist. |
+| Temporary write protection before full RBAC | Done in the backend as a temporary guard. |
+| RBAC foundations | Done foundationally in the backend and admin UI. Roles, permissions, protected routes, and permission-aware UI are in place. |
+| Publishing workflow foundations | Done foundationally for pages, blog posts, and testimonials. More polish is still possible. |
+| Basic audit logging | Done foundationally in the backend. Retention and archival are not yet the focus. |
+| Legacy admin freeze | Partially done. Deprecation work started, but full removal is later. |
+| Public fallback shell and graceful degradation | Partially done. Fallback shell and degraded-mode behavior exist; broader cached last-known-good coverage can still improve. |
+| Non-Docker local startup scripts | Done. Root scripts now exist for DB setup, backend, public, admin, full dev startup, and superuser creation. |
+| Detailed production operations | Not the current focus. This should now be treated as deployment handoff material for the future Contabo deployer. |
+
+### What Stays In The Main Document
+
+These items still matter now and should stay visible in the architecture plan:
+
+- RBAC
+  - keep roles, backend permission checks, role-aware UI, and basic user management
+- Health endpoints
+  - keep `/health/live` and `/health/ready`
+- Legacy-admin cutover
+  - keep the principle that legacy admin should stop growing and `admin-next` should become the only real admin surface
+- Public-site resilience
+  - keep the requirement that homepage, navigation, footer, and other shell-critical content must not collapse just because backend or DB is down
+- Basic audit logging
+  - keep who changed what, when, and which record was affected
+
+### What Changes From The Earlier Draft
+
+These items should be rewritten, not removed:
+
+- Production deployment becomes deployment handoff requirements
+  - the document should no longer sound like the current developer is personally operating the final production server today
+- Audit-log archival automation moves to future hardening
+  - basic audit logging matters now; retention automation is not a launch blocker while the project is still local-first
+- Sentry and external uptime monitoring move to post-launch hardening
+  - they remain good ideas, but they should not slow down application correctness
+- Ubuntu + nginx + systemd remain recommended assumptions
+  - but they should be presented as recommended handoff targets, not fixed commands that assume one exact server layout
+
+### What Is Postponed For Now
+
+These items should not dominate the main architecture document yet:
+
+- detailed server bootstrap commands
+- monthly or automated audit-log archival flows
+- external uptime monitoring before the app is publicly reachable
+- a full observability stack as a pre-launch blocker
+
+### Priority Order
+
+If priorities need to be stated plainly, the practical order should be:
+
+1. application correctness
+2. public resilience
+3. deployment handoff readiness
+4. post-launch hardening
+
+## 19. Core App Work
+
+This is the work that matters even before any Contabo deployment happens.
+
+### Application correctness priorities
+
+| Priority | Task | Why it stays important now |
+| --- | --- | --- |
+| 1 | Finalize roles and permission matrix | RBAC is an application design concern, not only a server concern. |
+| 2 | Keep backend permission enforcement | Frontend hiding is only convenience; backend must decide access. |
+| 3 | Keep first-superuser bootstrap path | A secure CLI bootstrap flow is required in local, staging, and production. |
+| 4 | Keep basic audit logging | Multiple staff users require accountability even before production hardening. |
+| 5 | Continue legacy-admin cutover | Two admins create confusion and split effort. |
+
+### Recommended role model
+
+- `superuser`: full platform access, including role and user management
+- `administrator`: operational administration, settings, and publishing control
+- `editor`: create and edit drafts, then submit for review
+- `reviewer`: approve or reject submitted content
+- `viewer`: read-only back-office access
+
+If a dedicated `publisher` role is needed later, it can be added as a separate permission grouping, but it should not complicate the current stage unnecessarily.
+
+### Core design principles that still apply
+
+- Backend enforces every permission.
+- Publishing workflow applies to public content.
+- Audit logs are append-only and never user-editable.
+- Fine-grained permissions should remain possible even if the first version is role-led.
+- No Docker is required for the local development model.
+
+## 20. Public Resilience Work
+
+This remains one of the most important product concerns.
+
+The public site should not become blank just because backend or DB is unavailable.
+
+### Public resilience priorities
+
+| Priority | Task | Intended result |
+| --- | --- | --- |
+| 1 | Keep fallback shell for homepage, nav, footer, and brand | Visitors always see a coherent public shell. |
+| 2 | Add or improve cached last-known-good content | Previously successful content can still be shown during outages. |
+| 3 | Keep graceful fallback for blog basics and core public pages | Public content should degrade, not disappear. |
+| 4 | Keep health endpoints | Local testing and future deployment checks become easier immediately. |
+| 5 | Keep cleaner loading hierarchy | Avoid loader-on-loader confusion and maintain shell stability. |
+
+### Practical resilience direction
+
+- render a shell immediately
+- keep fallback navigation, footer, and company basics in the frontend
+- hydrate with live API content when available
+- preserve last-known-good content where practical
+- let dynamic sections fail independently instead of collapsing the whole page
+
+## 21. Deployment Handoff Requirements
+
+This is the right framing for server work at the current stage.
+
+It should not read as:
+
+- "we are personally running the final production platform right now"
+
+It should read as:
+
+- "these are the requirements the future Contabo deployer should satisfy"
+
+### Recommended deployment target
+
+| Area | Requirement |
+| --- | --- |
+| Target OS | Ubuntu LTS preferred |
+| Reverse proxy | `nginx` recommended |
+| Backend process manager | `systemd` recommended |
+| Database | PostgreSQL required |
+| TLS | Domain plus SSL required |
+| Health checks | `/health/live` and `/health/ready` must be reachable |
+| Frontend deploy target | Public site at `/`, `admin-next` at `/admin/` |
+| Database migrations | Alembic upgrade required during deployment |
+| Admin bootstrap | First superuser must be created by CLI, not public signup |
+| Backups | Database backup strategy must exist before real production usage |
+
+### Required environment inputs
+
+The deployer should receive or define these values before deployment:
+
+- `DATABASE_URL`
+- `ADMIN_API_KEY`
+- `JWT_SECRET`
+- `JWT_ALGORITHM`
+- `ACCESS_TOKEN_EXPIRE_MINUTES`
+- `REFRESH_TOKEN_EXPIRE_DAYS`
+- `CORS_ORIGINS`
+- `PUBLIC_SITE_URL`
+- `VITE_API_URL`
+- `VITE_ADMIN_API_KEY`
+
+For local-first root scripts, these values may also be relevant:
+
+- `EXXONIM_BACKEND_DIR`
+- `POSTGRES_HOST`
+- `POSTGRES_PORT`
+- `POSTGRES_ADMIN_USER`
+- `POSTGRES_APP_USER`
+- `POSTGRES_APP_PASSWORD`
+- `POSTGRES_DB_NAME`
+- `PUBLIC_DEV_PORT`
+- `ADMIN_DEV_PORT`
+- `BACKEND_DEV_PORT`
+- `BACKEND_HTTP_URL`
+
+### Required application-level handoff items
+
+The deployer should receive a short, practical checklist:
+
+- environment variable list
+- backend repo path and frontend repo path
+- build commands
+- backend run command
+- migration command
+- role/permission seed command
+- first-superuser creation command
+- health endpoints
+- public URL, admin URL, and API routing expectations
+- DB backup expectation
+
+### Recommended handoff commands
+
+These are application commands, not a full server runbook:
+
+- full local dev startup: `./scripts/dev.sh`
+- DB setup: `./scripts/setup-db.sh`
+- backend only: `./scripts/start-backend.sh`
+- public only: `./scripts/start-public.sh`
+- admin only: `./scripts/start-admin.sh`
+- first superuser: `./scripts/create-superuser.sh`
+- deploy build artifact: `npm run build:deploy`
+
+The future server operator may wrap these in `systemd`, `nginx`, or other hosting conventions, but those wrapper details should not dominate this architecture guide.
+
+### Deployment smoke test checklist
+
+After deployment, the deployer should verify:
+
+- the public homepage loads from `/`
+- the admin login loads from `/admin/`
+- the backend responds normally
+- `GET /health/live` returns `200`
+- `GET /health/ready` returns `200`
+- login works for the first CLI-created superuser
+- at least one protected admin write succeeds for an authorized user
+- the public shell still renders if dynamic backend content is temporarily unavailable
+
+## 22. Post-Launch Hardening
+
+These items are still valuable, but they should follow first real deployment rather than block it.
+
+### Move these here instead of "must-have now"
+
+- Sentry or similar error tracking
+- external uptime monitoring such as UptimeRobot
+- audit-log archival automation and long-term retention tooling
+- deeper observability and structured monitoring stack
+- full legacy-admin removal after stable cutover
+
+### Audit-log retention stance at the current stage
+
+The target can still be:
+
+- keep audit logs for 1 year
+
+But the implementation stance right now should be:
+
+- keep audit logs in the database
+- review volume later
+- archive only when volume becomes a real operational issue
+
+That makes retention a future hardening concern, not a blocker for current application correctness.
+
+## 23. Detailed Permission Reference
+
+This section replaces the removed standalone permission matrix file.
+
+It is the documentation-level reference for which roles are supposed to do what. The backend remains the real enforcement layer.
+
+Legend:
+
+- `✓` allowed
+- `✗` not allowed
+
+### Role principles
+
+- `superuser` can do everything, including role and permission administration.
+- `administrator` manages operations, settings, publishing, and normal admin governance.
+- `editor` creates and updates draft content, then submits it for review.
+- `reviewer` approves or rejects submitted public content.
+- `viewer` has read-only back-office access where read access is granted.
+
+### Permission matrix
+
+| Permission Code | Module | Action | Superuser | Administrator | Editor | Reviewer | Viewer |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `dashboard.read` | Dashboard | View the admin dashboard | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `page.read` | Pages | View page records in admin | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `page.create` | Pages | Create a page draft | ✓ | ✓ | ✓ | ✗ | ✗ |
+| `page.edit_own_draft` | Pages | Edit a draft page you created | ✓ | ✓ | ✓ | ✗ | ✗ |
+| `page.edit_any_draft` | Pages | Edit any draft page | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `page.submit_review` | Pages | Submit a page for review | ✓ | ✓ | ✓ | ✗ | ✗ |
+| `page.approve` | Pages | Approve a page in review | ✓ | ✓ | ✗ | ✓ | ✗ |
+| `page.reject` | Pages | Reject a page in review | ✓ | ✓ | ✗ | ✓ | ✗ |
+| `page.publish` | Pages | Publish or unpublish a page | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `page.archive` | Pages | Archive a page | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `page.delete` | Pages | Delete a page | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `blog_post.read` | Blog posts | View blog post records in admin | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `blog_post.create` | Blog posts | Create a blog post draft | ✓ | ✓ | ✓ | ✗ | ✗ |
+| `blog_post.edit_own_draft` | Blog posts | Edit a draft blog post you created | ✓ | ✓ | ✓ | ✗ | ✗ |
+| `blog_post.edit_any_draft` | Blog posts | Edit any draft blog post | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `blog_post.submit_review` | Blog posts | Submit a blog post for review | ✓ | ✓ | ✓ | ✗ | ✗ |
+| `blog_post.approve` | Blog posts | Approve a blog post in review | ✓ | ✓ | ✗ | ✓ | ✗ |
+| `blog_post.reject` | Blog posts | Reject a blog post in review | ✓ | ✓ | ✗ | ✓ | ✗ |
+| `blog_post.publish` | Blog posts | Publish or unpublish a blog post | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `blog_post.archive` | Blog posts | Archive a blog post | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `blog_post.delete` | Blog posts | Delete a blog post | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `blog_category.read` | Blog categories | View blog categories | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `blog_category.manage` | Blog categories | Create, update, or delete categories | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `blog_author.read` | Blog authors | View blog authors | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `blog_author.manage` | Blog authors | Create, update, or delete authors | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `testimonial.read` | Testimonials | View testimonial records in admin | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `testimonial.create` | Testimonials | Create a testimonial draft | ✓ | ✓ | ✓ | ✗ | ✗ |
+| `testimonial.edit_own_draft` | Testimonials | Edit a draft testimonial you created | ✓ | ✓ | ✓ | ✗ | ✗ |
+| `testimonial.edit_any_draft` | Testimonials | Edit any draft testimonial | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `testimonial.submit_review` | Testimonials | Submit a testimonial for review | ✓ | ✓ | ✓ | ✗ | ✗ |
+| `testimonial.approve` | Testimonials | Approve a testimonial in review | ✓ | ✓ | ✗ | ✓ | ✗ |
+| `testimonial.reject` | Testimonials | Reject a testimonial in review | ✓ | ✓ | ✗ | ✓ | ✗ |
+| `testimonial.publish` | Testimonials | Publish or unpublish a testimonial | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `testimonial.archive` | Testimonials | Archive a testimonial | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `testimonial.delete` | Testimonials | Delete a testimonial | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `media.read` | Media | View the media library | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `media.create` | Media | Upload or create media | ✓ | ✓ | ✓ | ✓ | ✗ |
+| `media.update` | Media | Update media metadata | ✓ | ✓ | ✓ | ✓ | ✗ |
+| `media.delete` | Media | Delete media | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `navigation.read` | Navigation | View navigation items | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `navigation.create` | Navigation | Create a navigation item | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `navigation.update` | Navigation | Update a navigation item | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `navigation.delete` | Navigation | Delete a navigation item | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `pricing.read` | Pricing | View pricing plans | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `pricing.create` | Pricing | Create a pricing plan | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `pricing.update` | Pricing | Update a pricing plan | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `pricing.delete` | Pricing | Delete a pricing plan | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `job.read` | Careers | View job openings | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `job.create` | Careers | Create a job opening | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `job.update` | Careers | Update a job opening | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `job.delete` | Careers | Delete a job opening | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `site_setting.read` | Site settings | View site settings | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `site_setting.create` | Site settings | Create a site setting | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `site_setting.update` | Site settings | Update a site setting | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `site_setting.delete` | Site settings | Delete a site setting | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `consultation.read` | Consultations | View consultation records | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `consultation.update` | Consultations | Update consultation status or assignee | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `user.read` | Users | View admin users | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `user.manage` | Users | Create, update, activate, or deactivate users | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `role.read` | Roles | View roles and role-permission mappings | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `role.manage` | Roles | Create roles and change role-permission mappings | ✓ | ✗ | ✗ | ✗ | ✗ |
+| `audit_log.read` | Audit log | View append-only audit history | ✓ | ✓ | ✗ | ✗ | ✗ |
+
+### Workflow notes
+
+- Publishing workflow applies to `page`, `blog_post`, and `testimonial`.
+- Public API routes should expose only `published` records.
+- `edit_own_draft` applies only when the current user created the record and the record is still in an editable workflow state.
+- `role.manage` stays restricted to `superuser` so the permission model remains tightly controlled.
+
+## 24. Plain-English Operational Interpretation
+
+If someone asks, "What should this document be used for now?" the honest answer is:
+
+- use it to guide core application work
+- use it to guide public-site resilience work
+- use it to prepare a clean deployment handoff for the future Contabo deployer
+- do not use it as proof that the current developer is already operating a fully hardened production platform today
+
+That is the realistic and useful posture for Exxonim at this stage.

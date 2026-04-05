@@ -1,6 +1,0 @@
-apple: red
-banana: yellow
-cherry: red
-mango: yellow
-grapes: black, green
-orange: orange

@@ -32,7 +32,7 @@ export function AdminDashboardPage() {
     return (
       <ErrorMessage
         title="Unable to load the admin dashboard."
-        detail="Check that the admin API is reachable and try again."
+        detail="The admin dashboard could not be loaded right now."
       />
     );
   }

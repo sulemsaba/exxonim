@@ -151,6 +151,48 @@ export function isAdminSectionRestrictedForRole(
   return false;
 }
 
+const adminSectionPermissionMap: Record<AdminSection, string[]> = {
+  dashboard: ["dashboard.read"],
+  consultations: ["consultation.read"],
+  "blog-posts": ["blog_post.read"],
+  "blog-analytics": ["blog_post.read"],
+  "blog-categories": ["blog_category.read"],
+  "blog-authors": ["blog_author.read"],
+  "page-home": ["page.read"],
+  "page-services": ["page.read"],
+  "page-about": ["page.read"],
+  "page-faq": ["page.read"],
+  "page-contact": ["page.read"],
+  "page-careers": ["page.read"],
+  pages: ["page.read"],
+  jobs: ["job.read"],
+  "brand-settings": ["site_setting.read"],
+  "contact-settings": ["site_setting.read"],
+  navigation: ["navigation.read"],
+  pricing: ["pricing.read"],
+  testimonials: ["testimonial.read"],
+  "footer-settings": ["site_setting.read"],
+  "seo-settings": ["site_setting.read"],
+  "access-roles": ["user.manage"],
+};
+
+export function getAdminSectionPermissions(section: AdminSection) {
+  return adminSectionPermissionMap[section];
+}
+
+export function canAccessAdminSection(
+  section: AdminSection,
+  permissions?: string[] | null,
+  role?: string | null
+) {
+  if (Array.isArray(permissions) && permissions.length > 0) {
+    const requiredPermissions = getAdminSectionPermissions(section);
+    return requiredPermissions.some((permission) => permissions.includes(permission));
+  }
+
+  return !isAdminSectionRestrictedForRole(role, section);
+}
+
 const pageShortcuts = {
   home: {
     section: "page-home",

@@ -87,7 +87,7 @@ export function AccessRolesPage() {
     return (
       <ErrorMessage
         title="Unable to load access roles."
-        detail="Check that the admin users and roles endpoints are available."
+        detail="User and role records could not be loaded right now."
       />
     );
   }

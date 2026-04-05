@@ -1,2 +1,6 @@
-export type ApiContentStatus = "draft" | "published" | "archived";
-
+export type ApiContentStatus =
+  | "draft"
+  | "pending_review"
+  | "published"
+  | "rejected"
+  | "archived";

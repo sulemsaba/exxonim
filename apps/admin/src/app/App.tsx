@@ -7,6 +7,24 @@ import { matchAdminRoute } from "./adminRoutes";
 import { normalizePathname, routes } from "./routes";
 import { ErrorMessage } from "../components/ErrorMessage";
 
+const deprecatedBannerStyles = {
+  background:
+    "linear-gradient(135deg, rgba(155, 28, 28, 0.96) 0%, rgba(127, 29, 29, 0.98) 100%)",
+  borderBottom: "1px solid rgba(254, 202, 202, 0.28)",
+  color: "#fff7f7",
+  padding: "14px 18px",
+  textAlign: "center" as const,
+  fontSize: "0.95rem",
+  fontWeight: 600,
+  letterSpacing: "0.01em",
+};
+
+const deprecatedLinkStyles = {
+  color: "#ffffff",
+  fontWeight: 700,
+  textDecoration: "underline",
+};
+
 export default function App() {
   const { theme, toggleTheme } = useTheme();
   const pathname =
@@ -35,6 +53,15 @@ export default function App() {
 
   return (
     <div className="site-shell">
+      <div role="note" aria-live="polite" style={deprecatedBannerStyles}>
+        This admin panel is deprecated. Please use the new admin interface from
+        {" "}
+        <a href="/admin/" style={deprecatedLinkStyles}>
+          apps/admin-next
+        </a>
+        {" "}
+        for ongoing work.
+      </div>
       <div className="cinematic-bg" aria-hidden="true">
         <div className="cinematic-bg__orb cinematic-bg__orb--one"></div>
         <div className="cinematic-bg__orb cinematic-bg__orb--two"></div>

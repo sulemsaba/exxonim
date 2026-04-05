@@ -148,7 +148,7 @@ export function SiteSettingsPage() {
     return (
       <ErrorMessage
         title="Unable to load site settings."
-        detail="Check that the admin site settings endpoint is available."
+        detail="Site settings could not be loaded right now."
       />
     );
   }

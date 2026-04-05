@@ -45,3 +45,21 @@ export function getResourcePostSlug(pathname: string | undefined) {
 
   return null;
 }
+
+export function isPublicAppRoute(pathname: string | undefined) {
+  const normalizedPathname = normalizePathname(pathname);
+
+  if (
+    normalizedPathname === normalizePathname(routes.admin) ||
+    normalizedPathname === normalizePathname(routes.adminLogin)
+  ) {
+    return false;
+  }
+
+  return (
+    staticRoutePaths
+      .filter((route) => route !== routes.admin && route !== routes.adminLogin)
+      .map((route) => normalizePathname(route))
+      .includes(normalizedPathname) || Boolean(getResourcePostSlug(normalizedPathname))
+  );
+}

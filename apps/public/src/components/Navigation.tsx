@@ -5,19 +5,19 @@ import {
   useState,
   type FocusEvent,
 } from "react";
-import { useNavigation } from "../hooks/useNavigation";
-import { useSiteSetting } from "../hooks/useSiteSetting";
 import { normalizePathname, routes } from "../routes";
-import type { BrandAssets, CompanyInfo, Theme } from "../types";
+import type { BrandAssets, CompanyInfo, NavigationItem, Theme } from "../types";
 import {
   findNavigationLinksByTitle,
   getNavigationColumns,
   getNavigationRoot,
   getPrimaryLinks,
 } from "../utils/navigation";
-import { ErrorMessage } from "./ErrorMessage";
 
 interface NavigationProps {
+  brand: BrandAssets;
+  company: CompanyInfo;
+  navigationItems: NavigationItem[];
   pathname: string;
   theme: Theme;
   onToggleTheme: () => void;
@@ -1110,7 +1110,14 @@ function getHrefPath(href: string) {
   return normalizePathname(href.split("#")[0]);
 }
 
-export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) {
+export function Navigation({
+  brand,
+  company,
+  navigationItems,
+  pathname,
+  theme,
+  onToggleTheme,
+}: NavigationProps) {
   const headerRef = useRef<HTMLElement>(null);
   const mobilePanelRef = useRef<HTMLDivElement>(null);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
@@ -1121,24 +1128,6 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
   const currentPath = normalizePathname(pathname);
   const [desktopMenu, setDesktopMenu] = useState<MenuKey | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const {
-    data: navigationItems = [],
-    isPending: navigationPending,
-    error: navigationError,
-  } = useNavigation();
-  const {
-    data: brandSetting,
-    isPending: brandPending,
-    error: brandError,
-  } = useSiteSetting<BrandAssets>("brand");
-  const {
-    data: companySetting,
-    isPending: companyPending,
-    error: companyError,
-  } = useSiteSetting<CompanyInfo>("company_info");
-
-  const brand = brandSetting?.value;
-  const company = companySetting?.value;
   const servicesRoot = getNavigationRoot(navigationItems, "Services");
   const resourcesRoot = getNavigationRoot(navigationItems, "Resources");
   const desktopLinks = getPrimaryLinks(navigationItems);
@@ -1291,6 +1280,10 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
   const isActive = (href: string) => getHrefPath(href) === currentPath;
   const servicesActive = currentPath === normalizePathname(routes.services);
   const resourcesActive = currentPath === normalizePathname(routes.resources);
+  const primaryPhone = company.phones[0];
+  const callHref = primaryPhone
+    ? `tel:${primaryPhone.replace(/\s+/g, "")}`
+    : routes.contact;
 
   const closeAllMenus = () => {
     setDesktopMenu(null);
@@ -1304,27 +1297,6 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
     }
     setDesktopMenu(null);
   };
-
-    if (navigationPending || brandPending || companyPending) {
-    return null;
-    }
-
-  if (
-    navigationError ||
-    brandError ||
-    companyError ||
-    !brand ||
-    !company ||
-    desktopLinks.length === 0
-  ) {
-    return (
-      <ErrorMessage
-        compact={true}
-        title="Unable to load navigation."
-        detail="Check that the navigation and site settings APIs are available."
-      />
-    );
-  }
 
   return (
     <>
@@ -1470,10 +1442,7 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
             {renderThemeToggle("tutorial-toggle nav-shell__theme-desktop", theme, onToggleTheme)}
             {renderThemeToggle("tutorial-toggle tutorial-toggle--mobile nav-shell__theme-mobile", theme, onToggleTheme)}
 
-            <a
-              className="nav-shell__call-button"
-              href={`tel:${company.phones[0].replace(/\s+/g, "")}`}
-            >
+            <a className="nav-shell__call-button" href={callHref}>
               <div className="nav-shell__call-icon">
                 <svg className="animate-ring" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path
@@ -1485,8 +1454,12 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
                 </svg>
               </div>
               <div className="nav-shell__call-copy">
-                <span className="nav-shell__call-label">Call Now</span>
-                <span className="nav-shell__call-number">{company.phones[0]}</span>
+                <span className="nav-shell__call-label">
+                  {primaryPhone ? "Call Now" : "Contact Exxonim"}
+                </span>
+                <span className="nav-shell__call-number">
+                  {primaryPhone || "Open the contact page"}
+                </span>
               </div>
             </a>
 
@@ -1617,12 +1590,14 @@ export function Navigation({ pathname, theme, onToggleTheme }: NavigationProps) 
               <div className="nav-shell__mobile-bottom">
                 <a
                   className="nav-shell__mobile-bottom-link"
-                  href={`tel:${company.phones[0].replace(/\s+/g, "")}`}
+                  href={callHref}
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <span className="nav-shell__mobile-bottom-label">Call Now</span>
+                  <span className="nav-shell__mobile-bottom-label">
+                    {primaryPhone ? "Call Now" : "Contact Exxonim"}
+                  </span>
                   <span className="nav-shell__mobile-bottom-number">
-                    {company.phones[0]}
+                    {primaryPhone || "Open the contact page"}
                   </span>
                 </a>
               </div>

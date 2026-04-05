@@ -45,6 +45,10 @@ export interface AdminBlogAuthorPayload {
   bio?: string | null;
 }
 
+export interface AdminBlogWorkflowActionPayload {
+  reason?: string | null;
+}
+
 function toRequestPayload(payload: Partial<AdminBlogPostPayload>) {
   return {
     ...payload,
@@ -122,6 +126,61 @@ export async function updateAdminBlogPost(id: number, payload: Partial<AdminBlog
   const response = await api.put<ApiBlogPost>(
     apiRoutes.admin.blog.posts.byId(id),
     toRequestPayload(payload)
+  );
+  return normalizeBlogContentRecord(response.data);
+}
+
+export async function submitAdminBlogPostForReview(
+  id: number,
+  payload?: AdminBlogWorkflowActionPayload
+) {
+  const response = await api.post<ApiBlogPost>(
+    apiRoutes.admin.blog.posts.submit(id),
+    payload ?? {}
+  );
+  return normalizeBlogContentRecord(response.data);
+}
+
+export async function approveAdminBlogPost(
+  id: number,
+  payload?: AdminBlogWorkflowActionPayload
+) {
+  const response = await api.post<ApiBlogPost>(
+    apiRoutes.admin.blog.posts.approve(id),
+    payload ?? {}
+  );
+  return normalizeBlogContentRecord(response.data);
+}
+
+export async function rejectAdminBlogPost(
+  id: number,
+  payload?: AdminBlogWorkflowActionPayload
+) {
+  const response = await api.post<ApiBlogPost>(
+    apiRoutes.admin.blog.posts.reject(id),
+    payload ?? {}
+  );
+  return normalizeBlogContentRecord(response.data);
+}
+
+export async function publishAdminBlogPost(
+  id: number,
+  payload?: AdminBlogWorkflowActionPayload
+) {
+  const response = await api.post<ApiBlogPost>(
+    apiRoutes.admin.blog.posts.publish(id),
+    payload ?? {}
+  );
+  return normalizeBlogContentRecord(response.data);
+}
+
+export async function archiveAdminBlogPost(
+  id: number,
+  payload?: AdminBlogWorkflowActionPayload
+) {
+  const response = await api.post<ApiBlogPost>(
+    apiRoutes.admin.blog.posts.archive(id),
+    payload ?? {}
   );
   return normalizeBlogContentRecord(response.data);
 }

@@ -26,7 +26,7 @@ export function BlogAnalyticsPage({ theme }: BlogAnalyticsPageProps) {
     return (
       <ErrorMessage
         title="Unable to load blog analytics."
-        detail="Check that the admin blog endpoints are available."
+        detail="Blog analytics could not be loaded right now."
       />
     );
   }

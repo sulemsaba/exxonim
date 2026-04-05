@@ -24,7 +24,7 @@ import {
 } from "../../utils/admin";
 import type { ApiPricingPlan } from "../../types/api";
 
-const contentStatusSchema = z.enum(["draft", "published", "archived"]);
+const contentStatusSchema = z.enum(["draft", "pending_review", "published", "rejected", "archived"]);
 
 const pricingSchema = z.object({
   name: z.string().min(1, "Name is required."),
@@ -191,7 +191,7 @@ export function PricingPage() {
     return (
       <ErrorMessage
         title="Unable to load pricing plans."
-        detail="Check that the admin pricing endpoint is available."
+        detail="Pricing plans could not be loaded right now."
       />
     );
   }

@@ -1,5 +1,4 @@
-import { ErrorMessage } from "../components/ErrorMessage";
-import { LoadingSpinner } from "../components/LoadingSpinner";
+import { LoadBoundary } from "../components/LoadBoundary";
 import { ProviderSection } from "../components/ProviderSection";
 import { ReferenceHero } from "../components/ReferenceHero";
 import { ServicePackagesSection } from "../components/ServicePlansSection";
@@ -18,33 +17,31 @@ export function HomePage() {
 
   useResolvedPageSeo(page, routes.home);
 
-  if (pagePending) {
-    return <LoadingSpinner label="Loading homepage..." />;
-  }
-
-  if (pageError || !page) {
-    return (
-      <ErrorMessage
-        title="Unable to load the homepage."
-        detail="Check that the page endpoint is available."
-      />
-    );
-  }
-
   return (
-    <>
-      <ReferenceHero content={page.content.hero} />
-      {page.content.provider_section && (
-        <ProviderSection content={page.content.provider_section} />
+    <LoadBoundary
+      error={pageError}
+      errorDetail="The homepage content could not be loaded right now."
+      errorTitle="Unable to load the homepage."
+      isPending={pagePending}
+      isReady={Boolean(page)}
+      loadingLabel="Loading homepage..."
+    >
+      {() => (
+        <>
+        <ReferenceHero content={page!.content.hero} />
+        {page!.content.provider_section && (
+          <ProviderSection content={page!.content.provider_section} />
+        )}
+        {page!.content.stack_section && (
+          <StackSection
+            items={page!.content.stack_section.items}
+            defaultFeatureRows={page!.content.stack_section.default_feature_rows}
+            featureVisualContentMap={page!.content.stack_section.feature_visual_content}
+          />
+        )}
+        <ServicePackagesSection />
+        </>
       )}
-      {page.content.stack_section && (
-        <StackSection
-          items={page.content.stack_section.items}
-          defaultFeatureRows={page.content.stack_section.default_feature_rows}
-          featureVisualContentMap={page.content.stack_section.feature_visual_content}
-        />
-      )}
-      <ServicePackagesSection />
-    </>
+    </LoadBoundary>
   );
 }

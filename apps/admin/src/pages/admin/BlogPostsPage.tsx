@@ -301,7 +301,7 @@ export function BlogPostsPage({ mode, entityId, theme }: BlogPostsPageProps) {
     return (
       <ErrorMessage
         title="Unable to load blog post management."
-        detail="Check that the admin blog endpoints are available."
+        detail="Blog posts could not be loaded right now."
       />
     );
   }

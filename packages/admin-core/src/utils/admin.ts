@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { ApiAdminRole, ApiContentStatus } from "../types/api";
 
-type ContentLikeStatus = ApiContentStatus | "scheduled";
+type ContentLikeStatus = ApiContentStatus;
 
 export type AdminStatusTone =
   | "published"
@@ -186,17 +186,17 @@ export function getAdminStatusTone(status?: string | null): AdminStatusTone {
     case "completed":
     case "open":
       return "published";
-    case "scheduled":
+    case "pending_review":
+    case "pending":
+    case "contacted":
+    case "warning":
       return "warning";
+    case "rejected":
     case "archived":
     case "cancelled":
     case "inactive":
     case "closed":
       return "danger";
-    case "pending":
-    case "contacted":
-    case "warning":
-      return "warning";
     default:
       return "draft";
   }
@@ -207,8 +207,24 @@ export function formatAdminRole(role?: ApiAdminRole | string | null) {
     return "Administrator";
   }
 
+  if (role === "superuser") {
+    return "Superuser";
+  }
+
+  if (role === "administrator" || role === "admin") {
+    return "Administrator";
+  }
+
   if (role === "editor") {
     return "Editor";
+  }
+
+  if (role === "reviewer") {
+    return "Reviewer";
+  }
+
+  if (role === "viewer") {
+    return "Viewer";
   }
 
   if (role === "author") {
@@ -293,7 +309,7 @@ export function isContentPublished(value: {
   return getContentStatus(value) === "published";
 }
 
-export function statusToPublishedFlag(status: ApiContentStatus | "scheduled") {
+export function statusToPublishedFlag(status: ApiContentStatus) {
   return status === "published";
 }
 
@@ -325,4 +341,21 @@ export function normalizeBlogContentRecord<
     ...value,
     status: getBlogContentStatus(value),
   };
+}
+
+export function formatWorkflowStatusLabel(status?: string | null) {
+  switch (status) {
+    case "pending_review":
+      return "Pending Review";
+    case "rejected":
+      return "Rejected";
+    case "archived":
+      return "Archived";
+    case "published":
+      return "Published";
+    case "draft":
+      return "Draft";
+    default:
+      return status || "Draft";
+  }
 }

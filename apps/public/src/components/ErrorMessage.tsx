@@ -6,7 +6,7 @@ interface ErrorMessageProps {
 
 export function ErrorMessage({
   title = "Unable to load content.",
-  detail = "Check that the backend API is running and try again.",
+  detail = "This content is unavailable right now. Please try again in a moment.",
   compact = false,
 }: ErrorMessageProps) {
   return (

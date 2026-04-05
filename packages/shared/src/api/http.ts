@@ -15,8 +15,16 @@ export function setAuthorizationHeader(
   config: InternalAxiosRequestConfig,
   token: string
 ) {
+  setRequestHeader(config, "Authorization", `Bearer ${token}`);
+}
+
+export function setRequestHeader(
+  config: InternalAxiosRequestConfig,
+  headerName: string,
+  value: string
+) {
   if (config.headers && "set" in config.headers) {
-    config.headers.set("Authorization", `Bearer ${token}`);
+    config.headers.set(headerName, value);
     return;
   }
 
@@ -25,9 +33,9 @@ export function setAuthorizationHeader(
   }
 
   if ("set" in config.headers) {
-    config.headers.set("Authorization", `Bearer ${token}`);
+    config.headers.set(headerName, value);
     return;
   }
 
-  (config.headers as Record<string, string>).Authorization = `Bearer ${token}`;
+  (config.headers as Record<string, string>)[headerName] = value;
 }

@@ -14,12 +14,13 @@ import { ResourceArticlePage, ResourcesPage } from "../features/resources";
 import { ServicesPage } from "../features/services";
 import { Footer, Navigation } from "../features/site-shell";
 import { PageLoader } from "../components/PageLoader";
-import { useSiteSetting } from "../hooks/useSiteSetting";
+import { ShellStatusNotice } from "../components/ShellStatusNotice";
+import { usePublicRouter } from "./usePublicRouter";
+import { usePublicShell } from "../hooks/usePublicShell";
 import { useRevealOnScroll } from "../hooks/useRevealOnScroll";
 import { useStackCardDepth } from "../hooks/useStackCardDepth";
 import { useTheme } from "../hooks/useTheme";
-import { getResourcePostSlug, normalizePathname, routes } from "./routes";
-import type { CompanyInfo } from "../types";
+import { getResourcePostSlug, routes } from "./routes";
 
 interface AppProps {
   initialPathname?: string;
@@ -27,15 +28,12 @@ interface AppProps {
 
 export default function App({ initialPathname }: AppProps) {
   const { theme, toggleTheme } = useTheme();
-  const { data: companySetting } = useSiteSetting<CompanyInfo>("company_info");
+  const { pathname } = usePublicRouter({ initialPathname });
+  const shell = usePublicShell();
   const [isPageLoading, setIsPageLoading] = useState(true);
-  const pathname =
-    typeof window === "undefined"
-      ? normalizePathname(initialPathname)
-      : normalizePathname(window.location.pathname);
 
   useRevealOnScroll();
-  useStackCardDepth();
+  useStackCardDepth(pathname);
 
   useEffect(() => {
     setIsPageLoading(false);
@@ -133,27 +131,27 @@ export default function App({ initialPathname }: AppProps) {
   }, []);
 
   const articleSlug = getResourcePostSlug(pathname);
-  const whatsappUrl = companySetting?.value.whatsapp;
+  const whatsappUrl = shell.company.whatsapp;
 
-  const page = pathname === normalizePathname(routes.home) ? (
+  const page = pathname === "/" ? (
     <HomePage />
-  ) : pathname === normalizePathname(routes.about) ? (
+  ) : pathname === "/about" ? (
     <AboutPage />
-  ) : pathname === normalizePathname(routes.faq) ? (
+  ) : pathname === "/faq" ? (
     <FaqPage />
-  ) : pathname === normalizePathname(routes.services) ? (
+  ) : pathname === "/services" ? (
     <ServicesPage />
-  ) : pathname === normalizePathname(routes.resources) ? (
+  ) : pathname === "/resources" ? (
     <ResourcesPage />
-  ) : pathname === normalizePathname(routes.career) ? (
+  ) : pathname === "/career" ? (
     <CareerPage />
-  ) : pathname === normalizePathname(routes.contact) ? (
+  ) : pathname === "/contact" ? (
     <ContactPage />
-  ) : pathname === normalizePathname(routes.support) ? (
+  ) : pathname === "/support" ? (
     <SupportPage />
-  ) : pathname === normalizePathname(routes.terms) ? (
+  ) : pathname === "/terms" ? (
     <TermsPage />
-  ) : pathname === normalizePathname(routes.privacy) ? (
+  ) : pathname === "/privacy" ? (
     <PrivacyPage />
   ) : articleSlug ? (
     <ResourceArticlePage slug={articleSlug} />
@@ -164,20 +162,34 @@ export default function App({ initialPathname }: AppProps) {
   return (
     <div className="site-shell">
       <PageLoader isLoading={isPageLoading} delay={300} />
-      
+
       <div className="cinematic-bg" aria-hidden="true">
         <div className="cinematic-bg__orb cinematic-bg__orb--one"></div>
         <div className="cinematic-bg__orb cinematic-bg__orb--two"></div>
         <div className="cinematic-bg__glow"></div>
       </div>
 
-      <Navigation pathname={pathname} theme={theme} onToggleTheme={toggleTheme} />
+      <Navigation
+        brand={shell.brand}
+        company={shell.company}
+        navigationItems={shell.navigationItems}
+        onToggleTheme={toggleTheme}
+        pathname={pathname}
+        theme={theme}
+      />
+
+      <ShellStatusNotice isVisible={shell.isDegraded && shell.isUsingFallback} />
 
       <main id="top" className="site-main">
         {page}
       </main>
 
-      <Footer theme={theme} />
+      <Footer
+        brand={shell.brand}
+        company={shell.company}
+        footer={shell.footer}
+        theme={theme}
+      />
 
       {!whatsappUrl ? null : (
         <a

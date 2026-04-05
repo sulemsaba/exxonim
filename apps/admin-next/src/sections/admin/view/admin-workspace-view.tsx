@@ -11,13 +11,28 @@ import type {
   ApiAdminDashboardSummary,
 } from '@exxonim/admin-core/types/api';
 
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@exxonim/admin-core/contexts/AuthContext';
 import { getAdminPricingPlans } from '@exxonim/admin-core/services/adminPricingService';
 import { getAdminNavigation } from '@exxonim/admin-core/services/adminNavigationService';
-import { getAdminPage, getAdminPages } from '@exxonim/admin-core/services/adminPageService';
-import { getAdminTestimonials } from '@exxonim/admin-core/services/adminTestimonialService';
+import {
+  getAdminPage,
+  getAdminPages,
+  approveAdminPage,
+  archiveAdminPage,
+  publishAdminPage,
+  rejectAdminPage,
+  submitAdminPageForReview,
+} from '@exxonim/admin-core/services/adminPageService';
+import {
+  getAdminTestimonials,
+  approveAdminTestimonial,
+  archiveAdminTestimonial,
+  publishAdminTestimonial,
+  rejectAdminTestimonial,
+  submitAdminTestimonialForReview,
+} from '@exxonim/admin-core/services/adminTestimonialService';
 import { getAdminDashboardSummary } from '@exxonim/admin-core/services/adminDashboardService';
 import {
   getAdminRoles,
@@ -34,7 +49,7 @@ import {
 import {
   matchAdminRoute,
   type AdminRouteMatch,
-  isAdminSectionRestrictedForRole,
+  canAccessAdminSection,
 } from '@exxonim/admin-core/lib/adminRoutes';
 import {
   prettyJson,
@@ -42,6 +57,7 @@ import {
   getAdminStatusTone,
   getAdminErrorMessage,
   flattenNavigationItems,
+  formatWorkflowStatusLabel,
 } from '@exxonim/admin-core/utils/admin';
 
 import Box from '@mui/material/Box';
@@ -51,6 +67,7 @@ import Grid from '@mui/material/Grid';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
 import Divider from '@mui/material/Divider';
 import TableRow from '@mui/material/TableRow';
@@ -86,6 +103,9 @@ type TableColumn<Row> = {
   align?: 'left' | 'center' | 'right';
 };
 
+type FormMessage = { tone: 'success' | 'error'; text: string } | null;
+type ContentWorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive';
+
 function formatDateTime(value?: string | null) {
   if (!value) {
     return '-';
@@ -113,7 +133,78 @@ function statusColor(status?: string | null): MuiChipColor {
 }
 
 function StatusChip({ status }: { status?: string | null }) {
-  return <Chip size="small" label={status || 'unknown'} color={statusColor(status)} variant="outlined" />;
+  return (
+    <Chip
+      size="small"
+      label={formatWorkflowStatusLabel(status || 'unknown')}
+      color={statusColor(status)}
+      variant="outlined"
+    />
+  );
+}
+
+function WorkflowActions({
+  status,
+  permissionPrefix,
+  hasPermission,
+  onAction,
+  disabled = false,
+}: {
+  status?: string | null;
+  permissionPrefix: 'page' | 'testimonial';
+  hasPermission: (permission: string) => boolean;
+  onAction: (action: ContentWorkflowAction) => void;
+  disabled?: boolean;
+}) {
+  const workflowStatus = status || 'draft';
+  const canSubmit =
+    hasPermission(`${permissionPrefix}.submit_review`) &&
+    (workflowStatus === 'draft' || workflowStatus === 'rejected');
+  const canApprove =
+    hasPermission(`${permissionPrefix}.approve`) && workflowStatus === 'pending_review';
+  const canReject =
+    hasPermission(`${permissionPrefix}.reject`) && workflowStatus === 'pending_review';
+  const canPublish =
+    hasPermission(`${permissionPrefix}.publish`) &&
+    (workflowStatus === 'draft' ||
+      workflowStatus === 'pending_review' ||
+      workflowStatus === 'rejected');
+  const canArchive =
+    hasPermission(`${permissionPrefix}.archive`) && workflowStatus !== 'archived';
+
+  if (!canSubmit && !canApprove && !canReject && !canPublish && !canArchive) {
+    return <Typography variant="caption" sx={{ color: 'text.secondary' }}>No workflow actions</Typography>;
+  }
+
+  return (
+    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+      {canSubmit ? (
+        <Button size="small" variant="outlined" color="warning" disabled={disabled} onClick={() => onAction('submit')}>
+          Submit
+        </Button>
+      ) : null}
+      {canReject ? (
+        <Button size="small" variant="outlined" color="error" disabled={disabled} onClick={() => onAction('reject')}>
+          Reject
+        </Button>
+      ) : null}
+      {canApprove ? (
+        <Button size="small" variant="contained" color="success" disabled={disabled} onClick={() => onAction('approve')}>
+          Approve
+        </Button>
+      ) : null}
+      {canPublish ? (
+        <Button size="small" variant="contained" color="success" disabled={disabled} onClick={() => onAction('publish')}>
+          Publish
+        </Button>
+      ) : null}
+      {canArchive ? (
+        <Button size="small" color="inherit" disabled={disabled} onClick={() => onAction('archive')}>
+          Archive
+        </Button>
+      ) : null}
+    </Stack>
+  );
 }
 
 function LoadingState({ label }: { label: string }) {
@@ -341,6 +432,9 @@ function BlogAuthorsPanel() {
 }
 
 function PagesPanel({ match }: { match: AdminRouteMatch }) {
+  const queryClient = useQueryClient();
+  const { hasPermission } = useAuth();
+  const [message, setMessage] = useState<FormMessage>(null);
   const pagesQuery = useQuery({
     queryKey: ['admin-next', 'pages'],
     queryFn: getAdminPages,
@@ -350,6 +444,48 @@ function PagesPanel({ match }: { match: AdminRouteMatch }) {
     queryKey: ['admin-next', 'page', match.entityId],
     queryFn: () => getAdminPage(match.entityId!),
     enabled: match.mode === 'edit' && Boolean(match.entityId),
+  });
+
+  const workflowMutation = useMutation({
+    mutationFn: async ({ pageId, action }: { pageId: number; action: ContentWorkflowAction }) => {
+      switch (action) {
+        case 'submit':
+          return submitAdminPageForReview(pageId);
+        case 'approve':
+          return approveAdminPage(pageId);
+        case 'reject':
+          return rejectAdminPage(pageId);
+        case 'publish':
+          return publishAdminPage(pageId);
+        case 'archive':
+          return archiveAdminPage(pageId);
+        default:
+          throw new Error('Unsupported page workflow action.');
+      }
+    },
+    onSuccess: async (pageRecord, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-next', 'pages'] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-next', 'page', pageRecord.id] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-next', 'dashboard'] }),
+      ]);
+
+      const successMessages: Record<ContentWorkflowAction, string> = {
+        submit: 'Page submitted for review.',
+        approve: 'Page approved and published.',
+        reject: 'Page rejected.',
+        publish: 'Page published.',
+        archive: 'Page archived.',
+      };
+
+      setMessage({ tone: 'success', text: successMessages[variables.action] });
+    },
+    onError: (error) => {
+      setMessage({
+        tone: 'error',
+        text: getAdminErrorMessage(error, 'Unable to run this page workflow action.'),
+      });
+    },
   });
 
   if (match.mode === 'new') {
@@ -363,7 +499,21 @@ function PagesPanel({ match }: { match: AdminRouteMatch }) {
 
     return (
       <Stack spacing={3}>
+        {message ? <Alert severity={message.tone}>{message.text}</Alert> : null}
         <MigrationNotice match={match} title="Page editor pending." detail="The new workspace shows the live page payload while the editor UI is still under construction." />
+        <Card>
+          <CardHeader title="Workflow actions" subheader="Run publish workflow actions against this page record." />
+          <Divider />
+          <CardContent>
+            <WorkflowActions
+              status={pageQuery.data.status}
+              permissionPrefix="page"
+              hasPermission={hasPermission}
+              disabled={workflowMutation.isPending}
+              onAction={(action) => workflowMutation.mutate({ pageId: pageQuery.data!.id, action })}
+            />
+          </CardContent>
+        </Card>
         <JsonCard title={pageQuery.data.title} subtitle={pageQuery.data.slug} value={pageQuery.data} />
       </Stack>
     );
@@ -385,17 +535,32 @@ function PagesPanel({ match }: { match: AdminRouteMatch }) {
   }
 
   return (
-    <RecordsCard<ApiPage>
-      title="Pages"
-      subtitle="Public content records available through the admin API"
-      rows={pagesQuery.data}
-      columns={[
-        { header: 'Title', render: (row) => row.title },
-        { header: 'Slug', render: (row) => row.slug },
-        { header: 'Status', render: (row) => <StatusChip status={row.status} /> },
-        { header: 'Updated', render: (row) => formatDateTime(row.updated_at), align: 'right' },
-      ]}
-    />
+    <Stack spacing={3}>
+      {message ? <Alert severity={message.tone}>{message.text}</Alert> : null}
+      <RecordsCard<ApiPage>
+        title="Pages"
+        subtitle="Public content records available through the admin API"
+        rows={pagesQuery.data}
+        columns={[
+          { header: 'Title', render: (row) => row.title },
+          { header: 'Slug', render: (row) => row.slug },
+          { header: 'Status', render: (row) => <StatusChip status={row.status} /> },
+          {
+            header: 'Workflow',
+            render: (row) => (
+              <WorkflowActions
+                status={row.status}
+                permissionPrefix="page"
+                hasPermission={hasPermission}
+                disabled={workflowMutation.isPending}
+                onAction={(action) => workflowMutation.mutate({ pageId: row.id, action })}
+              />
+            ),
+          },
+          { header: 'Updated', render: (row) => formatDateTime(row.updated_at), align: 'right' },
+        ]}
+      />
+    </Stack>
   );
 }
 
@@ -452,24 +617,88 @@ function PricingPanel() {
 }
 
 function TestimonialsPanel() {
+  const queryClient = useQueryClient();
+  const { hasPermission } = useAuth();
+  const [message, setMessage] = useState<FormMessage>(null);
   const query = useQuery({ queryKey: ['admin-next', 'testimonials'], queryFn: getAdminTestimonials });
+
+  const workflowMutation = useMutation({
+    mutationFn: async ({ testimonialId, action }: { testimonialId: number; action: ContentWorkflowAction }) => {
+      switch (action) {
+        case 'submit':
+          return submitAdminTestimonialForReview(testimonialId);
+        case 'approve':
+          return approveAdminTestimonial(testimonialId);
+        case 'reject':
+          return rejectAdminTestimonial(testimonialId);
+        case 'publish':
+          return publishAdminTestimonial(testimonialId);
+        case 'archive':
+          return archiveAdminTestimonial(testimonialId);
+        default:
+          throw new Error('Unsupported testimonial workflow action.');
+      }
+    },
+    onSuccess: async (testimonial, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-next', 'testimonials'] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-next', 'dashboard'] }),
+      ]);
+
+      const successMessages: Record<ContentWorkflowAction, string> = {
+        submit: 'Testimonial submitted for review.',
+        approve: 'Testimonial approved and published.',
+        reject: 'Testimonial rejected.',
+        publish: 'Testimonial published.',
+        archive: 'Testimonial archived.',
+      };
+
+      setMessage({ tone: 'success', text: successMessages[variables.action] });
+    },
+    onError: (error) => {
+      setMessage({
+        tone: 'error',
+        text: getAdminErrorMessage(error, 'Unable to run this testimonial workflow action.'),
+      });
+    },
+  });
 
   if (query.isLoading) return <LoadingState label="Loading testimonials..." />;
   if (query.isError) return <ErrorState error={query.error} />;
   if (!query.data) return <LoadingState label="Testimonials unavailable." />;
 
   return (
-    <RecordsCard<ApiTestimonial>
-      title="Testimonials"
-      subtitle="Customer proof content from the live admin API"
-      rows={query.data}
-      columns={[
-        { header: 'Author', render: (row) => row.author },
-        { header: 'Role', render: (row) => row.author_role || '-' },
-        { header: 'Rating', render: (row) => row.rating ?? '-' },
-        { header: 'Status', render: (row) => <StatusChip status={row.status} /> },
-      ]}
-    />
+    <Stack spacing={3}>
+      {message ? <Alert severity={message.tone}>{message.text}</Alert> : null}
+      <RecordsCard<ApiTestimonial>
+        title="Testimonials"
+        subtitle="Customer proof content from the live admin API"
+        rows={query.data}
+        columns={[
+          { header: 'Author', render: (row) => row.author },
+          { header: 'Role', render: (row) => row.author_role || '-' },
+          { header: 'Rating', render: (row) => row.rating ?? '-' },
+          { header: 'Status', render: (row) => <StatusChip status={row.status} /> },
+          {
+            header: 'Workflow',
+            render: (row) => (
+              <WorkflowActions
+                status={row.status}
+                permissionPrefix="testimonial"
+                hasPermission={hasPermission}
+                disabled={workflowMutation.isPending}
+                onAction={(action) =>
+                  workflowMutation.mutate({
+                    testimonialId: row.id,
+                    action,
+                  })
+                }
+              />
+            ),
+          },
+        ]}
+      />
+    </Stack>
   );
 }
 
@@ -533,11 +762,10 @@ function NotFoundPanel() {
   );
 }
 
-function RestrictedPanel({ adminRole, title }: { adminRole: string; title: string }) {
+function RestrictedPanel({ title }: { title: string }) {
   return (
     <Alert severity="warning">
-      {formatAdminRole(adminRole)} accounts cannot access <strong>{title}</strong>. Use an administrator account for this
-      section.
+      Your account does not have access to <strong>{title}</strong>. Ask an administrator if you need this workspace.
     </Alert>
   );
 }
@@ -546,7 +774,6 @@ export function AdminWorkspaceView() {
   const pathname = usePathname();
   const match = useMemo(() => matchAdminRoute(pathname), [pathname]);
   const { admin } = useAuth();
-  const adminRole = admin?.role ?? 'admin';
 
   if (!match) {
     return (
@@ -556,8 +783,8 @@ export function AdminWorkspaceView() {
     );
   }
 
-  if (isAdminSectionRestrictedForRole(adminRole, match.section)) {
-    return <PageShell match={match}><RestrictedPanel adminRole={adminRole} title={match.title} /></PageShell>;
+  if (!canAccessAdminSection(match.section, admin?.permissions, admin?.role)) {
+    return <PageShell match={match}><RestrictedPanel title={match.title} /></PageShell>;
   }
 
   if (match.section === 'dashboard') {

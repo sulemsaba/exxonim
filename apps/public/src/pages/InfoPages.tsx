@@ -1,6 +1,5 @@
 import { routes } from "../routes";
-import { ErrorMessage } from "../components/ErrorMessage";
-import { LoadingSpinner } from "../components/LoadingSpinner";
+import { LoadBoundary } from "../components/LoadBoundary";
 import { usePage } from "../hooks/usePage";
 import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
 import type { ContentSection, InfoPageContent } from "../types";
@@ -198,27 +197,25 @@ function InfoPageRoute({
   const { data: page, isPending, error } = usePage<InfoPageContent>(slug);
   useResolvedPageSeo(page, canonicalPath);
 
-  if (isPending) {
-    return <LoadingSpinner label={loadingLabel} />;
-  }
-
-  if (error || !page) {
-    return (
-      <ErrorMessage
-        title="Unable to load the page."
-        detail="Check that the page endpoint is available."
-      />
-    );
-  }
-
   return (
-    <ContentPage
-      eyebrow={page.content.hero.eyebrow}
-      title={page.content.hero.title}
-      description={page.content.hero.description}
-      sections={page.content.sections}
-      nextStep={page.content.next_step}
-    />
+    <LoadBoundary
+      error={error}
+      errorDetail="This page could not be loaded right now."
+      errorTitle="Unable to load the page."
+      isPending={isPending}
+      isReady={Boolean(page)}
+      loadingLabel={loadingLabel}
+    >
+      {() => (
+        <ContentPage
+          eyebrow={page!.content.hero.eyebrow}
+          title={page!.content.hero.title}
+          description={page!.content.hero.description}
+          sections={page!.content.sections}
+          nextStep={page!.content.next_step}
+        />
+      )}
+    </LoadBoundary>
   );
 }
 

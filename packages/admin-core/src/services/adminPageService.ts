@@ -13,6 +13,10 @@ export interface AdminPagePayload {
   status: ApiContentStatus;
 }
 
+export interface AdminWorkflowActionPayload {
+  reason?: string | null;
+}
+
 function toRequestPayload(payload: Partial<AdminPagePayload>) {
   return {
     ...payload,
@@ -46,6 +50,46 @@ export async function updateAdminPage(id: number, payload: Partial<AdminPagePayl
     apiRoutes.admin.pages.byId(id),
     toRequestPayload(payload)
   );
+  return normalizeContentRecord(response.data);
+}
+
+export async function submitAdminPageForReview(
+  id: number,
+  payload?: AdminWorkflowActionPayload
+) {
+  const response = await api.post<ApiPage>(apiRoutes.admin.pages.submit(id), payload ?? {});
+  return normalizeContentRecord(response.data);
+}
+
+export async function approveAdminPage(
+  id: number,
+  payload?: AdminWorkflowActionPayload
+) {
+  const response = await api.post<ApiPage>(apiRoutes.admin.pages.approve(id), payload ?? {});
+  return normalizeContentRecord(response.data);
+}
+
+export async function rejectAdminPage(
+  id: number,
+  payload?: AdminWorkflowActionPayload
+) {
+  const response = await api.post<ApiPage>(apiRoutes.admin.pages.reject(id), payload ?? {});
+  return normalizeContentRecord(response.data);
+}
+
+export async function publishAdminPage(
+  id: number,
+  payload?: AdminWorkflowActionPayload
+) {
+  const response = await api.post<ApiPage>(apiRoutes.admin.pages.publish(id), payload ?? {});
+  return normalizeContentRecord(response.data);
+}
+
+export async function archiveAdminPage(
+  id: number,
+  payload?: AdminWorkflowActionPayload
+) {
+  const response = await api.post<ApiPage>(apiRoutes.admin.pages.archive(id), payload ?? {});
   return normalizeContentRecord(response.data);
 }
 

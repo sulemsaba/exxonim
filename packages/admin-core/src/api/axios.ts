@@ -1,7 +1,11 @@
 import { clearAuthSession, getAuthSession, updateAuthSession } from "@exxonim/shared/auth/session";
 import { apiRoutes } from "@exxonim/shared/api/routes";
 import { resolveApiBaseUrl } from "@exxonim/shared/api/baseUrl";
-import { createHttpClient, setAuthorizationHeader } from "@exxonim/shared/api/http";
+import {
+  createHttpClient,
+  setAuthorizationHeader,
+  setRequestHeader,
+} from "@exxonim/shared/api/http";
 import type { AxiosError, InternalAxiosRequestConfig } from "axios";
 import type { ApiAdminAccessTokenResponse } from "../types/api";
 
@@ -30,8 +34,17 @@ function isAdminAuthEndpoint(url?: string) {
 const baseURL = resolveApiBaseUrl(import.meta.env.VITE_API_URL);
 const api = createHttpClient(baseURL);
 const refreshClient = createHttpClient(baseURL);
+const adminApiKey = import.meta.env.VITE_ADMIN_API_KEY;
 
 let refreshPromise: Promise<string> | null = null;
+
+function applyAdminApiKey(config: InternalAxiosRequestConfig) {
+  if (!adminApiKey || !isAdminRequest(config.url)) {
+    return;
+  }
+
+  setRequestHeader(config, "X-API-Key", adminApiKey);
+}
 
 async function requestNewAccessToken() {
   const { admin, refreshToken } = getAuthSession();
@@ -52,6 +65,8 @@ async function requestNewAccessToken() {
 }
 
 api.interceptors.request.use((config) => {
+  applyAdminApiKey(config);
+
   if (isAdminRequest(config.url) && !isAdminAuthEndpoint(config.url)) {
     const { accessToken } = getAuthSession();
 
@@ -60,6 +75,11 @@ api.interceptors.request.use((config) => {
     }
   }
 
+  return config;
+});
+
+refreshClient.interceptors.request.use((config) => {
+  applyAdminApiKey(config);
   return config;
 });
 

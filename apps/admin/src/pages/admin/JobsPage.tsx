@@ -304,7 +304,7 @@ export function JobsPage({ mode, entitySlug, theme }: JobsPageProps) {
     return (
       <ErrorMessage
         title="Unable to load job listings."
-        detail="Check that the admin jobs endpoint is available."
+        detail="Job records could not be loaded right now."
       />
     );
   }

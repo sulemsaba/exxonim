@@ -229,7 +229,7 @@ export function BlogCategoriesPage({ theme }: BlogCategoriesPageProps) {
     return (
       <ErrorMessage
         title="Unable to load blog categories."
-        detail="Check that the admin blog category endpoint is available."
+        detail="Blog categories could not be loaded right now."
       />
     );
   }

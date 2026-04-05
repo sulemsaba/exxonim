@@ -1,0 +1,36 @@
+name: legacy-admin-guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  block-legacy-admin-changes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Block non-critical legacy admin changes
+        env:
+          HAS_LEGACY_FIX_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'legacy-critical-fix') }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "$HAS_LEGACY_FIX_LABEL" = "true" ]; then
+            echo "legacy-critical-fix label present; allowing apps/admin changes."
+            exit 0
+          fi
+
+          git fetch origin "$BASE_REF" --depth=1
+          CHANGED_FILES="$(git diff --name-only "origin/$BASE_REF"...HEAD -- apps/admin)"
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No apps/admin changes detected."
+            exit 0
+          fi
+
+          echo "apps/admin is frozen. Remove these changes or add the legacy-critical-fix label."
+          echo "$CHANGED_FILES"
+          exit 1

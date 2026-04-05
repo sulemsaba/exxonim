@@ -16,6 +16,10 @@ export interface AdminTestimonialPayload {
   status: ApiContentStatus;
 }
 
+export interface AdminTestimonialWorkflowActionPayload {
+  reason?: string | null;
+}
+
 function toRequestPayload(payload: Partial<AdminTestimonialPayload>) {
   return {
     ...payload,
@@ -46,6 +50,61 @@ export async function updateAdminTestimonial(
   const response = await api.put<ApiTestimonial>(
     apiRoutes.admin.testimonials.byId(id),
     toRequestPayload(payload)
+  );
+  return normalizeContentRecord(response.data);
+}
+
+export async function submitAdminTestimonialForReview(
+  id: number,
+  payload?: AdminTestimonialWorkflowActionPayload
+) {
+  const response = await api.post<ApiTestimonial>(
+    apiRoutes.admin.testimonials.submit(id),
+    payload ?? {}
+  );
+  return normalizeContentRecord(response.data);
+}
+
+export async function approveAdminTestimonial(
+  id: number,
+  payload?: AdminTestimonialWorkflowActionPayload
+) {
+  const response = await api.post<ApiTestimonial>(
+    apiRoutes.admin.testimonials.approve(id),
+    payload ?? {}
+  );
+  return normalizeContentRecord(response.data);
+}
+
+export async function rejectAdminTestimonial(
+  id: number,
+  payload?: AdminTestimonialWorkflowActionPayload
+) {
+  const response = await api.post<ApiTestimonial>(
+    apiRoutes.admin.testimonials.reject(id),
+    payload ?? {}
+  );
+  return normalizeContentRecord(response.data);
+}
+
+export async function publishAdminTestimonial(
+  id: number,
+  payload?: AdminTestimonialWorkflowActionPayload
+) {
+  const response = await api.post<ApiTestimonial>(
+    apiRoutes.admin.testimonials.publish(id),
+    payload ?? {}
+  );
+  return normalizeContentRecord(response.data);
+}
+
+export async function archiveAdminTestimonial(
+  id: number,
+  payload?: AdminTestimonialWorkflowActionPayload
+) {
+  const response = await api.post<ApiTestimonial>(
+    apiRoutes.admin.testimonials.archive(id),
+    payload ?? {}
   );
   return normalizeContentRecord(response.data);
 }

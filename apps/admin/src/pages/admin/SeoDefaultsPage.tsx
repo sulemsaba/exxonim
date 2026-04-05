@@ -74,7 +74,7 @@ export function SeoDefaultsPage() {
     return (
       <ErrorMessage
         title="Unable to load SEO defaults."
-        detail="Check that the site settings endpoint is available."
+        detail="SEO defaults could not be loaded right now."
       />
     );
   }

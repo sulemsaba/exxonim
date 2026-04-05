@@ -124,7 +124,7 @@ export function FooterSettingsPage() {
     return (
       <ErrorMessage
         title="Unable to load footer content."
-        detail="Check that the site settings endpoint is available."
+        detail="Footer settings could not be loaded right now."
       />
     );
   }

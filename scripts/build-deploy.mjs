@@ -4,7 +4,7 @@ import { execSync } from "node:child_process";
 
 const rootDir = process.cwd();
 const publicAppDir = resolve(rootDir, "apps", "public");
-const adminAppDir = resolve(rootDir, "apps", "admin");
+const adminAppDir = resolve(rootDir, "apps", "admin-next");
 const publicDistDir = resolve(publicAppDir, "dist");
 const adminDistDir = resolve(adminAppDir, "dist");
 const deployDistDir = resolve(rootDir, "dist");
@@ -19,7 +19,7 @@ function runWorkspaceBuild(workspace) {
 await rm(deployDistDir, { recursive: true, force: true });
 
 runWorkspaceBuild("@exxonim/public");
-runWorkspaceBuild("@exxonim/admin");
+runWorkspaceBuild("@exxonim/admin-next");
 
 await mkdir(deployDistDir, { recursive: true });
 await cp(publicDistDir, deployDistDir, { recursive: true });

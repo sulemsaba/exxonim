@@ -1,5 +1,9 @@
 import type { SiteSettingSeoDefaultsValue } from "../types/api";
-import { getPublicBlogPostBySlug, listPublicBlogPosts } from "../services/blogService";
+import {
+  fetchFreshPublicBlogPosts,
+  getPublicBlogPostBySlug,
+  listPublicBlogPosts,
+} from "../services/blogService";
 import { getPageBySlug } from "../services/pageService";
 import { getSiteSetting } from "../services/siteSettingsService";
 import {
@@ -114,7 +118,7 @@ export async function resolveServerSeo(pathname: string | undefined): Promise<Pa
 
 export async function getBlogPrerenderRoutes() {
   try {
-    const posts = await listPublicBlogPosts();
+    const posts = await fetchFreshPublicBlogPosts();
     return posts.map((post) => resourcePost(post.slug));
   } catch {
     return [];

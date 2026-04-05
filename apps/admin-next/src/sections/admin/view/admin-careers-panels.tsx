@@ -3,16 +3,23 @@ import type { ApiPage, ApiContentStatus } from '@exxonim/admin-core/types/api';
 
 import { useMemo, useState, useEffect } from 'react';
 import { adminRoutes } from '@exxonim/admin-core/lib/adminRoutes';
+import { useAuth } from '@exxonim/admin-core/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   slugify,
   getAdminErrorMessage,
   toDatetimeLocalValue,
   fromDatetimeLocalValue,
+  formatWorkflowStatusLabel,
 } from '@exxonim/admin-core/utils/admin';
 import {
   getAdminPages,
+  approveAdminPage,
+  archiveAdminPage,
   createAdminPage,
+  publishAdminPage,
+  rejectAdminPage,
+  submitAdminPageForReview,
   updateAdminPage,
   type AdminPagePayload,
 } from '@exxonim/admin-core/services/adminPageService';
@@ -91,6 +98,8 @@ type JobFormValues = {
   publishedAt: string;
 };
 
+type PageWorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive';
+
 const employmentTypeOptions = ['Full-time', 'Part-time', 'Contract', 'Internship', 'Consulting'];
 const locationModeOptions = ['Onsite', 'Remote', 'Hybrid'];
 
@@ -112,7 +121,7 @@ const defaultCareerPageValues: CareerPageFormValues = {
   metaTitle: 'Careers | Exxonim',
   metaDescription:
     'Explore current Exxonim roles across registration, licensing, tax, and compliance support.',
-  status: 'published',
+  status: 'draft',
 };
 
 const defaultJobFormValues: JobFormValues = {
@@ -260,6 +269,7 @@ function ActionToast({ message, onClose }: { message: FormMessage; onClose: () =
 export function CareersRoutePanel({ match }: { match: AdminRouteMatch }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { hasPermission } = useAuth();
   const [message, setMessage] = useState<FormMessage>(null);
   const [pageValues, setPageValues] = useState(defaultCareerPageValues);
   const [jobValues, setJobValues] = useState(defaultJobFormValues);
@@ -274,6 +284,7 @@ export function CareersRoutePanel({ match }: { match: AdminRouteMatch }) {
 
   const careerPage = useMemo(() => getCareerPage(pagesQuery.data), [pagesQuery.data]);
   const isJobEditorOpen = match.section === 'jobs' && (match.mode === 'new' || match.mode === 'edit');
+  const currentPageStatus = pageValues.status || 'draft';
 
   useEffect(() => {
     setPageValues(toCareerPageValues(careerPage));
@@ -289,16 +300,92 @@ export function CareersRoutePanel({ match }: { match: AdminRouteMatch }) {
       const payload = buildCareerPagePayload(pageValues);
       return careerPage ? updateAdminPage(careerPage.id, payload) : createAdminPage(payload);
     },
-    onSuccess: async () => {
+    onSuccess: async (savedPage) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-next', 'pages'] }),
         queryClient.invalidateQueries({ queryKey: ['admin-next', 'dashboard'] }),
       ]);
-      setMessage({ tone: 'success', text: 'Careers page updated.' });
+      setPageValues(toCareerPageValues(savedPage));
+      setMessage({
+        tone: 'success',
+        text: careerPage ? 'Careers page saved.' : 'Careers page draft created.',
+      });
     },
     onError: (error) =>
       setMessage({ tone: 'error', text: getAdminErrorMessage(error, 'Unable to save the careers page.') }),
   });
+
+  const pageWorkflowMutation = useMutation({
+    mutationFn: async (action: PageWorkflowAction) => {
+      const targetId = careerPage?.id;
+
+      if (!targetId) {
+        throw new Error('Save the careers page before running workflow actions.');
+      }
+
+      switch (action) {
+        case 'submit':
+          return submitAdminPageForReview(targetId);
+        case 'approve':
+          return approveAdminPage(targetId);
+        case 'reject':
+          return rejectAdminPage(targetId);
+        case 'publish':
+          return publishAdminPage(targetId);
+        case 'archive':
+          return archiveAdminPage(targetId);
+        default:
+          throw new Error('Unsupported page workflow action.');
+      }
+    },
+    onSuccess: async (savedPage, action) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-next', 'pages'] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-next', 'dashboard'] }),
+      ]);
+
+      setPageValues(toCareerPageValues(savedPage));
+
+      const successMessages: Record<PageWorkflowAction, string> = {
+        submit: 'Careers page submitted for review.',
+        approve: 'Careers page approved and published.',
+        reject: 'Careers page rejected.',
+        publish: 'Careers page published.',
+        archive: 'Careers page archived.',
+      };
+
+      setMessage({ tone: 'success', text: successMessages[action] });
+    },
+    onError: (error) =>
+      setMessage({
+        tone: 'error',
+        text: getAdminErrorMessage(error, 'Unable to run this page workflow action.'),
+      }),
+  });
+
+  const canSubmitPageForReview =
+    Boolean(careerPage) &&
+    hasPermission('page.submit_review') &&
+    (currentPageStatus === 'draft' || currentPageStatus === 'rejected');
+  const canApprovePage =
+    Boolean(careerPage) &&
+    hasPermission('page.approve') &&
+    currentPageStatus === 'pending_review';
+  const canRejectPage =
+    Boolean(careerPage) &&
+    hasPermission('page.reject') &&
+    currentPageStatus === 'pending_review';
+  const canPublishPage =
+    Boolean(careerPage) &&
+    hasPermission('page.publish') &&
+    (currentPageStatus === 'draft' ||
+      currentPageStatus === 'pending_review' ||
+      currentPageStatus === 'rejected');
+  const canArchivePage =
+    Boolean(careerPage) &&
+    hasPermission('page.archive') &&
+    currentPageStatus !== 'archived';
+  const isPageActionPending = savePageMutation.isPending || pageWorkflowMutation.isPending;
 
   const saveJobMutation = useMutation({
     mutationFn: async () => {
@@ -363,20 +450,12 @@ export function CareersRoutePanel({ match }: { match: AdminRouteMatch }) {
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
                       <TextField
-                        select
                         fullWidth
-                        label="Page status"
-                        value={pageValues.status}
-                        onChange={(event) =>
-                          setPageValues((current) => ({
-                            ...current,
-                            status: event.target.value as ApiContentStatus,
-                          }))
-                        }
-                      >
-                        <MenuItem value="draft">Draft</MenuItem>
-                        <MenuItem value="published">Published</MenuItem>
-                      </TextField>
+                        label="Workflow status"
+                        value={formatWorkflowStatusLabel(pageValues.status)}
+                        helperText="Status changes happen through the workflow buttons below."
+                        slotProps={{ input: { readOnly: true } }}
+                      />
                     </Grid>
                     <Grid size={{ xs: 12 }}>
                       <TextField
@@ -526,15 +605,100 @@ export function CareersRoutePanel({ match }: { match: AdminRouteMatch }) {
                     </Grid>
                   </Grid>
 
-                  <Stack direction="row" justifyContent="flex-end">
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => savePageMutation.mutate()}
-                      disabled={savePageMutation.isPending}
-                    >
-                      {savePageMutation.isPending ? 'Saving...' : 'Save careers page'}
-                    </Button>
+                  <Stack
+                    direction={{ xs: 'column', md: 'row' }}
+                    justifyContent="space-between"
+                    spacing={1.5}
+                    useFlexGap
+                  >
+                    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        color={
+                          currentPageStatus === 'published'
+                            ? 'success'
+                            : currentPageStatus === 'pending_review'
+                              ? 'warning'
+                              : currentPageStatus === 'rejected' || currentPageStatus === 'archived'
+                                ? 'error'
+                                : 'default'
+                        }
+                        label={formatWorkflowStatusLabel(currentPageStatus)}
+                      />
+                      {!careerPage ? (
+                        <Chip size="small" variant="outlined" label="Create a draft first" />
+                      ) : null}
+                    </Stack>
+
+                    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" justifyContent="flex-end">
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => savePageMutation.mutate()}
+                        disabled={isPageActionPending}
+                      >
+                        {savePageMutation.isPending
+                          ? 'Saving...'
+                          : careerPage
+                            ? 'Save careers page'
+                            : 'Create draft'}
+                      </Button>
+                      {canSubmitPageForReview ? (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="warning"
+                          onClick={() => pageWorkflowMutation.mutate('submit')}
+                          disabled={isPageActionPending}
+                        >
+                          Submit for review
+                        </Button>
+                      ) : null}
+                      {canRejectPage ? (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="error"
+                          onClick={() => pageWorkflowMutation.mutate('reject')}
+                          disabled={isPageActionPending}
+                        >
+                          Reject
+                        </Button>
+                      ) : null}
+                      {canApprovePage ? (
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color="success"
+                          onClick={() => pageWorkflowMutation.mutate('approve')}
+                          disabled={isPageActionPending}
+                        >
+                          Approve
+                        </Button>
+                      ) : null}
+                      {canPublishPage ? (
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color="success"
+                          onClick={() => pageWorkflowMutation.mutate('publish')}
+                          disabled={isPageActionPending}
+                        >
+                          Publish
+                        </Button>
+                      ) : null}
+                      {canArchivePage ? (
+                        <Button
+                          size="small"
+                          color="inherit"
+                          onClick={() => pageWorkflowMutation.mutate('archive')}
+                          disabled={isPageActionPending}
+                        >
+                          Archive
+                        </Button>
+                      ) : null}
+                    </Stack>
                   </Stack>
                 </Stack>
               </CardContent>

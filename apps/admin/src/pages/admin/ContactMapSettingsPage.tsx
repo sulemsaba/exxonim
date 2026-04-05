@@ -143,7 +143,7 @@ export function ContactMapSettingsPage() {
     return (
       <ErrorMessage
         title="Unable to load contact settings."
-        detail="Check that the site settings endpoint is available."
+        detail="Contact map settings could not be loaded right now."
       />
     );
   }

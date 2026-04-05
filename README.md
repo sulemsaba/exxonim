@@ -1,32 +1,32 @@
 # Exxonim Monorepo
 
-This repository is in an active admin migration.
+Exxonim is a split-platform product with:
 
-Current product direction:
+- a public website in `apps/public`
+- the primary admin application in `apps/admin-next`
+- a legacy admin in `apps/admin` that is being retired
+- shared frontend packages in `packages/shared` and `packages/admin-core`
+- a separate FastAPI backend in the sibling repo `../exxonim_backend`
 
-- `apps/public`: public website
-- `apps/admin-next`: Material Kit based admin rewrite and intended future admin
-- `apps/admin`: legacy admin kept temporarily during migration
-- `packages/shared`: shared contracts, API helpers, auth/session primitives, utilities
-- `packages/admin-core`: shared admin domain layer used by the new admin
-- `material-kit-react`: temporary reference/template source; planned for removal after the new admin is complete
+This repository is local-first today. The public site, the new admin, and the backend integration are actively being completed and hardened before final server deployment.
 
-## Current Migration Status
+## Canonical Project Documents
 
-The repo is not fully cut over yet.
+This repo keeps only two top-level project documents on purpose:
 
-Important reality today:
+- `README.md`
+- `PROJECT_ARCHITECTURE_DIAGRAM.md`
 
-- the intended admin is `apps/admin-next`
-- the legacy admin still exists in `apps/admin`
-- some root scripts and deploy flow still target the legacy admin
+`README.md` is the quick orientation guide.
 
-This means the repository currently has both:
+`PROJECT_ARCHITECTURE_DIAGRAM.md` is the deep reference for architecture, runtime flow, RBAC, publishing workflow, public-site resilience, and deployment handoff expectations.
 
-- target-state code
-- transition-state code
+## Current Product State
 
-If you are working on the future admin, use `apps/admin-next`.
+- `apps/public` is the customer-facing website.
+- `apps/admin-next` is the primary admin surface and the only place new admin features should be built.
+- `apps/admin` still exists for transition purposes, but it is deprecated for normal feature work.
+- `material-kit-react` remains only as a temporary migration reference and should not be treated as the product app.
 
 ## Workspace Layout
 
@@ -34,150 +34,98 @@ If you are working on the future admin, use `apps/admin-next`.
 apps/
   public/
   admin-next/
-  admin/          # legacy, planned for removal
+  admin/          # deprecated legacy admin
 packages/
   shared/
   admin-core/
-material-kit-react/  # temporary reference, planned for removal
 scripts/
+material-kit-react/  # temporary reference during migration
 ```
 
 ## Local Development
 
-Install dependencies once at the repo root:
+Install frontend dependencies at the repo root:
 
 ```bash
 npm install
 ```
 
-Run the public site:
+The repo includes non-Docker helper scripts for coordinated local startup:
+
+- `./scripts/setup-db.sh`
+- `./scripts/start-backend.sh`
+- `./scripts/start-public.sh`
+- `./scripts/start-admin.sh`
+- `./scripts/dev.sh`
+- `./scripts/create-superuser.sh`
+
+Recommended local flow:
+
+1. Ensure the sibling backend repo `../exxonim_backend` has its Python environment and `.env` configured.
+2. Run `./scripts/setup-db.sh` if the local PostgreSQL cluster or DB user/database needs to be prepared.
+3. Run `./scripts/dev.sh` to start the backend, public app, and admin app together.
+
+If you need individual processes instead:
 
 ```bash
 npm run dev:public
-```
-
-Run the future admin rewrite:
-
-```bash
 npm run dev:admin
-```
-
-Run the legacy admin only if you are working on the old surface during migration:
-
-```bash
 npm run dev:admin-legacy
 ```
 
-You can still run the explicit new-admin alias if you want:
+Current local URLs:
 
-```bash
-npm run dev:admin-next
-```
-
-Current development URLs:
-
-- Public: `http://localhost:5173`
+- Public site: `http://localhost:5173`
 - Admin Next: `http://localhost:3039`
 - Legacy Admin: `http://localhost:5174`
+- Backend API: `http://localhost:8000`
 
-## Build Commands
+## Build And Preview
 
-Public app:
+Build the public site:
 
 ```bash
 npm run build:public
 ```
 
-Future admin rewrite:
+Build the primary admin:
 
 ```bash
 npm run build:admin
 ```
 
-Legacy admin:
-
-```bash
-npm run build:admin-legacy
-```
-
-Typecheck all workspaces:
-
-```bash
-npm run typecheck
-```
-
-## Deploy Status
-
-The current deploy assembly script still packages the legacy admin.
-
-Command:
+Build the deploy artifact:
 
 ```bash
 npm run build:deploy
 ```
 
-Current behavior:
+The deploy build now assembles:
 
-- builds `apps/public`
-- builds `apps/admin`
-- assembles the root `dist/` artifact with the legacy admin mounted under `/admin/`
+- `apps/public` at `/`
+- `apps/admin-next` at `/admin/`
 
-This is a transition-state behavior, not the intended final state.
-
-Planned final state:
-
-- `apps/public` served from `/`
-- `apps/admin-next` served from `/admin/`
-- `apps/admin` removed
-- `material-kit-react` removed
-
-## Preview
-
-Preview the public production build:
+Preview commands:
 
 ```bash
 npm run preview:public
-```
-
-Preview the legacy admin production build:
-
-```bash
-npm run preview:admin-legacy
-```
-
-Preview the future admin production build:
-
-```bash
 npm run preview:admin
-```
-
-Preview the assembled deploy artifact:
-
-```bash
+npm run preview:admin-legacy
 npm run preview:deploy
 ```
 
-## Public Routes
+## Working Rules
 
-- `/`
-- `/about/`
-- `/services/`
-- `/resources/`
-- `/resources/:slug/`
-- `/faq/`
-- `/career/`
-- `/contact/`
-- `/support/`
-- `/terms/`
-- `/privacy/`
+- Build new admin features in `apps/admin-next`.
+- Treat `apps/admin` as legacy and limit changes there to short-lived migration or critical fixes.
+- Keep shared admin logic in `packages/admin-core`.
+- Keep shared public/API contracts in `packages/shared`.
+- Prefer meaningful, descriptive filenames and remove throwaway exports, temporary notes, and stray audit files instead of letting them accumulate.
+- Keep durable project documentation in the two canonical docs above rather than scattering product decisions across many separate markdown files.
 
-## Architecture Notes
+## API And Content Notes
 
-### Public site
-
-The public site is API-backed.
-
-Main data sources include:
+The public site is API-backed. Its visible content comes from backend-managed domains such as:
 
 - pages
 - blog/resources
@@ -186,61 +134,16 @@ Main data sources include:
 - testimonials
 - site settings
 
-### Admin next
-
-`apps/admin-next` is the intended admin platform and uses:
-
-- `packages/admin-core` for shared admin routes, auth, services, and utilities
-- `packages/shared` for shared contracts and API helpers
-
-### Legacy admin
-
-`apps/admin` is still present because the migration is not complete yet.
-
-It should be treated as temporary.
-
-### Template reference
-
-`material-kit-react` is not the intended long-term product app.
-
-It is kept temporarily as a migration/reference source and should be removed after the new admin no longer depends on it for comparison or extraction.
+The admin writes through backend routes under `/api/v1/admin/...`, and the public site reads from public API routes under `/api/v1/...`.
 
 ## Environment
 
-Each app has its own env file pattern.
-
-At minimum the frontend apps use:
+At minimum, the frontend apps depend on:
 
 - `VITE_API_URL`
 
-Default API assumption in shared helpers:
+The default API base used by shared frontend helpers is:
 
 - `http://localhost:8000/api/v1`
 
-## Content API Notes
-
-- Homepage content comes from `/api/v1/pages/home`
-- Public blog/resources content comes from:
-  - `/api/v1/blog/posts`
-  - `/api/v1/blog/posts/:slug`
-  - `/api/v1/blog/categories`
-  - `/api/v1/blog/authors`
-- Admin endpoints are under `/api/v1/admin/...`
-
-## Project Documents
-
-- `ADMIN_PANEL_FRONTEND_README.md`: original product blueprint
-- `API_TRANSPARENCY.md`: backend/frontend API alignment reference
-- `BLOG_SYSTEM_AUDIT.md`: blog-specific audit
-- `PROJECT_AUDIT_TRAIL.md`: current repo audit
-- `PROJECT_AUDIT_SOLUTIONS.md`: current solution plan based on the audit
-- `PROJECT_ARCHITECTURE_DIAGRAM.md`: illustrated architecture and design map of the cleaned project state
-
-## Recommended Working Rule
-
-During migration:
-
-- build new admin features in `apps/admin-next`
-- avoid adding new product work to `apps/admin` unless it is a short-lived migration necessity
-- keep shared admin logic in `packages/admin-core`
-- remove template/legacy code once the replacement path is proven
+For the full environment, RBAC, workflow, and deployment handoff details, use `PROJECT_ARCHITECTURE_DIAGRAM.md`.

@@ -145,7 +145,7 @@ export function MediaPage() {
     return (
       <ErrorMessage
         title="Unable to load the media library."
-        detail="Check that the admin media endpoint is available."
+        detail="The media library could not be loaded right now."
       />
     );
   }

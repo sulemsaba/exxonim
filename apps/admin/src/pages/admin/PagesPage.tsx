@@ -27,7 +27,7 @@ import {
   tryParseJsonValue,
 } from "../../utils/admin";
 
-const contentStatusSchema = z.enum(["draft", "published", "archived"]);
+const contentStatusSchema = z.enum(["draft", "pending_review", "published", "rejected", "archived"]);
 
 const pageSchema = z.object({
   title: z.string().min(1, "Title is required."),
@@ -258,7 +258,7 @@ export function PagesPage({ mode, entityId, pageSlug }: PagesPageProps) {
     return (
       <ErrorMessage
         title="Unable to load page management."
-        detail="Check that the admin page endpoint is available."
+        detail="Page records could not be loaded right now."
       />
     );
   }
@@ -276,7 +276,7 @@ export function PagesPage({ mode, entityId, pageSlug }: PagesPageProps) {
     return (
       <ErrorMessage
         title="Page not found."
-        detail="The requested page could not be loaded from the admin API."
+        detail="The requested page could not be loaded right now."
       />
     );
   }
@@ -350,7 +350,7 @@ export function PagesPage({ mode, entityId, pageSlug }: PagesPageProps) {
           ) : (
             <div className="admin-empty">
               <strong>No pages yet.</strong>
-              <p>Create the first page record to populate the frontend route content API.</p>
+              <p>Create the first page record so the matching public page has content to display.</p>
             </div>
           )}
         </AdminSectionCard>
@@ -385,7 +385,7 @@ export function PagesPage({ mode, entityId, pageSlug }: PagesPageProps) {
           description={
             isShortcut
               ? "This shortcut route edits page content only. The slug stays fixed so the public route remains stable."
-              : "Page content is stored as raw JSON so public routes can render typed content from the API."
+              : "Page content is stored as structured JSON so the public site can render each page consistently."
           }
         >
           <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>

@@ -5,8 +5,7 @@ import {
   useState,
   type RefObject,
 } from "react";
-import { ErrorMessage } from "./ErrorMessage";
-import { LoadingSpinner } from "./LoadingSpinner";
+import { LoadBoundary } from "./LoadBoundary";
 import { usePricingPlans } from "../hooks/usePricingPlans";
 import { useTestimonials } from "../hooks/useTestimonials";
 import { routes } from "../routes";
@@ -336,56 +335,53 @@ export function ServicePackagesSection({
     return () => window.clearTimeout(id);
   }, [activeReview, documentVisible, pauseNonce, sectionInView, testimonials.length]);
 
-  if (testimonialsPending || plansPending) {
-    return <LoadingSpinner label="Loading package plans..." />;
-  }
-
-  if (testimonialsError || plansError || testimonials.length === 0 || plans.length === 0) {
-    return (
-      <ErrorMessage
-        title="Unable to load plans."
-        detail="Make sure the pricing and testimonial endpoints are available."
-      />
-    );
-  }
-
   return (
-    <section
-      ref={sectionRef}
-      className={`sp-section ${variant === "page" ? "sp-section--page" : ""}`}
-      id={variant === "page" ? "packages" : undefined}
+    <LoadBoundary
+      error={testimonialsError || plansError}
+      errorDetail="Service plans could not be loaded right now."
+      errorTitle="Unable to load plans."
+      isPending={testimonialsPending || plansPending}
+      isReady={testimonials.length > 0 && plans.length > 0}
+      loadingLabel="Loading package plans..."
+      variant="section"
     >
-      <div className="sp-section__desktop">
-        <div className="sp-shell">
-          <div className="sp-shell__left">
+      <section
+        ref={sectionRef}
+        className={`sp-section ${variant === "page" ? "sp-section--page" : ""}`}
+        id={variant === "page" ? "packages" : undefined}
+      >
+        <div className="sp-section__desktop">
+          <div className="sp-shell">
+            <div className="sp-shell__left">
+              <TestimonialCard
+                testimonials={testimonials}
+                activeIndex={activeReview}
+                onSelect={setActiveReview}
+                onUserInteract={pauseTestimonials}
+              />
+            </div>
+
+            <div className="sp-shell__right">
+              <DesktopLayout plans={plans} />
+            </div>
+          </div>
+        </div>
+
+        <div className="sp-section__mobile">
+          <div className="sp-mobileShell">
             <TestimonialCard
               testimonials={testimonials}
               activeIndex={activeReview}
               onSelect={setActiveReview}
               onUserInteract={pauseTestimonials}
+              mobile={true}
             />
-          </div>
 
-          <div className="sp-shell__right">
-            <DesktopLayout plans={plans} />
+            <MobilePlanStack plans={plans} />
           </div>
         </div>
-      </div>
-
-      <div className="sp-section__mobile">
-        <div className="sp-mobileShell">
-          <TestimonialCard
-            testimonials={testimonials}
-            activeIndex={activeReview}
-            onSelect={setActiveReview}
-            onUserInteract={pauseTestimonials}
-            mobile={true}
-          />
-
-          <MobilePlanStack plans={plans} />
-        </div>
-      </div>
-    </section>
+      </section>
+    </LoadBoundary>
   );
 }
 

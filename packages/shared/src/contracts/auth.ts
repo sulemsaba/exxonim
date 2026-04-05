@@ -1,10 +1,19 @@
-export type ApiAdminRole = "admin" | "editor" | "author";
+export type ApiAdminRole =
+  | "superuser"
+  | "administrator"
+  | "editor"
+  | "reviewer"
+  | "viewer"
+  | "admin"
+  | "author";
 
 export interface ApiAdminUser {
   id: number;
   email: string;
   full_name?: string | null;
   role?: ApiAdminRole | null;
+  roles?: ApiAdminRole[];
+  permissions?: string[];
   is_active: boolean;
   last_login_at?: string | null;
   created_at: string;
@@ -25,4 +34,5 @@ export interface ApiAdminAccessTokenResponse {
 
 export interface ApiAdminMeResponse {
   admin: ApiAdminUser;
+  permissions?: string[];
 }

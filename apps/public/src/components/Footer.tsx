@@ -1,10 +1,7 @@
 import { useEffect, useRef } from "react";
-import { useSiteSetting } from "../hooks/useSiteSetting";
 import { routes } from "../routes";
 import type { BrandAssets, CompanyInfo, Theme } from "../types";
 import type { SiteSettingFooterValue, SiteSettingSocialLinkValue } from "../types/api";
-import { ErrorMessage } from "./ErrorMessage";
-import { LoadingSpinner } from "./LoadingSpinner";
 
 const footerStyles = String.raw`
 .footer-shell{
@@ -578,22 +575,14 @@ function renderSocialIcon(platform: SiteSettingSocialLinkValue["platform"]) {
   }
 }
 
-export function Footer({ theme }: { theme: Theme }) {
-  const {
-    data: brandSetting,
-    isPending: brandPending,
-    error: brandError,
-  } = useSiteSetting<BrandAssets>("brand");
-  const {
-    data: footerSetting,
-    isPending: footerPending,
-    error: footerError,
-  } = useSiteSetting<SiteSettingFooterValue>("footer");
-  const {
-    data: companySetting,
-    isPending: companyPending,
-    error: companyError,
-  } = useSiteSetting<CompanyInfo>("company_info");
+interface FooterProps {
+  brand: BrandAssets;
+  company: CompanyInfo;
+  footer: SiteSettingFooterValue;
+  theme: Theme;
+}
+
+export function Footer({ brand, company, footer, theme }: FooterProps) {
   const footerRef = useRef<HTMLElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const pointerRef = useRef({ x: -1000, y: -1000, active: false });
@@ -836,23 +825,6 @@ export function Footer({ theme }: { theme: Theme }) {
     };
   }, [theme]);
 
-  if (brandPending || footerPending || companyPending) {
-    return <LoadingSpinner compact label="Loading footer..." />;
-  }
-
-  if (brandError || footerError || companyError || !brandSetting || !footerSetting || !companySetting) {
-    return (
-      <ErrorMessage
-        compact={true}
-        title="Unable to load the footer."
-        detail="Check that the site settings API is available."
-      />
-    );
-  }
-
-  const brand = brandSetting.value;
-  const footer = footerSetting.value;
-  const company = companySetting.value;
   const socialLinks = footerSocialPlatforms
     .map((platform) =>
       (footer.social_links ?? []).find(
@@ -871,14 +843,6 @@ export function Footer({ theme }: { theme: Theme }) {
         data-theme={theme}
         id="site-footer"
       >
-        <canvas
-          ref={canvasRef}
-          className="footer-shell__canvas"
-          aria-hidden="true"
-        ></canvas>
-        <div className="footer-shell__spotlight" aria-hidden="true"></div>
-        <div className="footer-shell__veil" aria-hidden="true"></div>
-
         <div className="footer-shell__content">
           <div className="footer-shell__grid">
             <section className="footer-shell__brand-panel">
@@ -953,9 +917,7 @@ export function Footer({ theme }: { theme: Theme }) {
                     />
                   </svg>
 
-                  <span>
-                    {company.address}
-                  </span>
+                  <span>{company.address || "Use the contact page for location details."}</span>
                 </li>
 
                 <li className="footer-shell__contact-item">
@@ -980,11 +942,15 @@ export function Footer({ theme }: { theme: Theme }) {
                   </svg>
 
                   <div className="footer-shell__contact-copy--stacked">
-                    {company.emails.map((email) => (
-                      <a key={email} href={`mailto:${email}`}>
-                        {email}
-                      </a>
-                    ))}
+                    {company.emails.length ? (
+                      company.emails.map((email) => (
+                        <a key={email} href={`mailto:${email}`}>
+                          {email}
+                        </a>
+                      ))
+                    ) : (
+                      <a href={routes.contact}>Use the Exxonim contact page</a>
+                    )}
                   </div>
                 </li>
 
@@ -1005,11 +971,15 @@ export function Footer({ theme }: { theme: Theme }) {
                   </svg>
 
                   <div className="footer-shell__contact-copy--stacked">
-                    {company.phones.map((phone) => (
-                      <a key={phone} href={`tel:${phone.replace(/\s+/g, "")}`}>
-                        {phone}
-                      </a>
-                    ))}
+                    {company.phones.length ? (
+                      company.phones.map((phone) => (
+                        <a key={phone} href={`tel:${phone.replace(/\s+/g, "")}`}>
+                          {phone}
+                        </a>
+                      ))
+                    ) : (
+                      <a href={routes.contact}>Live phone details are reconnecting</a>
+                    )}
                   </div>
                 </li>
               </ul>

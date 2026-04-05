@@ -18,7 +18,7 @@ import {
 import { getContentStatus, getAdminErrorMessage } from "../../utils/admin";
 import type { ApiTestimonial } from "../../types/api";
 
-const contentStatusSchema = z.enum(["draft", "published", "archived"]);
+const contentStatusSchema = z.enum(["draft", "pending_review", "published", "rejected", "archived"]);
 
 const testimonialSchema = z.object({
   eyebrow: z.string().optional(),
@@ -181,7 +181,7 @@ export function TestimonialsPage() {
     return (
       <ErrorMessage
         title="Unable to load testimonials."
-        detail="Check that the admin testimonial endpoint is available."
+        detail="Testimonials could not be loaded right now."
       />
     );
   }

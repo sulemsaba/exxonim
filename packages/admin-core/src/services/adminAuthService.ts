@@ -3,6 +3,7 @@ import { apiRoutes } from "@exxonim/shared/api/routes";
 import type {
   ApiAdminAccessTokenResponse,
   ApiAdminTokenResponse,
+  ApiAdminUser,
 } from "../types/api";
 
 export interface AdminLoginPayload {
@@ -30,5 +31,10 @@ export async function refreshAdminAccessToken(
     }
   );
 
+  return response.data;
+}
+
+export async function getAdminMe(): Promise<ApiAdminUser> {
+  const response = await api.get<ApiAdminUser>(apiRoutes.admin.auth.me);
   return response.data;
 }

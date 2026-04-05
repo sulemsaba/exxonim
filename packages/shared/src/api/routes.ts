@@ -9,6 +9,11 @@ export const apiRoutes = {
       posts: {
         list: "/admin/blog/posts",
         byId: (id: number) => `/admin/blog/posts/${id}`,
+        submit: (id: number) => `/admin/blog/posts/${id}/submit`,
+        approve: (id: number) => `/admin/blog/posts/${id}/approve`,
+        reject: (id: number) => `/admin/blog/posts/${id}/reject`,
+        publish: (id: number) => `/admin/blog/posts/${id}/publish`,
+        archive: (id: number) => `/admin/blog/posts/${id}/archive`,
         previewToken: (id: number) => `/admin/blog/posts/${id}/preview-token`,
       },
       categories: {
@@ -29,6 +34,11 @@ export const apiRoutes = {
     pages: {
       list: "/admin/pages",
       byId: (id: number) => `/admin/pages/${id}`,
+      submit: (id: number) => `/admin/pages/${id}/submit`,
+      approve: (id: number) => `/admin/pages/${id}/approve`,
+      reject: (id: number) => `/admin/pages/${id}/reject`,
+      publish: (id: number) => `/admin/pages/${id}/publish`,
+      archive: (id: number) => `/admin/pages/${id}/archive`,
     },
     navigation: {
       list: "/admin/navigation",
@@ -43,6 +53,11 @@ export const apiRoutes = {
     testimonials: {
       list: "/admin/testimonials",
       byId: (id: number) => `/admin/testimonials/${id}`,
+      submit: (id: number) => `/admin/testimonials/${id}/submit`,
+      approve: (id: number) => `/admin/testimonials/${id}/approve`,
+      reject: (id: number) => `/admin/testimonials/${id}/reject`,
+      publish: (id: number) => `/admin/testimonials/${id}/publish`,
+      archive: (id: number) => `/admin/testimonials/${id}/archive`,
     },
     jobs: {
       list: "/admin/jobs",

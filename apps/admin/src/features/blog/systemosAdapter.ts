@@ -1,6 +1,6 @@
 import type { AdminBlogPostPayload } from "../../services/adminBlogService";
 import type { ApiBlogAuthor, ApiBlogCategory, ApiBlogPost, ApiBlogStatus } from "../../types/api";
-import type { SystemOSPost } from "../../systemos/types";
+import type { SystemOSPost, SystemOSPostStatus } from "../../systemos/types";
 import { getBlogContentStatus } from "../../utils/admin";
 
 function getContentSource(post: ApiBlogPost) {
@@ -120,12 +120,12 @@ export function getBlogReadLabel(post: ApiBlogPost) {
 
 export function getBlogWorkspaceStatus(
   post: Pick<ApiBlogPost, "status" | "is_published"> & { is_active?: boolean | null }
-): ApiBlogStatus {
+): SystemOSPostStatus {
   const status = getBlogContentStatus(post);
   return status === "archived" ? "archived" : status;
 }
 
-export function getBlogWorkspaceStatusClass(status: ApiBlogStatus) {
+export function getBlogWorkspaceStatusClass(status: SystemOSPostStatus) {
   return status === "archived" ? "trash" : status;
 }
 
@@ -179,13 +179,16 @@ export function toAdminPayloadFromSystemOSPost(
     categories.find((item) => normalizeName(item.name) === normalizeName(cleanSelectionValue(post.category))) ?? null;
   const matchedAuthor =
     authors.find((item) => normalizeName(item.name) === normalizeName(cleanSelectionValue(post.author))) ?? null;
-  const status = post.status === "trash" ? "archived" : post.status;
+  const status: ApiBlogStatus =
+    post.status === "trash"
+      ? "archived"
+      : post.status === "scheduled"
+        ? "pending_review"
+        : post.status;
   const publishedAt =
-    status === "scheduled"
-      ? toIsoString(post.scheduledFor) ?? original?.published_at ?? null
-      : status === "published"
-        ? toIsoString(post.publishedAt) ?? original?.published_at ?? new Date().toISOString()
-        : null;
+    status === "published"
+      ? toIsoString(post.publishedAt) ?? original?.published_at ?? new Date().toISOString()
+      : null;
 
   return {
     title: post.title.trim() || "Untitled post",

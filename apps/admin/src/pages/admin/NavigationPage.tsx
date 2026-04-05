@@ -19,7 +19,7 @@ import {
 } from "../../utils/admin";
 import type { ApiNavigationItem } from "../../types/api";
 
-const contentStatusSchema = z.enum(["draft", "published", "archived"]);
+const contentStatusSchema = z.enum(["draft", "pending_review", "published", "rejected", "archived"]);
 
 const navigationSchema = z.object({
   title: z.string().min(1, "Title is required."),
@@ -245,7 +245,7 @@ export function NavigationPage() {
     return (
       <ErrorMessage
         title="Unable to load navigation."
-        detail="Check that the admin navigation endpoint is available."
+        detail="Navigation settings could not be loaded right now."
       />
     );
   }

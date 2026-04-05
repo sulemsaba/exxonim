@@ -1,6 +1,13 @@
 export type SystemOSTheme = 'dark' | 'light';
 export type SystemOSScreen = 'posts' | 'analytics';
-export type SystemOSPostStatus = 'draft' | 'published' | 'scheduled' | 'trash';
+export type SystemOSPostStatus =
+  | 'draft'
+  | 'pending_review'
+  | 'published'
+  | 'rejected'
+  | 'archived'
+  | 'scheduled'
+  | 'trash';
 export type SystemOSRevisionState = '' | 'working' | 'ready_for_review';
 export type SystemOSEditorPane = 'basics' | 'content' | 'publishing' | 'seo';
 export type SystemOSViewMode = 'table' | 'cards';

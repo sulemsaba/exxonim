@@ -14,15 +14,26 @@ import { adminRoutes } from '@exxonim/admin-core/lib/adminRoutes';
 import { useAuth } from '@exxonim/admin-core/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { uploadMediaFile } from '@exxonim/admin-core/services/adminMediaService';
-import { slugify, toDatetimeLocalValue, getAdminErrorMessage, fromDatetimeLocalValue } from '@exxonim/admin-core/utils/admin';
+import {
+  slugify,
+  toDatetimeLocalValue,
+  getAdminErrorMessage,
+  fromDatetimeLocalValue,
+  formatWorkflowStatusLabel,
+} from '@exxonim/admin-core/utils/admin';
 import {
   getAdminBlogPost,
   updateAdminBlogPost,
   deleteAdminBlogPost,
   createAdminBlogPost,
+  archiveAdminBlogPost,
+  approveAdminBlogPost,
   listAdminBlogAuthors,
   listAdminBlogPostsPage,
   listAdminBlogCategories,
+  publishAdminBlogPost,
+  rejectAdminBlogPost,
+  submitAdminBlogPostForReview,
   type AdminBlogPostPayload,
 } from '@exxonim/admin-core/services/adminBlogService';
 
@@ -71,6 +82,7 @@ type BlogViewMode = 'table' | 'cards';
 type BlogSortValue = 'newest' | 'oldest' | 'title-asc' | 'title-desc';
 type BlogStatusFilter = 'all' | ApiBlogStatus;
 type BlogEditorStepKey = 'basics' | 'content' | 'seo' | 'publish';
+type BlogWorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive';
 
 type PublishRequirement = {
   key: string;
@@ -129,13 +141,6 @@ const featuredSlotOptions = [
   { value: 'hero', label: 'Hero' },
   { value: 'popular', label: 'Popular' },
   { value: 'editors-pick', label: 'Editors Pick' },
-];
-
-const statusOptions: Array<{ value: ApiBlogStatus; label: string }> = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'published', label: 'Published' },
-  { value: 'scheduled', label: 'Scheduled' },
-  { value: 'archived', label: 'Archived' },
 ];
 
 const blogEditorSteps: Array<{
@@ -209,8 +214,9 @@ function statusColor(status?: string | null): MuiChipColor {
   switch (status) {
     case 'published':
       return 'success';
-    case 'scheduled':
+    case 'pending_review':
       return 'warning';
+    case 'rejected':
     case 'archived':
       return 'error';
     default:
@@ -371,10 +377,11 @@ function createContentPayload(body: string, original?: ApiBlogPost | null) {
 function createPayload(values: BlogEditorValues, original?: ApiBlogPost | null): AdminBlogPostPayload {
   const readTimeValue = Number(values.readTimeMinutes);
   const publishedAt =
-    values.status === 'draft' || values.status === 'archived'
+    values.status !== 'published'
       ? null
       : fromDatetimeLocalValue(values.publishedAt) ??
-        (values.status === 'published' ? new Date().toISOString() : null);
+        original?.published_at ??
+        new Date().toISOString();
 
   return {
     title: values.title.trim() || 'Untitled post',
@@ -860,11 +867,7 @@ function RichTextEditor({
 }
 
 function getStatusLabel(status?: string | null) {
-  if (status === 'archived') {
-    return 'Trash';
-  }
-
-  return status || 'Draft';
+  return formatWorkflowStatusLabel(status);
 }
 
 function sortPosts(posts: ApiBlogPost[], sortBy: BlogSortValue) {
@@ -1073,9 +1076,10 @@ function BlogPostsIndexPanel() {
               >
                 <MenuItem value="all">All statuses</MenuItem>
                 <MenuItem value="draft">Draft</MenuItem>
+                <MenuItem value="pending_review">Pending review</MenuItem>
                 <MenuItem value="published">Published</MenuItem>
-                <MenuItem value="scheduled">Scheduled</MenuItem>
-                <MenuItem value="archived">Trash</MenuItem>
+                <MenuItem value="rejected">Rejected</MenuItem>
+                <MenuItem value="archived">Archived</MenuItem>
               </TextField>
             </Grid>
 
@@ -1601,7 +1605,7 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
   const router = useRouter();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const { admin } = useAuth();
+  const { admin, hasPermission } = useAuth();
   const [message, setMessage] = useState<FormMessage>(null);
   const [activeStep, setActiveStep] = useState<BlogEditorStepKey>('basics');
   const [pendingFocusField, setPendingFocusField] = useState<string | null>(null);
@@ -1653,13 +1657,20 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
   const previewSlug = clampEditorSlug(values.slug || values.title);
   const previewUrl = previewSlug ? resolvePublicPreviewUrl(previewSlug) : '';
   const editorTitle = values.title.trim() || 'Untitled draft';
+  const currentStatus = values.status || 'draft';
   const adminIdentity = admin?.email || 'admin@example.com';
-  const saveStateLabel = originalPost ? 'Saved draft' : 'Not saved yet';
-  const statusLine = `${getStatusLabel(values.status)} / ${saveStateLabel} / ${adminIdentity}`;
+  const saveStateLabel = originalPost ? 'Saved changes' : 'Not saved yet';
+  const statusLine = `${getStatusLabel(currentStatus)} / ${saveStateLabel} / ${adminIdentity}`;
   const statusNote = originalPost
-    ? values.status === 'published'
-      ? 'Published version ready for review'
-      : 'Draft saved and ready for edits'
+    ? currentStatus === 'published'
+      ? 'Published version is live.'
+      : currentStatus === 'pending_review'
+        ? 'Awaiting reviewer approval.'
+        : currentStatus === 'rejected'
+          ? 'Changes requested. Update the post, then submit it again.'
+          : currentStatus === 'archived'
+            ? 'Archived posts stay out of the public site until republished.'
+            : 'Draft saved and ready for edits'
     : 'Draft not saved yet';
   const nextRequirementText = missingRequirements.length
     ? `Next: ${missingRequirements
@@ -1733,7 +1744,7 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
 
       return createAdminBlogPost(payload);
     },
-    onSuccess: async (savedPost, submittedValues) => {
+    onSuccess: async (savedPost) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-next', 'blog-posts'] }),
         queryClient.invalidateQueries({ queryKey: ['admin-next', 'blog-analytics'] }),
@@ -1745,12 +1756,7 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
       setSlugManuallyEdited(true);
       setMessage({
         tone: 'success',
-        text:
-          submittedValues.status === 'published'
-            ? 'Blog post published.'
-            : isEditMode
-              ? 'Blog post updated.'
-              : 'Blog post created.',
+        text: isEditMode ? 'Blog post saved.' : 'Blog post draft created.',
       });
 
       if (!isEditMode) {
@@ -1764,6 +1770,80 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
       });
     },
   });
+
+  const workflowMutation = useMutation({
+    mutationFn: async (action: BlogWorkflowAction) => {
+      const targetId = originalPost?.id ?? match.entityId;
+
+      if (!targetId) {
+        throw new Error('Save this blog post before running workflow actions.');
+      }
+
+      switch (action) {
+        case 'submit':
+          return submitAdminBlogPostForReview(targetId);
+        case 'approve':
+          return approveAdminBlogPost(targetId);
+        case 'reject':
+          return rejectAdminBlogPost(targetId);
+        case 'publish':
+          return publishAdminBlogPost(targetId);
+        case 'archive':
+          return archiveAdminBlogPost(targetId);
+        default:
+          throw new Error('Unsupported workflow action.');
+      }
+    },
+    onSuccess: async (savedPost, action) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-next', 'blog-posts'] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-next', 'blog-analytics'] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-next', 'dashboard'] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-next', 'blog-posts', savedPost.id] }),
+      ]);
+
+      setValues(createEditorValues(savedPost));
+      setSlugManuallyEdited(true);
+
+      const successMessages: Record<BlogWorkflowAction, string> = {
+        submit: 'Blog post submitted for review.',
+        approve: 'Blog post approved and published.',
+        reject: 'Blog post rejected and returned to the author.',
+        publish: 'Blog post published.',
+        archive: 'Blog post archived.',
+      };
+
+      setMessage({ tone: 'success', text: successMessages[action] });
+    },
+    onError: (error) => {
+      setMessage({
+        tone: 'error',
+        text: getAdminErrorMessage(error, 'Unable to run this workflow action.'),
+      });
+    },
+  });
+
+  const canSubmitForReview =
+    Boolean(originalPost) &&
+    hasPermission('blog_post.submit_review') &&
+    (currentStatus === 'draft' || currentStatus === 'rejected');
+  const canApprove =
+    Boolean(originalPost) &&
+    hasPermission('blog_post.approve') &&
+    currentStatus === 'pending_review';
+  const canReject =
+    Boolean(originalPost) &&
+    hasPermission('blog_post.reject') &&
+    currentStatus === 'pending_review';
+  const canPublishDirectly =
+    Boolean(originalPost) &&
+    hasPermission('blog_post.publish') &&
+    (currentStatus === 'draft' || currentStatus === 'pending_review' || currentStatus === 'rejected');
+  const canArchivePost =
+    Boolean(originalPost) &&
+    hasPermission('blog_post.archive') &&
+    currentStatus !== 'archived';
+  const isActionPending = saveMutation.isPending || workflowMutation.isPending;
 
   if (isEditMode && !match.entityId) {
     return <ErrorState error={new Error('Missing blog post id.')} fallback="Missing blog post id." />;
@@ -1833,16 +1913,10 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
     await uploadCoverFile(event.dataTransfer.files?.[0]);
   }
 
-  function handleSubmit(nextStatus?: ApiBlogStatus) {
-    const normalizedStatus = nextStatus ?? values.status;
+  function handleSave() {
     const nextValues: BlogEditorValues = {
       ...values,
-      status: normalizedStatus,
       slug: clampEditorSlug(values.slug) || clampEditorSlug(values.title) || 'untitled-post',
-      publishedAt:
-        normalizedStatus === 'published' && !values.publishedAt
-          ? toDatetimeLocalValue(new Date().toISOString())
-          : values.publishedAt,
     };
 
     setMessage(null);
@@ -2337,32 +2411,20 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
                   <CardContent>
                     <Stack spacing={2}>
                       <TextField
-                        select
                         fullWidth
-                        label="Status"
-                        value={values.status}
-                        onChange={(event) => updateField('status', event.target.value as ApiBlogStatus)}
-                      >
-                        {statusOptions.map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </TextField>
+                        label="Workflow status"
+                        value={getStatusLabel(values.status)}
+                        helperText="Status changes happen through the workflow buttons, not this form."
+                        slotProps={{ input: { readOnly: true } }}
+                      />
 
                       <TextField
                         fullWidth
                         type="datetime-local"
-                        label={
-                          values.status === 'scheduled'
-                            ? 'Scheduled for'
-                            : values.status === 'published'
-                              ? 'Published at'
-                              : 'Publish timestamp'
-                        }
+                        label="Published at"
                         value={values.publishedAt}
                         onChange={(event) => updateField('publishedAt', event.target.value)}
-                        disabled={values.status === 'draft' || values.status === 'archived'}
+                        disabled={values.status !== 'published'}
                         slotProps={{ inputLabel: { shrink: true } }}
                       />
 
@@ -2374,6 +2436,7 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
                           onClick={() =>
                             updateField('publishedAt', toDatetimeLocalValue(new Date().toISOString()))
                           }
+                          disabled={values.status !== 'published'}
                         >
                           Use now
                         </Button>
@@ -2402,10 +2465,6 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
                           </MenuItem>
                         ))}
                       </TextField>
-
-                      {values.status === 'scheduled' && !values.publishedAt ? (
-                        <Alert severity="warning">Scheduled posts need a release date and time.</Alert>
-                      ) : null}
                     </Stack>
                   </CardContent>
                 </Card>
@@ -2423,7 +2482,7 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
       component="form"
       onSubmit={(event) => {
         event.preventDefault();
-        handleSubmit();
+        handleSave();
       }}
     >
       <Stack spacing={3}>
@@ -2505,21 +2564,71 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
                     type="button"
                     size="small"
                     variant="outlined"
-                    onClick={() => handleSubmit('draft')}
-                    disabled={saveMutation.isPending}
+                    onClick={handleSave}
+                    disabled={isActionPending}
                   >
-                    {isEditMode ? 'Save Draft' : 'Create Draft'}
+                    {isEditMode ? 'Save changes' : 'Create draft'}
                   </Button>
-                  <Button
-                    type="button"
-                    size="small"
-                    variant="contained"
-                    color="success"
-                    onClick={() => handleSubmit('published')}
-                    disabled={saveMutation.isPending || !canPublish}
-                  >
-                    Publish
-                  </Button>
+                  {canSubmitForReview ? (
+                    <Button
+                      type="button"
+                      size="small"
+                      variant="outlined"
+                      color="warning"
+                      onClick={() => workflowMutation.mutate('submit')}
+                      disabled={isActionPending}
+                    >
+                      Submit for review
+                    </Button>
+                  ) : null}
+                  {canReject ? (
+                    <Button
+                      type="button"
+                      size="small"
+                      variant="outlined"
+                      color="error"
+                      onClick={() => workflowMutation.mutate('reject')}
+                      disabled={isActionPending}
+                    >
+                      Reject
+                    </Button>
+                  ) : null}
+                  {canApprove ? (
+                    <Button
+                      type="button"
+                      size="small"
+                      variant="contained"
+                      color="success"
+                      onClick={() => workflowMutation.mutate('approve')}
+                      disabled={isActionPending || !canPublish}
+                    >
+                      Approve
+                    </Button>
+                  ) : null}
+                  {canPublishDirectly ? (
+                    <Button
+                      type="button"
+                      size="small"
+                      variant="contained"
+                      color="success"
+                      onClick={() => workflowMutation.mutate('publish')}
+                      disabled={isActionPending || !canPublish}
+                    >
+                      Publish
+                    </Button>
+                  ) : null}
+                  {canArchivePost ? (
+                    <Button
+                      type="button"
+                      size="small"
+                      variant="text"
+                      color="inherit"
+                      onClick={() => workflowMutation.mutate('archive')}
+                      disabled={isActionPending}
+                    >
+                      Archive
+                    </Button>
+                  ) : null}
                 </Stack>
               </Stack>
 
@@ -2628,10 +2737,10 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
                         variant="text"
                         size="small"
                         color="inherit"
-                        onClick={() => handleSubmit('draft')}
-                        disabled={saveMutation.isPending}
+                        onClick={handleSave}
+                        disabled={isActionPending}
                       >
-                        Save draft
+                        Save changes
                       </Button>
 
                       {activeStepIndex < blogEditorSteps.length - 1 ? (
@@ -2639,16 +2748,56 @@ function BlogPostEditorPanel({ match }: { match: AdminRouteMatch }) {
                           Continue
                         </Button>
                       ) : (
-                        <Button
-                          type="button"
-                          variant="contained"
-                          size="small"
-                          color="success"
-                          onClick={() => handleSubmit('published')}
-                          disabled={saveMutation.isPending || !canPublish}
-                        >
-                          Publish now
-                        </Button>
+                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                          {canSubmitForReview ? (
+                            <Button
+                              type="button"
+                              variant="outlined"
+                              size="small"
+                              color="warning"
+                              onClick={() => workflowMutation.mutate('submit')}
+                              disabled={isActionPending}
+                            >
+                              Submit for review
+                            </Button>
+                          ) : null}
+                          {canReject ? (
+                            <Button
+                              type="button"
+                              variant="outlined"
+                              size="small"
+                              color="error"
+                              onClick={() => workflowMutation.mutate('reject')}
+                              disabled={isActionPending}
+                            >
+                              Reject
+                            </Button>
+                          ) : null}
+                          {canApprove ? (
+                            <Button
+                              type="button"
+                              variant="contained"
+                              size="small"
+                              color="success"
+                              onClick={() => workflowMutation.mutate('approve')}
+                              disabled={isActionPending || !canPublish}
+                            >
+                              Approve now
+                            </Button>
+                          ) : null}
+                          {canPublishDirectly ? (
+                            <Button
+                              type="button"
+                              variant="contained"
+                              size="small"
+                              color="success"
+                              onClick={() => workflowMutation.mutate('publish')}
+                              disabled={isActionPending || !canPublish}
+                            >
+                              Publish now
+                            </Button>
+                          ) : null}
+                        </Stack>
                       )}
                     </Stack>
                   </Stack>
@@ -2669,4 +2818,3 @@ export function BlogPostsRoutePanel({ match }: { match: AdminRouteMatch }) {
 
   return <BlogPostEditorPanel match={match} />;
 }
-

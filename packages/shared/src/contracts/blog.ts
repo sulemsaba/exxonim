@@ -1,9 +1,10 @@
+import type { ApiContentStatus } from "./content";
 import type {
   ApiPaginatedResponse,
   ApiPaginationParams,
 } from "./pagination";
 
-export type ApiBlogStatus = "draft" | "published" | "scheduled" | "archived";
+export type ApiBlogStatus = ApiContentStatus;
 export type ApiBlogRevisionState = "working" | "ready_for_review";
 
 export interface ApiBlogAuthor {

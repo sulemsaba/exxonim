@@ -4,7 +4,7 @@ import {
   adminNavItems,
   type AdminSection,
   type AdminNavItem,
-  isAdminSectionRestrictedForRole,
+  canAccessAdminSection,
 } from '@exxonim/admin-core/lib/adminRoutes';
 
 import { Iconify } from 'src/components/iconify';
@@ -140,7 +140,7 @@ export type NavGroup = {
   items: NavItem[];
 };
 
-export function getNavData(role?: string | null): NavGroup[] {
+export function getNavData(role?: string | null, permissions?: string[] | null): NavGroup[] {
   const itemsBySection = new Map(adminNavItems.map((item) => [item.section, item] as const));
 
   return navBlueprint
@@ -149,7 +149,7 @@ export function getNavData(role?: string | null): NavGroup[] {
         if (typeof entry === 'string') {
           const item = itemsBySection.get(entry);
 
-          if (!item || isAdminSectionRestrictedForRole(role, item.section)) {
+          if (!item || !canAccessAdminSection(item.section, permissions, role)) {
             return [];
           }
 
@@ -158,14 +158,14 @@ export function getNavData(role?: string | null): NavGroup[] {
 
         const parent = itemsBySection.get(entry.section);
 
-        if (!parent || isAdminSectionRestrictedForRole(role, parent.section)) {
+        if (!parent || !canAccessAdminSection(parent.section, permissions, role)) {
           return [];
         }
 
         const children = entry.children.flatMap((section) => {
           const child = itemsBySection.get(section);
 
-          if (!child || isAdminSectionRestrictedForRole(role, child.section)) {
+          if (!child || !canAccessAdminSection(child.section, permissions, role)) {
             return [];
           }
 

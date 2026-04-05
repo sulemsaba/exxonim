@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { ErrorMessage } from "../components/ErrorMessage";
-import { LoadingSpinner } from "../components/LoadingSpinner";
+import { LoadBoundary } from "../components/LoadBoundary";
 import { useBlogCategories } from "../hooks/useBlogCategories";
 import { useBlogPosts } from "../hooks/useBlogPosts";
 import { usePage } from "../hooks/usePage";
@@ -1259,20 +1258,7 @@ export function ResourcesPage() {
   } = usePage<ResourcesPageContent>("resources");
   useResolvedPageSeo(page, routes.resources);
 
-  if (postsPending || categoriesPending || pagePending) {
-    return <LoadingSpinner label="Loading resources..." />;
-  }
-
-  if (postsError || categoriesError || pageError || !page) {
-    return (
-      <ErrorMessage
-        title="Unable to load resources."
-        detail="Check that the blog and page endpoints are available."
-      />
-    );
-  }
-
-  const topMedia = page.content.top_media;
+  const topMedia = page?.content.top_media;
   const { heroPost, topRailPosts, topSectionSlugs: defaultTopSectionSlugs } =
     buildResourcesBlogLayout(posts);
   const topSectionSlugs =
@@ -1288,8 +1274,8 @@ export function ResourcesPage() {
     selectedCategory === "all"
       ? null
       : categories.find((category) => category.id === selectedCategory);
-  const heroMediaSrc = heroPost?.coverImageSrc ?? topMedia.hero;
-  const heroMediaAlt = heroPost?.coverAlt ?? heroPost?.title ?? page.content.hero_title;
+  const heroMediaSrc = heroPost?.coverImageSrc ?? topMedia?.hero;
+  const heroMediaAlt = heroPost?.coverAlt ?? heroPost?.title ?? page?.content.hero_title;
 
   const handleSelectCategory = (categoryId: ActiveCategory) => {
     setSelectedCategory(categoryId);
@@ -1297,135 +1283,146 @@ export function ResourcesPage() {
   };
 
   return (
-    <>
-      <style>{resourcesPageStyles}</style>
+    <LoadBoundary
+      error={postsError || categoriesError || pageError}
+      errorDetail="The resources content could not be loaded right now."
+      errorTitle="Unable to load resources."
+      isPending={postsPending || categoriesPending || pagePending}
+      isReady={Boolean(page)}
+      loadingLabel="Loading resources..."
+    >
+      {() => (
+        <>
+        <style>{resourcesPageStyles}</style>
 
-      <div className="cx-blog-page">
-        <div className="cx-container">
-          <span className="section-anchor" id="resources" aria-hidden="true"></span>
-          <span className="section-anchor" id="blogs" aria-hidden="true"></span>
+        <div className="cx-blog-page">
+          <div className="cx-container">
+            <span className="section-anchor" id="resources" aria-hidden="true"></span>
+            <span className="section-anchor" id="blogs" aria-hidden="true"></span>
 
-          <div className="cx-top-shell">
-            <h1 className="cx-sr-only">{page.content.hero_title}</h1>
-            {heroPost ? (
-              <div className="cx-top-layout">
-                <a href={resourcePost(heroPost.slug)} className="cx-top-hero-card">
-                  <div className="cx-top-hero-media">
-                    <img src={heroMediaSrc} alt={heroMediaAlt} />
-                  </div>
-
-                  <div className="cx-top-hero-copy">
-                    <h2>{heroPost.title}</h2>
-                    <p>{heroPost.excerpt}</p>
-                    {renderTopHeroByline(heroPost)}
-                  </div>
-                </a>
-
-                <aside
-                  className="cx-top-aside"
-                  aria-label={page.content.trending_label ?? "Trending articles"}
-                >
-                  <div className="cx-trending-banner">
-                    <img
-                      className="cx-trending-bannerImage"
-                      src={topMedia.banner}
-                      alt=""
-                      aria-hidden="true"
-                    />
-                    <div className="cx-trending-bannerContent">
-                      {page.content.trending_label ? (
-                        <h2>{page.content.trending_label}</h2>
-                      ) : null}
+            <div className="cx-top-shell">
+              <h1 className="cx-sr-only">{page!.content.hero_title}</h1>
+              {heroPost ? (
+                <div className="cx-top-layout">
+                  <a href={resourcePost(heroPost.slug)} className="cx-top-hero-card">
+                    <div className="cx-top-hero-media">
+                      <img src={heroMediaSrc} alt={heroMediaAlt} />
                     </div>
-                  </div>
 
-                  <div className="cx-trending-list">
-                    {topRailPosts.map((post, index) => (
-                      <div key={post.slug}>
-                        {renderTopListItem(post, index, topMedia.trending)}
+                    <div className="cx-top-hero-copy">
+                      <h2>{heroPost.title}</h2>
+                      <p>{heroPost.excerpt}</p>
+                      {renderTopHeroByline(heroPost)}
+                    </div>
+                  </a>
+
+                  <aside
+                    className="cx-top-aside"
+                    aria-label={page!.content.trending_label ?? "Trending articles"}
+                  >
+                    <div className="cx-trending-banner">
+                      <img
+                        className="cx-trending-bannerImage"
+                        src={topMedia!.banner}
+                        alt=""
+                        aria-hidden="true"
+                      />
+                      <div className="cx-trending-bannerContent">
+                        {page!.content.trending_label ? (
+                          <h2>{page!.content.trending_label}</h2>
+                        ) : null}
                       </div>
-                    ))}
-                  </div>
-                </aside>
+                    </div>
+
+                    <div className="cx-trending-list">
+                      {topRailPosts.map((post, index) => (
+                        <div key={post.slug}>
+                          {renderTopListItem(post, index, topMedia!.trending)}
+                        </div>
+                      ))}
+                    </div>
+                  </aside>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="cx-filters" aria-label="Blog categories">
+              <button
+                type="button"
+                className={`cx-filter-btn ${selectedCategory === "all" ? "active" : ""}`}
+                aria-pressed={selectedCategory === "all"}
+                onClick={() => handleSelectCategory("all")}
+              >
+                {selectedCategory === "all" ? (
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                    <polyline points="16 7 22 7 22 13"></polyline>
+                  </svg>
+                ) : null}
+                Latest
+              </button>
+
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  type="button"
+                  className={`cx-filter-btn ${selectedCategory === category.id ? "active" : ""}`}
+                  aria-pressed={selectedCategory === category.id}
+                  onClick={() => handleSelectCategory(category.id)}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+
+            {visiblePosts.length ? (
+              <div className="cx-post-grid">
+                {visiblePosts.map((post) => (
+                  <div key={post.slug}>{renderGridCard(post)}</div>
+                ))}
+              </div>
+            ) : (
+              <article className="cx-empty-state">
+                <span className="cx-date">No posts in view</span>
+                <h2>
+                  {activeCategory
+                    ? `${activeCategory.label} posts will appear here.`
+                    : page!.content.empty_state.title}
+                </h2>
+                <p>
+                  {activeCategory?.description ??
+                    page!.content.empty_state.description}
+                </p>
+              </article>
+            )}
+
+            {hasMorePosts ? (
+              <div className="cx-grid-actions">
+                <button
+                  type="button"
+                  className="cx-more-btn"
+                  onClick={() =>
+                    setVisibleCount((currentCount) => currentCount + INITIAL_VISIBLE_COUNT)
+                  }
+                >
+                  See more
+                </button>
               </div>
             ) : null}
           </div>
-
-          <div className="cx-filters" aria-label="Blog categories">
-            <button
-              type="button"
-              className={`cx-filter-btn ${selectedCategory === "all" ? "active" : ""}`}
-              aria-pressed={selectedCategory === "all"}
-              onClick={() => handleSelectCategory("all")}
-            >
-              {selectedCategory === "all" ? (
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-                  <polyline points="16 7 22 7 22 13"></polyline>
-                </svg>
-              ) : null}
-              Latest
-            </button>
-
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                type="button"
-                className={`cx-filter-btn ${selectedCategory === category.id ? "active" : ""}`}
-                aria-pressed={selectedCategory === category.id}
-                onClick={() => handleSelectCategory(category.id)}
-              >
-                {category.label}
-              </button>
-            ))}
-          </div>
-
-          {visiblePosts.length ? (
-            <div className="cx-post-grid">
-              {visiblePosts.map((post) => (
-                <div key={post.slug}>{renderGridCard(post)}</div>
-              ))}
-            </div>
-          ) : (
-            <article className="cx-empty-state">
-              <span className="cx-date">No posts in view</span>
-              <h2>
-                {activeCategory
-                  ? `${activeCategory.label} posts will appear here.`
-                  : page.content.empty_state.title}
-              </h2>
-              <p>
-                {activeCategory?.description ??
-                  page.content.empty_state.description}
-              </p>
-            </article>
-          )}
-
-          {hasMorePosts ? (
-            <div className="cx-grid-actions">
-              <button
-                type="button"
-                className="cx-more-btn"
-                onClick={() =>
-                  setVisibleCount((currentCount) => currentCount + INITIAL_VISIBLE_COUNT)
-                }
-              >
-                See more
-              </button>
-            </div>
-          ) : null}
         </div>
-      </div>
-    </>
+        </>
+      )}
+    </LoadBoundary>
   );
 }

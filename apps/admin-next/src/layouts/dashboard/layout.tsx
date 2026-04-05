@@ -69,7 +69,7 @@ export function DashboardLayout({
   const { logout, admin } = useAuth();
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
   const [navCollapsed, setNavCollapsed] = useState(false);
-  const navData = getNavData(admin?.role);
+  const navData = getNavData(admin?.role, admin?.permissions);
   const isFocusMode = useMemo(
     () => isBlogEditorFocusMode(location.pathname, location.search),
     [location.pathname, location.search]

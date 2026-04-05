@@ -46,7 +46,7 @@ function getMotionConfig(viewportWidth: number) {
   };
 }
 
-export function useStackCardDepth() {
+export function useStackCardDepth(trigger?: string) {
   useEffect(() => {
     const cards = Array.from(
       document.querySelectorAll<HTMLElement>("[data-stack-card]")
@@ -166,5 +166,5 @@ export function useStackCardDepth() {
       reducedMotionQuery.removeEventListener("change", queueDepthUpdate);
       resetDepth();
     };
-  }, []);
+  }, [trigger]);
 }

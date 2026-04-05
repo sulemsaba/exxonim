@@ -351,8 +351,8 @@ export function BlogAuthorsPage({ theme }: BlogAuthorsPageProps) {
         title={isAuthorSelfService ? "Unable to load your author profile." : "Unable to load blog authors."}
         detail={
           isAuthorSelfService
-            ? "Check that the self-service author endpoint is available."
-            : "Check that the admin author endpoint is available."
+            ? "Your author profile could not be loaded right now."
+            : "Author records could not be loaded right now."
         }
       />
     );
