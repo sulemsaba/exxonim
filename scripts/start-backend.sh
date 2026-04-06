@@ -9,13 +9,17 @@ ensure_backend_venv
 cd "${BACKEND_DIR}"
 
 export DATABASE_URL
-export ADMIN_API_KEY
+export APP_ENV
 export JWT_SECRET
 export JWT_ALGORITHM
 export ACCESS_TOKEN_EXPIRE_MINUTES
 export REFRESH_TOKEN_EXPIRE_DAYS
+export COOKIE_SECURE
+export COOKIE_DOMAIN
 export CORS_ORIGINS
 export PUBLIC_SITE_URL
+export ADMIN_SITE_URL
+export MEDIA_ROOT
 
 .venv/bin/alembic upgrade head
 PYTHONPYCACHEPREFIX=/tmp/exxonim_backend_pycache .venv/bin/python scripts/seed_roles_permissions.py

@@ -33,7 +33,11 @@ const fallback = (
 
 function RequireAdminAuth({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isHydrating } = useAuth();
+
+  if (isHydrating) {
+    return fallback;
+  }
 
   if (!isAuthenticated) {
     const next = encodeURIComponent(`${location.pathname}${location.search}`);

@@ -1,40 +1,40 @@
 import type { DragEvent, ChangeEvent } from 'react';
 import type { AdminRouteMatch } from '@exxonim/admin-core/lib/adminRoutes';
+import type { AdminBlogPostPayload } from '@exxonim/admin-core/services/adminBlogService';
 import type {
   ApiBlogPost,
-  ApiBlogStatus,
   ApiBlogAuthor,
+  ApiBlogStatus,
   ApiBlogCategory,
 } from '@exxonim/admin-core/types/api';
 
 import { useLocation } from 'react-router';
-import { legacyBlogPost } from '@exxonim/admin-core/routes';
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { adminRoutes } from '@exxonim/admin-core/lib/adminRoutes';
 import { useAuth } from '@exxonim/admin-core/contexts/AuthContext';
+import { legacyBlogArticlePath } from '@exxonim/admin-core/routes';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { uploadMediaFile } from '@exxonim/admin-core/services/adminMediaService';
 import {
   slugify,
-  toDatetimeLocalValue,
   getAdminErrorMessage,
+  toDatetimeLocalValue,
   fromDatetimeLocalValue,
   formatWorkflowStatusLabel,
 } from '@exxonim/admin-core/utils/admin';
 import {
   getAdminBlogPost,
-  updateAdminBlogPost,
-  deleteAdminBlogPost,
   createAdminBlogPost,
-  archiveAdminBlogPost,
+  deleteAdminBlogPost,
+  rejectAdminBlogPost,
+  updateAdminBlogPost,
   approveAdminBlogPost,
+  archiveAdminBlogPost,
   listAdminBlogAuthors,
+  publishAdminBlogPost,
   listAdminBlogPostsPage,
   listAdminBlogCategories,
-  publishAdminBlogPost,
-  rejectAdminBlogPost,
   submitAdminBlogPostForReview,
-  type AdminBlogPostPayload,
 } from '@exxonim/admin-core/services/adminBlogService';
 
 import Box from '@mui/material/Box';
@@ -442,7 +442,7 @@ function formatRelativeTime(value?: string | null) {
 }
 
 function resolvePublicPreviewUrl(slug: string) {
-  const path = legacyBlogPost(slug);
+  const path = legacyBlogArticlePath(slug);
 
   if (typeof window === 'undefined') {
     return path;

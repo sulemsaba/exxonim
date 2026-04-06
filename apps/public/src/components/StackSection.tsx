@@ -982,7 +982,7 @@ const stackSectionStyles = String.raw`
   }
 `;
 
-function renderStudyVisual(index: number) {
+function renderReferenceVisual(index: number) {
   if (index === 0) {
     return (
       <div className="study-visual-shell">
@@ -1231,7 +1231,7 @@ function renderStatementCard(item: ExtendedStackItem, index: number) {
         </div>
       </div>
 
-      {renderStudyVisual(index)}
+      {renderReferenceVisual(index)}
     </div>
   );
 }

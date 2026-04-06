@@ -3,7 +3,10 @@ import { routes } from "../routes";
 import { LoadBoundary } from "../components/LoadBoundary";
 import { usePage } from "../hooks/usePage";
 import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
-import { getPublishedJobs } from "../services/jobsService";
+import {
+  getCachedPublishedJobs,
+  getPublishedJobs,
+} from "../services/jobsService";
 import type { CareerPageContent } from "../types";
 
 function formatJobLocation(city: string, country: string, mode: string) {
@@ -16,6 +19,8 @@ export function CareerPage() {
   const jobsQuery = useQuery({
     queryKey: ["career-jobs"],
     queryFn: getPublishedJobs,
+    initialData: getCachedPublishedJobs,
+    staleTime: 1000 * 60 * 30,
   });
   useResolvedPageSeo(page, routes.career);
 

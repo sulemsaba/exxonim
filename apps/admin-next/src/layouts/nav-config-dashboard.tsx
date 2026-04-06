@@ -13,6 +13,7 @@ import { Iconify } from 'src/components/iconify';
 
 const iconMap: Record<AdminNavItem['icon'], string> = {
   dashboard: 'solar:widget-5-bold',
+  notifications: 'solar:bell-bing-bold',
   consultations: 'solar:chat-round-call-bold',
   posts: 'solar:document-text-bold',
   analytics: 'solar:chart-square-bold',
@@ -34,6 +35,7 @@ const iconMap: Record<AdminNavItem['icon'], string> = {
   footer: 'solar:text-field-focus-bold',
   seo: 'solar:magnifer-zoom-in-bold',
   roles: 'solar:shield-user-bold',
+  privacy: 'solar:shield-warning-bold',
 };
 
 const navBlueprint: Array<{
@@ -49,7 +51,7 @@ const navBlueprint: Array<{
 }> = [
   {
     subheader: 'Overview',
-    items: ['dashboard'],
+    items: ['dashboard', 'reports', 'notifications'],
   },
   {
     subheader: 'Operations',
@@ -79,7 +81,7 @@ const navBlueprint: Array<{
   },
   {
     subheader: 'Access',
-    items: ['access-roles'],
+    items: ['access-roles', 'privacy-requests'],
   },
 ];
 

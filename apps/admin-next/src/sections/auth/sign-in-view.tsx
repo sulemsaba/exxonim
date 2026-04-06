@@ -25,7 +25,7 @@ import { Iconify } from 'src/components/iconify';
 export function SignInView() {
   const location = useLocation();
   const router = useRouter();
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, isHydrating, login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +38,7 @@ export function SignInView() {
     return next || adminRoutes.dashboard;
   }, [location.search]);
 
-  if (isAuthenticated) {
+  if (!isHydrating && isAuthenticated) {
     router.replace(nextPath);
   }
 
@@ -60,9 +60,9 @@ export function SignInView() {
   return (
     <Box component="form" onSubmit={handleSubmit}>
       <Stack spacing={1.5} sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography variant="h4">Exxonim Admin Study</Typography>
+        <Typography variant="h4">Exxonim Admin</Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          Sign in with a real admin account to explore the Material Kit rewrite.
+          Sign in with an admin account to manage content, service requests, and operations.
         </Typography>
       </Stack>
 
@@ -118,7 +118,7 @@ export function SignInView() {
 
       <Box sx={{ mt: 3, textAlign: 'center' }}>
         <Link href={adminRoutes.dashboard} underline="hover" color="inherit">
-          Preview dashboard path
+          Go to admin home
         </Link>
       </Box>
     </Box>

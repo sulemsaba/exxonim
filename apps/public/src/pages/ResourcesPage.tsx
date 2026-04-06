@@ -4,7 +4,7 @@ import { useBlogCategories } from "../hooks/useBlogCategories";
 import { useBlogPosts } from "../hooks/useBlogPosts";
 import { usePage } from "../hooks/usePage";
 import { useResolvedPageSeo } from "../hooks/useResolvedSeo";
-import { resourcePost, routes } from "../routes";
+import { resourceArticlePath, routes } from "../routes";
 import type {
   BlogCategoryId,
   BlogFeaturedSlot,
@@ -1176,7 +1176,7 @@ function renderTopListItem(
   trendingMedia: string[]
 ) {
   const categoryLabel = post.category?.label;
-  const articleLink = resourcePost(post.slug);
+  const articleLink = resourceArticlePath(post.slug);
   const metaParts = [formatBlogDate(post.publishedAt)];
   const thumbnailSrc =
     post.coverImageSrc ??
@@ -1209,7 +1209,7 @@ function renderTopListItem(
 function renderGridCard(post: BlogPost) {
   const categoryLabel = post.category?.label;
   const slot = getVisualSlot(post);
-  const articleLink = resourcePost(post.slug);
+  const articleLink = resourceArticlePath(post.slug);
   const metaParts = [formatBlogDate(post.publishedAt)];
 
   if (categoryLabel) {
@@ -1304,7 +1304,7 @@ export function ResourcesPage() {
               <h1 className="cx-sr-only">{page!.content.hero_title}</h1>
               {heroPost ? (
                 <div className="cx-top-layout">
-                  <a href={resourcePost(heroPost.slug)} className="cx-top-hero-card">
+                  <a href={resourceArticlePath(heroPost.slug)} className="cx-top-hero-card">
                     <div className="cx-top-hero-media">
                       <img src={heroMediaSrc} alt={heroMediaAlt} />
                     </div>

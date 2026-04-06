@@ -11,28 +11,12 @@ import type {
   ApiAdminDashboardSummary,
 } from '@exxonim/admin-core/types/api';
 
-import { useMemo, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMemo, useState, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { useAuth } from '@exxonim/admin-core/contexts/AuthContext';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAdminPricingPlans } from '@exxonim/admin-core/services/adminPricingService';
 import { getAdminNavigation } from '@exxonim/admin-core/services/adminNavigationService';
-import {
-  getAdminPage,
-  getAdminPages,
-  approveAdminPage,
-  archiveAdminPage,
-  publishAdminPage,
-  rejectAdminPage,
-  submitAdminPageForReview,
-} from '@exxonim/admin-core/services/adminPageService';
-import {
-  getAdminTestimonials,
-  approveAdminTestimonial,
-  archiveAdminTestimonial,
-  publishAdminTestimonial,
-  rejectAdminTestimonial,
-  submitAdminTestimonialForReview,
-} from '@exxonim/admin-core/services/adminTestimonialService';
 import { getAdminDashboardSummary } from '@exxonim/admin-core/services/adminDashboardService';
 import {
   getAdminRoles,
@@ -43,14 +27,14 @@ import {
   listAdminBlogCategories,
 } from '@exxonim/admin-core/services/adminBlogService';
 import {
-  getFooterSetting,
-  getSeoDefaultsSetting,
-} from '@exxonim/admin-core/services/adminStructuredSettingsService';
-import {
   matchAdminRoute,
   type AdminRouteMatch,
   canAccessAdminSection,
 } from '@exxonim/admin-core/lib/adminRoutes';
+import {
+  getFooterSetting,
+  getSeoDefaultsSetting,
+} from '@exxonim/admin-core/services/adminStructuredSettingsService';
 import {
   prettyJson,
   formatAdminRole,
@@ -59,6 +43,23 @@ import {
   flattenNavigationItems,
   formatWorkflowStatusLabel,
 } from '@exxonim/admin-core/utils/admin';
+import {
+  getAdminPage,
+  getAdminPages,
+  rejectAdminPage,
+  approveAdminPage,
+  archiveAdminPage,
+  publishAdminPage,
+  submitAdminPageForReview,
+} from '@exxonim/admin-core/services/adminPageService';
+import {
+  getAdminTestimonials,
+  rejectAdminTestimonial,
+  approveAdminTestimonial,
+  archiveAdminTestimonial,
+  publishAdminTestimonial,
+  submitAdminTestimonialForReview,
+} from '@exxonim/admin-core/services/adminTestimonialService';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -67,16 +68,21 @@ import Grid from '@mui/material/Grid';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
+import Select from '@mui/material/Select';
 import Divider from '@mui/material/Divider';
+import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
+import TextField from '@mui/material/TextField';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
+import InputLabel from '@mui/material/InputLabel';
 import CardContent from '@mui/material/CardContent';
+import FormControl from '@mui/material/FormControl';
 
 import { usePathname } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
@@ -86,8 +92,12 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { NotFoundView } from 'src/sections/error';
 import { OverviewAnalyticsView } from 'src/sections/overview/view';
 import { BlogPostsRoutePanel } from 'src/sections/admin/view/admin-blog-panels';
+import { ReportsRoutePanel } from 'src/sections/admin/view/admin-reports-panel';
 import { CareersRoutePanel } from 'src/sections/admin/view/admin-careers-panels';
+import { PrivacyRequestsRoutePanel } from 'src/sections/admin/view/admin-privacy-panel';
+import { ReviewQueueRoutePanel } from 'src/sections/admin/view/admin-review-queue-panel';
 import { ConsultationsRoutePanel } from 'src/sections/admin/view/admin-consultation-panels';
+import { NotificationsRoutePanel } from 'src/sections/admin/view/admin-notifications-panel';
 import {
   BrandSettingsPanel,
   ContactSettingsPanel,
@@ -105,6 +115,16 @@ type TableColumn<Row> = {
 
 type FormMessage = { tone: 'success' | 'error'; text: string } | null;
 type ContentWorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive';
+
+const accessRoleFilterOptions: ApiAdminRole[] = [
+  'superuser',
+  'administrator',
+  'editor',
+  'reviewer',
+  'viewer',
+  'admin',
+  'author',
+];
 
 function formatDateTime(value?: string | null) {
   if (!value) {
@@ -711,7 +731,48 @@ function SeoSettingsPanel() {
 }
 
 function AccessRolesPanel() {
-  const usersQuery = useQuery({ queryKey: ['admin-next', 'users'], queryFn: () => getAdminUsers({ limit: 50 }) });
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const searchFilter = searchParams.get('search') ?? '';
+  const requestedRole = searchParams.get('role');
+  const roleFilter =
+    requestedRole && accessRoleFilterOptions.includes(requestedRole as ApiAdminRole)
+      ? (requestedRole as ApiAdminRole)
+      : '';
+
+  const updateFilters = useCallback(
+    (updates: Partial<Record<'search' | 'role', string | null>>) => {
+      const nextParams = new URLSearchParams(location.search);
+
+      for (const [key, value] of Object.entries(updates)) {
+        if (!value) {
+          nextParams.delete(key);
+        } else {
+          nextParams.set(key, value);
+        }
+      }
+
+      navigate(
+        {
+          pathname: location.pathname,
+          search: nextParams.toString() ? `?${nextParams.toString()}` : '',
+        },
+        { replace: true }
+      );
+    },
+    [location.pathname, location.search, navigate]
+  );
+
+  const usersQuery = useQuery({
+    queryKey: ['admin-next', 'users', { search: searchFilter, role: roleFilter }],
+    queryFn: () =>
+      getAdminUsers({
+        limit: 50,
+        search: searchFilter.trim() || undefined,
+        role: roleFilter || undefined,
+      }),
+  });
   const rolesQuery = useQuery({ queryKey: ['admin-next', 'roles'], queryFn: getAdminRoles });
 
   if (usersQuery.isLoading || rolesQuery.isLoading) return <LoadingState label="Loading access roles..." />;
@@ -733,9 +794,68 @@ function AccessRolesPanel() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader
+          title="User filters"
+          subheader="These filters are URL-backed so governance notifications can open the right admin context."
+        />
+        <Divider />
+        <CardContent>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Search admins"
+                placeholder="Filter by name or email"
+                value={searchFilter}
+                onChange={(event) => {
+                  updateFilters({ search: event.target.value });
+                }}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="access-roles-filter-label">Role</InputLabel>
+                <Select
+                  labelId="access-roles-filter-label"
+                  label="Role"
+                  value={roleFilter}
+                  onChange={(event) => {
+                    updateFilters({ role: event.target.value });
+                  }}
+                >
+                  <MenuItem value="">All roles</MenuItem>
+                  {accessRoleFilterOptions.map((role) => (
+                    <MenuItem key={role} value={role}>
+                      {formatAdminRole(role)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, md: 2 }}>
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={() => {
+                  updateFilters({ search: null, role: null });
+                }}
+              >
+                Clear
+              </Button>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
       <RecordsCard<ApiAdminManagedUser>
         title="Admin users"
-        subtitle="Managed users loaded from the access API"
+        subtitle={
+          searchFilter || roleFilter
+            ? 'Managed users loaded from the access API with the active URL filters applied.'
+            : 'Managed users loaded from the access API.'
+        }
         rows={usersQuery.data}
         columns={[
           { header: 'Name', render: (row) => row.full_name || row.email },
@@ -795,8 +915,14 @@ export function AdminWorkspaceView() {
 
   if (match.section === 'blog-posts') {
     content = <BlogPostsRoutePanel match={match} />;
+  } else if (match.section === 'notifications') {
+    content = <NotificationsRoutePanel />;
+  } else if (match.section === 'reports') {
+    content = <ReportsRoutePanel />;
   } else if (match.section === 'consultations') {
     content = <ConsultationsRoutePanel match={match} />;
+  } else if (match.section === 'review-queue') {
+    content = <ReviewQueueRoutePanel />;
   } else if (match.section === 'blog-analytics') {
     content = <BlogAnalyticsPanel />;
   } else if (match.section === 'blog-categories') {
@@ -825,6 +951,8 @@ export function AdminWorkspaceView() {
     content = <SeoSettingsPanel />;
   } else if (match.section === 'access-roles') {
     content = <AccessRolesPanel />;
+  } else if (match.section === 'privacy-requests') {
+    content = <PrivacyRequestsRoutePanel />;
   }
 
   return (

@@ -3,7 +3,9 @@ import { HomePage } from "../features/home";
 import {
   AboutPage,
   CareerPage,
+  CookiePage,
   ContactPage,
+  DataRightsPage,
   FaqPage,
   NotFoundPage,
   PrivacyPage,
@@ -14,6 +16,7 @@ import { ResourceArticlePage, ResourcesPage } from "../features/resources";
 import { ServicesPage } from "../features/services";
 import { Footer, Navigation } from "../features/site-shell";
 import { PageLoader } from "../components/PageLoader";
+import { PrivacyConsentBanner } from "../components/PrivacyConsentBanner";
 import { ShellStatusNotice } from "../components/ShellStatusNotice";
 import { usePublicRouter } from "./usePublicRouter";
 import { usePublicShell } from "../hooks/usePublicShell";
@@ -153,6 +156,10 @@ export default function App({ initialPathname }: AppProps) {
     <TermsPage />
   ) : pathname === "/privacy" ? (
     <PrivacyPage />
+  ) : pathname === "/cookies" ? (
+    <CookiePage />
+  ) : pathname === "/data-rights" ? (
+    <DataRightsPage />
   ) : articleSlug ? (
     <ResourceArticlePage slug={articleSlug} />
   ) : (
@@ -178,7 +185,10 @@ export default function App({ initialPathname }: AppProps) {
         theme={theme}
       />
 
-      <ShellStatusNotice isVisible={shell.isDegraded && shell.isUsingFallback} />
+      <ShellStatusNotice
+        isVisible={shell.isDegraded}
+        missingModules={shell.missingModules}
+      />
 
       <main id="top" className="site-main">
         {page}
@@ -190,6 +200,8 @@ export default function App({ initialPathname }: AppProps) {
         footer={shell.footer}
         theme={theme}
       />
+
+      <PrivacyConsentBanner pathname={pathname} />
 
       {!whatsappUrl ? null : (
         <a

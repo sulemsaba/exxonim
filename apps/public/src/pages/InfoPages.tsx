@@ -249,6 +249,26 @@ export function PrivacyPage() {
   );
 }
 
+export function CookiePage() {
+  return (
+    <InfoPageRoute
+      slug="cookies"
+      canonicalPath={routes.cookies}
+      loadingLabel="Loading cookie notice..."
+    />
+  );
+}
+
+export function DataRightsPage() {
+  return (
+    <InfoPageRoute
+      slug="data-rights"
+      canonicalPath={routes.dataRights}
+      loadingLabel="Loading data rights..."
+    />
+  );
+}
+
 export function NotFoundPage() {
   return (
     <InfoPageRoute

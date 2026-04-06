@@ -16,7 +16,7 @@ import {
 import {
   getResourcePostSlug,
   normalizePathname,
-  resourcePost,
+  resourceArticlePath,
   routes,
 } from "../routes";
 
@@ -78,7 +78,7 @@ export async function resolveServerSeo(pathname: string | undefined): Promise<Pa
         robots,
       });
     } catch {
-      return createFallbackSeo(resourcePost(articleSlug), {
+      return createFallbackSeo(resourceArticlePath(articleSlug), {
         canonicalBaseUrl,
         image: defaultImage,
       });
@@ -119,7 +119,7 @@ export async function resolveServerSeo(pathname: string | undefined): Promise<Pa
 export async function getBlogPrerenderRoutes() {
   try {
     const posts = await fetchFreshPublicBlogPosts();
-    return posts.map((post) => resourcePost(post.slug));
+    return posts.map((post) => resourceArticlePath(post.slug));
   } catch {
     return [];
   }

@@ -1,13 +1,18 @@
 import type {
   BlogCategory,
   BlogPost,
+  CareerPageContent,
+  ContactPageContent,
   HomePageContent,
+  InfoPageContent,
   PageRecord,
+  PricingPlan,
   ResourcesPageContent,
   SiteSetting,
+  Testimonial,
 } from "../types";
 import type { BrandAssets, CompanyInfo } from "../types";
-import type { SiteSettingFooterValue } from "../types/api";
+import type { ApiCareerJob, SiteSettingFooterValue } from "../types/api";
 import {
   fallbackBrand,
   fallbackCompanyInfo,
@@ -217,6 +222,209 @@ export const fallbackResourcesPage: PageRecord<ResourcesPageContent> =
     },
   });
 
+export const fallbackCareerPage: PageRecord<CareerPageContent> = createFallbackPage(
+  "career",
+  "Careers",
+  {
+    hero: {
+      eyebrow: "Fallback hiring view",
+      title: "Exxonim keeps the careers route visible while the live feed reconnects.",
+      description:
+        "You can still understand the hiring direction, the teams Exxonim is building, and the best contact route for current opportunities.",
+    },
+    focus_areas: [
+      "Client operations and workflow coordination",
+      "Regulatory and compliance support",
+      "Structured follow-up and document readiness",
+    ],
+    status: {
+      label: "Hiring details are refreshing",
+      description:
+        "Published openings reconnect automatically after the next successful sync. Direct contact remains available right now.",
+      primary: {
+        label: "Contact Exxonim",
+        href: routes.contact,
+      },
+      secondary: {
+        label: "Browse resources",
+        href: routes.resources,
+      },
+    },
+  }
+);
+
+export const fallbackContactPage: PageRecord<ContactPageContent> = createFallbackPage(
+  "contact",
+  "Contact",
+  {
+    hero: {
+      eyebrow: "Stable contact path",
+      title: "Reach Exxonim even while live content reconnects.",
+      description:
+        "The contact route stays available so visitors can still send a request, choose the right service path, and use direct fallback contact options.",
+    },
+    cards: [
+      {
+        label: "Email",
+        value: fallbackCompanyInfo.emails[0] ?? "Use the direct Exxonim email route",
+        description: "Best for sending structured details and follow-up questions.",
+        action: {
+          label: "Email Exxonim",
+          href: `mailto:${fallbackCompanyInfo.emails[0] ?? ""}`,
+        },
+      },
+      {
+        label: "Phone",
+        value: fallbackCompanyInfo.phones[0] ?? "Use the direct Exxonim phone route",
+        description: "Use the direct phone path when you need a quick conversation.",
+        action: {
+          label: "Call Exxonim",
+          href: `tel:${(fallbackCompanyInfo.phones[0] ?? "").replace(/\s+/g, "")}`,
+        },
+      },
+      {
+        label: "WhatsApp",
+        value: "Direct contact",
+        description: "Messaging remains available even if the live content layer is delayed.",
+        action: {
+          label: "Open WhatsApp",
+          href: fallbackCompanyInfo.whatsapp || routes.contact,
+        },
+      },
+    ],
+  }
+);
+
+export const fallbackPrivacyPage: PageRecord<InfoPageContent> = createFallbackPage(
+  "privacy",
+  "Privacy Policy",
+  {
+    hero: {
+      eyebrow: "Privacy notice",
+      title: "Customer and service history lives in the database, not in browser cookies.",
+      description:
+        "Exxonim uses secure session cookies for admin access, keeps customer and service records in PostgreSQL, and limits browser-side storage to optional preferences like theme memory when you allow it.",
+    },
+    sections: [
+      {
+        title: "What we store",
+        paragraphs: [
+          "Customer history, service records, notes, documents, inbox messages, notifications, and audit logs are stored in the backend database.",
+          "We do not use cookies as the main source of truth for business records.",
+        ],
+      },
+      {
+        title: "Why we store it",
+        paragraphs: [
+          "The platform needs operational history to manage requests, track work, notify staff, and produce internal reports grounded in real records.",
+          "Retention and access are governed by internal policies and role-based permissions.",
+        ],
+      },
+    ],
+    next_step: {
+      title: "Need a data request?",
+      description:
+        "Use Exxonim's support or contact channels and the team will log and process the request through the admin privacy workflow.",
+      primary_action: {
+        label: "Contact Exxonim",
+        href: routes.contact,
+      },
+      secondary_action: {
+        label: "Read your data rights",
+        href: routes.dataRights,
+      },
+    },
+  }
+);
+
+export const fallbackCookiePage: PageRecord<InfoPageContent> = createFallbackPage(
+  "cookies",
+  "Cookie Notice",
+  {
+    hero: {
+      eyebrow: "Cookie notice",
+      title: "Cookies stay minimal and tied to real browser behavior.",
+      description:
+        "Necessary cookies support secure admin sessions and consent-state identification. Optional preference storage is limited to browser-side theme memory when you allow it.",
+    },
+    sections: [
+      {
+        title: "Necessary storage",
+        paragraphs: [
+          "Admin authentication uses secure session cookies together with CSRF protection.",
+          "Consent records are tied to a consent identifier so the site can remember your choice.",
+        ],
+      },
+      {
+        title: "Optional preferences",
+        paragraphs: [
+          "Theme memory is the only browser preference storage used in this phase, and it should not be treated as a business record.",
+          "Analytics and marketing cookies are not active unless the product truly starts using them in a later phase.",
+        ],
+      },
+    ],
+    next_step: {
+      title: "Review the full privacy details",
+      description:
+        "The privacy policy and data-rights notice explain what is stored in the system and how requests are handled.",
+      primary_action: {
+        label: "Privacy policy",
+        href: routes.privacy,
+      },
+      secondary_action: {
+        label: "Data rights",
+        href: routes.dataRights,
+      },
+    },
+  }
+);
+
+export const fallbackDataRightsPage: PageRecord<InfoPageContent> = createFallbackPage(
+  "data-rights",
+  "Data Rights",
+  {
+    hero: {
+      eyebrow: "Data rights",
+      title: "Access, correction, and deletion requests are handled through a documented internal workflow.",
+      description:
+        "Exxonim keeps privacy handling operational and auditable. Requests are logged internally, reviewed, and processed without silently deleting audit-critical history.",
+    },
+    sections: [
+      {
+        title: "Available request types",
+        paragraphs: [
+          "You can ask for access to personal data, correction of inaccurate data, or deletion handling where legally and operationally appropriate.",
+        ],
+        bullets: [
+          "Access requests",
+          "Correction requests",
+          "Deletion requests with reviewed anonymization or constrained delete handling",
+        ],
+      },
+      {
+        title: "How requests are handled",
+        paragraphs: [
+          "Requests currently come through existing support and contact channels, then staff log them into the admin privacy-request workflow.",
+          "Deletion handling avoids silent hard deletion of audit-critical records and keeps an explicit audit trail.",
+        ],
+      },
+    ],
+    next_step: {
+      title: "Start a request",
+      description:
+        "Use the contact or support page and Exxonim staff will log the request for verification and follow-up.",
+      primary_action: {
+        label: "Contact Exxonim",
+        href: routes.contact,
+      },
+      secondary_action: {
+        label: "Support",
+        href: routes.support,
+      },
+    },
+  }
+);
+
 export const fallbackBlogPosts: BlogPost[] = [
   {
     id: 1,
@@ -337,6 +545,112 @@ export const fallbackBlogPosts: BlogPost[] = [
   },
 ];
 
+export const fallbackPricingPlans: PricingPlan[] = [
+  {
+    id: 1,
+    name: "Foundation",
+    badge: "Stable start",
+    description:
+      "A fallback package outline for registration and first-step compliance work while live pricing reconnects.",
+    notes: "Use the Exxonim contact route for the latest package guidance.",
+    recommended: false,
+    features: [
+      { label: "Entity setup guidance", included: true },
+      { label: "Document checklist review", included: true },
+      { label: "Licensing follow-through", included: false },
+    ],
+  },
+  {
+    id: 2,
+    name: "Operating",
+    badge: "Recommended",
+    description:
+      "A balanced fallback plan for teams that need registration, licensing, and recurring compliance support.",
+    notes: "Live package details return automatically after the next successful sync.",
+    recommended: true,
+    features: [
+      { label: "Entity setup guidance", included: true },
+      { label: "Licensing follow-through", included: true },
+      { label: "Compliance reminders", included: true },
+    ],
+  },
+  {
+    id: 3,
+    name: "Continuity",
+    badge: "Extended coverage",
+    description:
+      "A higher-touch fallback outline for teams with multiple filings, renewals, and document dependencies.",
+    notes: "Contact Exxonim directly for a tailored scope while the live catalog reconnects.",
+    recommended: false,
+    features: [
+      { label: "Priority support coordination", included: true },
+      { label: "Ongoing compliance planning", included: true },
+      { label: "Multi-stream document support", included: true },
+    ],
+  },
+];
+
+export const fallbackTestimonials: Testimonial[] = [
+  {
+    id: 1,
+    eyebrow: "Fallback review",
+    headline: "The public shell still gives visitors a clear next step.",
+    support:
+      "Even without live testimonials, Exxonim keeps the trust path readable with stable service framing and direct contact options.",
+    quote:
+      "We could still understand the service direction, the next action, and how to reach the team while the live feed recovered.",
+    name: "Operations Team",
+    role: "Fallback reference",
+    initials: "OT",
+  },
+  {
+    id: 2,
+    eyebrow: "Fallback review",
+    headline: "Important public context stays visible instead of disappearing.",
+    support:
+      "The site continues to show service categories, contact paths, and core positioning even during temporary backend interruptions.",
+    quote:
+      "The experience still felt intentional because the shell stayed complete and the contact route remained obvious.",
+    name: "Compliance Lead",
+    role: "Fallback reference",
+    initials: "CL",
+  },
+];
+
+export const fallbackJobs: ApiCareerJob[] = [
+  {
+    id: 1,
+    title: "Client Operations Coordinator",
+    slug: "client-operations-coordinator",
+    department: "Operations",
+    employment_type: "Full-time",
+    location_mode: "hybrid",
+    city: "Dar es Salaam",
+    country: "Tanzania",
+    compensation_label: null,
+    experience_label: "Mid-level",
+    summary:
+      "Support registration and compliance workflows while the live hiring feed reconnects.",
+    description:
+      "Coordinate internal follow-through, document readiness, and status visibility across active client work.",
+    requirements: [
+      "Comfort working with operational checklists",
+      "Clear written communication",
+      "Confidence handling structured follow-up work",
+    ],
+    responsibilities: [
+      "Track active workstreams",
+      "Coordinate next actions with the team",
+      "Help keep filing and follow-up work organized",
+    ],
+    status: "published",
+    is_published: true,
+    published_at: "2026-04-01T00:00:00Z",
+    created_at: "2026-04-01T00:00:00Z",
+    updated_at: "2026-04-01T00:00:00Z",
+  },
+];
+
 export const fallbackBrandSetting = createFallbackSiteSetting<BrandAssets>(
   "brand",
   fallbackBrand
@@ -367,8 +681,18 @@ export function getFallbackPage(slug: string) {
   switch (slug) {
     case "home":
       return fallbackHomePage;
+    case "career":
+      return fallbackCareerPage;
+    case "contact":
+      return fallbackContactPage;
     case "resources":
       return fallbackResourcesPage;
+    case "privacy":
+      return fallbackPrivacyPage;
+    case "cookies":
+      return fallbackCookiePage;
+    case "data-rights":
+      return fallbackDataRightsPage;
     default:
       return undefined;
   }

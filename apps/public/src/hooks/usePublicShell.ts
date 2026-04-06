@@ -1,9 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  getCachedSiteSetting,
-  getSiteSetting,
+  getCachedSiteSettingResource,
+  getSiteSettingResource,
 } from "../services/siteSettingsService";
-import { getCachedNavigation, getNavigation } from "../services/navigationService";
+import {
+  getCachedNavigationResource,
+  getNavigationResource,
+} from "../services/navigationService";
+import type { PublicContentSource } from "@exxonim/shared/publicContentCache";
 import type { SiteSettingFooterValue } from "../types/api";
 import type { BrandAssets, CompanyInfo, NavigationItem, SiteSetting } from "../types";
 import {
@@ -20,6 +24,8 @@ interface PublicShellData {
   navigationItems: NavigationItem[];
   isDegraded: boolean;
   isUsingFallback: boolean;
+  shellSource: PublicContentSource;
+  missingModules: string[];
 }
 
 function hasSiteSettingValue<TValue>(
@@ -30,70 +36,92 @@ function hasSiteSettingValue<TValue>(
 
 export function usePublicShell(): PublicShellData {
   const navigationQuery = useQuery({
-    queryKey: ["navigation"],
-    queryFn: getNavigation,
-    initialData: getCachedNavigation,
+    queryKey: ["public-shell", "navigation"],
+    queryFn: getNavigationResource,
+    initialData: getCachedNavigationResource,
     retry: false,
+    staleTime: 1000 * 60 * 60,
   });
   const brandQuery = useQuery({
-    queryKey: ["site-settings", "brand"],
-    queryFn: () => getSiteSetting<BrandAssets>("brand"),
-    initialData: () => getCachedSiteSetting<BrandAssets>("brand"),
+    queryKey: ["public-shell", "site-settings", "brand"],
+    queryFn: () => getSiteSettingResource<BrandAssets>("brand"),
+    initialData: () => getCachedSiteSettingResource<BrandAssets>("brand"),
     retry: false,
+    staleTime: 1000 * 60 * 60,
   });
   const footerQuery = useQuery({
-    queryKey: ["site-settings", "footer"],
-    queryFn: () => getSiteSetting<SiteSettingFooterValue>("footer"),
-    initialData: () => getCachedSiteSetting<SiteSettingFooterValue>("footer"),
+    queryKey: ["public-shell", "site-settings", "footer"],
+    queryFn: () => getSiteSettingResource<SiteSettingFooterValue>("footer"),
+    initialData: () => getCachedSiteSettingResource<SiteSettingFooterValue>("footer"),
     retry: false,
+    staleTime: 1000 * 60 * 60,
   });
   const companyQuery = useQuery({
-    queryKey: ["site-settings", "company_info"],
-    queryFn: () => getSiteSetting<CompanyInfo>("company_info"),
-    initialData: () => getCachedSiteSetting<CompanyInfo>("company_info"),
+    queryKey: ["public-shell", "site-settings", "company_info"],
+    queryFn: () => getSiteSettingResource<CompanyInfo>("company_info"),
+    initialData: () => getCachedSiteSettingResource<CompanyInfo>("company_info"),
     retry: false,
+    staleTime: 1000 * 60 * 60,
   });
 
-  const brand = hasSiteSettingValue(brandQuery.data)
-    ? brandQuery.data.value
+  const brand = hasSiteSettingValue(brandQuery.data?.data)
+    ? brandQuery.data.data.value
     : fallbackBrand;
-  const footer = hasSiteSettingValue(footerQuery.data)
-    ? footerQuery.data.value
+  const footer = hasSiteSettingValue(footerQuery.data?.data)
+    ? footerQuery.data.data.value
     : fallbackFooter;
-  const company = hasSiteSettingValue(companyQuery.data)
-    ? companyQuery.data.value
+  const company = hasSiteSettingValue(companyQuery.data?.data)
+    ? companyQuery.data.data.value
     : fallbackCompanyInfo;
   const navigationItems =
-    navigationQuery.data && navigationQuery.data.length > 0
-      ? navigationQuery.data
+    navigationQuery.data?.data && navigationQuery.data.data.length > 0
+      ? navigationQuery.data.data
       : fallbackNavigationItems;
 
-  const hasMissingShellData =
-    (!brandQuery.isPending && !hasSiteSettingValue(brandQuery.data)) ||
-    (!footerQuery.isPending && !hasSiteSettingValue(footerQuery.data)) ||
-    (!companyQuery.isPending && !hasSiteSettingValue(companyQuery.data)) ||
-    (!navigationQuery.isPending &&
-      (!navigationQuery.data || navigationQuery.data.length === 0));
-
-  const hasShellError = Boolean(
-    navigationQuery.error ||
-      brandQuery.error ||
-      footerQuery.error ||
-      companyQuery.error
-  );
+  const missingModules = [
+    !hasSiteSettingValue(brandQuery.data?.data) ? "brand" : null,
+    !hasSiteSettingValue(footerQuery.data?.data) ? "footer" : null,
+    !hasSiteSettingValue(companyQuery.data?.data) ? "company" : null,
+    !navigationQuery.data?.data?.length ? "navigation" : null,
+  ].filter((value): value is string => Boolean(value));
 
   const isUsingFallback =
+    brandQuery.data?.source === "fallback" ||
+    footerQuery.data?.source === "fallback" ||
+    companyQuery.data?.source === "fallback" ||
+    navigationQuery.data?.source === "fallback" ||
     brand === fallbackBrand ||
     footer === fallbackFooter ||
     company === fallbackCompanyInfo ||
     navigationItems === fallbackNavigationItems;
+
+  const hasShellCache =
+    navigationQuery.data?.source === "cache" ||
+    brandQuery.data?.source === "cache" ||
+    footerQuery.data?.source === "cache" ||
+    companyQuery.data?.source === "cache";
+
+  const hasShellFallback = isUsingFallback;
+  const hasShellError = Boolean(
+    navigationQuery.data?.error ||
+      brandQuery.data?.error ||
+      footerQuery.data?.error ||
+      companyQuery.data?.error
+  );
+  const shellSource: PublicContentSource = hasShellFallback
+    ? "fallback"
+    : hasShellCache || hasShellError
+      ? "cache"
+      : "live";
 
   return {
     brand,
     footer,
     company,
     navigationItems,
-    isDegraded: isUsingFallback || hasShellError || hasMissingShellData,
+    isDegraded: shellSource !== "live" || missingModules.length > 0 || hasShellError,
     isUsingFallback,
+    shellSource,
+    missingModules,
   };
 }

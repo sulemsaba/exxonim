@@ -89,3 +89,9 @@ export interface SiteSettingSeoDefaultsValue {
   robotsIndex: boolean;
   robotsFollow: boolean;
 }
+
+export interface SiteSettingPolicyVersionsValue {
+  privacy_policy: string;
+  cookie_notice: string;
+  data_rights_notice: string;
+}

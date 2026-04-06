@@ -3,11 +3,17 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useSyncExternalStore,
 } from "react";
-import { clearAuthSession, setAuthSession, subscribeAuthSession } from "../lib/authSession";
-import { getAuthSession } from "../lib/authSession";
-import { getAdminMe, loginAdmin } from "../services/adminAuthService";
+import {
+  clearAuthSession,
+  getAuthSession,
+  markAuthSessionHydrated,
+  setAuthSession,
+  subscribeAuthSession,
+} from "../lib/authSession";
+import { getAdminMe, loginAdmin, logoutAdmin } from "../services/adminAuthService";
 import type { ApiAdminUser } from "../types/api";
 
 export interface LoginCredentials {
@@ -17,12 +23,11 @@ export interface LoginCredentials {
 
 export interface AuthContextValue {
   admin: ApiAdminUser | null;
-  accessToken: string | null;
-  refreshToken: string | null;
   permissions: string[];
   isAuthenticated: boolean;
+  isHydrating: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshAdminProfile: () => Promise<void>;
   hasPermission: (permission: string) => boolean;
   hasAnyPermission: (...permissions: string[]) => boolean;
@@ -33,8 +38,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 function getServerSnapshot() {
   return {
     admin: null,
-    accessToken: null,
-    refreshToken: null,
+    hydrated: false,
   };
 }
 
@@ -44,20 +48,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
     getAuthSession,
     getServerSnapshot
   );
+  const hydrationAttemptedRef = useRef(false);
 
   const permissions = session.admin?.permissions ?? [];
 
   async function refreshAdminProfile() {
-    const { accessToken } = getAuthSession();
-
-    if (!accessToken) {
-      return;
-    }
-
     const admin = await getAdminMe();
     setAuthSession({
-      ...getAuthSession(),
       admin,
+      hydrated: true,
     });
   }
 
@@ -66,8 +65,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     setAuthSession({
       admin: response.admin,
-      accessToken: response.access_token,
-      refreshToken: response.refresh_token,
+      hydrated: true,
     });
 
     try {
@@ -77,8 +75,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
   }
 
-  function logout() {
-    clearAuthSession();
+  async function logout() {
+    try {
+      await logoutAdmin();
+    } finally {
+      clearAuthSession();
+    }
   }
 
   function hasPermission(permission: string) {
@@ -90,27 +92,24 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   useEffect(() => {
-    if (!session.accessToken) {
+    if (hydrationAttemptedRef.current) {
       return;
     }
 
-    if ((session.admin?.permissions?.length ?? 0) > 0) {
-      return;
-    }
+    hydrationAttemptedRef.current = true;
 
     void refreshAdminProfile().catch(() => {
-      // Ignore initial profile refresh failures; route guards still rely on token presence.
+      markAuthSessionHydrated();
     });
-  }, [session.accessToken, session.admin?.id, session.admin?.permissions?.length]);
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         admin: session.admin,
-        accessToken: session.accessToken,
-        refreshToken: session.refreshToken,
         permissions,
-        isAuthenticated: Boolean(session.admin && session.accessToken),
+        isAuthenticated: Boolean(session.admin),
+        isHydrating: !session.hydrated,
         login,
         logout,
         refreshAdminProfile,

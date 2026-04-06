@@ -83,6 +83,13 @@ Legend:
 | `site_setting.delete` | Site settings | Delete a site setting | ✓ | ✓ | ✗ | ✗ | ✗ |
 | `consultation.read` | Consultations | View consultation records | ✓ | ✓ | ✗ | ✗ | ✗ |
 | `consultation.update` | Consultations | Update consultation status or assignee | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `notification.read` | Notifications | View in-app admin notifications | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `notification.update` | Notifications | Mark notifications as read | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `notification.preference.read` | Notifications | View personal notification preferences | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `notification.preference.update` | Notifications | Manage personal notification preferences | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `report.read` | Reports | View read-only operational and activity reports | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `privacy_request.read` | Privacy requests | View privacy-request workflow records | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `privacy_request.manage` | Privacy requests | Create and update privacy-request workflow records | ✓ | ✓ | ✗ | ✗ | ✗ |
 | `user.read` | Users | View admin users | ✓ | ✓ | ✗ | ✗ | ✗ |
 | `user.manage` | Users | Create, update, activate, or deactivate users | ✓ | ✓ | ✗ | ✗ | ✗ |
 | `role.read` | Roles | View roles and role-permission mappings | ✓ | ✓ | ✗ | ✗ | ✗ |

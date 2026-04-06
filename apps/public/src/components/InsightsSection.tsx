@@ -1,5 +1,5 @@
 import type { RefObject } from "react";
-import { resourcePost, routes } from "../routes";
+import { resourceArticlePath, routes } from "../routes";
 import type { BlogPost, HomeInsightsContent } from "../types";
 
 const homeInsightsStyles = `
@@ -538,7 +538,7 @@ export function InsightsSection({
                         </div>
                       ) : null}
 
-                      <a className="home-insights__link" href={resourcePost(post.slug)}>
+                      <a className="home-insights__link" href={resourceArticlePath(post.slug)}>
                         Learn more <span aria-hidden="true">&rarr;</span>
                       </a>
                     </div>

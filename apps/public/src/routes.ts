@@ -11,17 +11,27 @@ export const routes = {
   support: "/support/",
   terms: "/terms/",
   privacy: "/privacy/",
+  cookies: "/cookies/",
+  dataRights: "/data-rights/",
   notFound: "/404/",
 } as const;
 
 export const staticRoutePaths = Object.values(routes);
 
-export function resourcePost(slug: string) {
+export function resourceArticlePath(slug: string) {
   return `${routes.resources}${slug}/`;
 }
 
-export function legacyBlogPost(slug: string) {
+export function resourcePost(slug: string) {
+  return resourceArticlePath(slug);
+}
+
+export function legacyBlogArticlePath(slug: string) {
   return `/blog/${slug}/`;
+}
+
+export function legacyBlogPost(slug: string) {
+  return legacyBlogArticlePath(slug);
 }
 
 export function normalizePathname(pathname: string | undefined) {

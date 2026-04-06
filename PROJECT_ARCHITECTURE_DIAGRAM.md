@@ -916,16 +916,20 @@ The standalone operational checklist also lives in `DEPLOYMENT_HANDOFF.md`.
 
 The deployer should receive or define these values before deployment:
 
+- `APP_ENV`
 - `DATABASE_URL`
-- `ADMIN_API_KEY`
 - `JWT_SECRET`
 - `JWT_ALGORITHM`
 - `ACCESS_TOKEN_EXPIRE_MINUTES`
 - `REFRESH_TOKEN_EXPIRE_DAYS`
+- `COOKIE_SECURE`
+- `COOKIE_DOMAIN`
 - `CORS_ORIGINS`
 - `PUBLIC_SITE_URL`
+- `ADMIN_SITE_URL`
+- `MEDIA_ROOT`
 - `VITE_API_URL`
-- `VITE_ADMIN_API_KEY`
+- `VITE_ADMIN_CSRF_COOKIE_NAME`
 
 For local-first root scripts, these values may also be relevant:
 
@@ -933,6 +937,7 @@ For local-first root scripts, these values may also be relevant:
 - `POSTGRES_HOST`
 - `POSTGRES_PORT`
 - `POSTGRES_ADMIN_USER`
+- `POSTGRES_ADMIN_PASSWORD`
 - `POSTGRES_APP_USER`
 - `POSTGRES_APP_PASSWORD`
 - `POSTGRES_DB_NAME`
@@ -1112,3 +1117,744 @@ If someone asks, "What should this document be used for now?" the honest answer 
 - do not use it as proof that the current developer is already operating a fully hardened production platform today
 
 That is the realistic and useful posture for Exxonim at this stage.
+
+## 25. Requested Technical Evidence Appendix
+
+This appendix answers a more technical due-diligence style request.
+
+Every statement below is one of three things:
+
+- directly measured on the local runtime on April 5, 2026
+- directly inspected from the frontend repo and the sibling backend repo
+- clearly marked as inference or not currently available
+
+### 25.1 Availability Snapshot
+
+| Requested item | Current answer |
+| --- | --- |
+| Public deployed URL | No public deployed URL is referenced in the checked-in repo materials. The only verified runtime URLs are local development URLs. |
+| Public local URL | Canonical dev port is `5173`, but during this evidence pass Vite moved to `5174` because `5173` was already occupied locally. |
+| Lighthouse report | Not currently available in the repo. No checked-in Lighthouse report was found, and the `lighthouse` CLI is not installed on this machine. |
+| Bundle analyzer output | Not currently available. No analyzer plugin or checked-in analyzer report was found. |
+| Full-page screenshots or screen recordings | Not currently available as checked-in project artifacts. |
+| Reverse-proxy or `nginx` config | Not currently checked into this repo. The project contains deployment guidance, but not an actual `nginx` or proxy config file. |
+| Explicit threat model document | Not currently found in the repo. |
+| Checked-in ERD | Not currently found. An inferred ERD is included later in this appendix instead. |
+
+### 25.2 Lighthouse, Public URL, and Frontend Runtime Evidence
+
+Actual Lighthouse scores are not available today.
+
+The honest reason is simple:
+
+- no deployed public URL was found in the repo
+- no checked-in Lighthouse JSON or HTML report was found
+- the `lighthouse` CLI is not installed locally
+
+What is available instead:
+
+- local public runtime verified previously at `http://127.0.0.1:5173`
+- local public runtime also observed at `http://127.0.0.1:5174` during this pass because Vite auto-shifted when `5173` was already in use
+
+So the correct answer is:
+
+- actual Lighthouse scores: not available yet
+- deployed public URL: not available from the checked-in repo materials
+- local development URL: available and verified
+
+### 25.3 Measured Backend Response Times
+
+These timings were measured locally on April 5, 2026 using one-shot `curl` requests against the running backend.
+
+Important interpretation notes:
+
+- these are local development measurements, not production measurements
+- these are not load-test numbers
+- they are still useful as a rough snapshot of relative endpoint cost
+
+| Endpoint | Total time | Time to first byte | HTTP code | Notes |
+| --- | --- | --- | --- | --- |
+| `GET /api/v1/blog/posts` | `0.038599s` | `0.038458s` | `200` | Slowest sampled endpoint in this pass. |
+| `GET /api/v1/site-settings/company_info` | `0.023614s` | `0.023466s` | `200` | Second-slowest sampled endpoint in this pass. |
+| `GET /api/v1/testimonials/` | `0.018314s` | `0.018207s` | `200` | Moderate among the sampled public endpoints. |
+| `GET /api/v1/navigation/` | `0.017906s` | `0.017773s` | `200` | Fast enough locally, but shell-critical. |
+| `GET /api/v1/pages/home` | `0.014568s` | `0.014444s` | `200` | Homepage page-content lookup. |
+| `GET /api/v1/pricing/plans` | `0.013568s` | `0.013326s` | `200` | Fast local response. |
+| `GET /api/v1/site-settings/brand` | `0.013377s` | `0.013250s` | `200` | Fast local response. |
+| `GET /api/v1/site-settings/footer` | `0.013261s` | `0.013166s` | `200` | Fast local response. |
+
+Plain-English conclusion:
+
+- the sampled endpoints are all locally fast
+- among the endpoints tested, blog listing is the slowest one today
+- the more important issue for the public experience is resilience and fallback behavior, not raw local endpoint latency
+
+### 25.4 Security Header Snapshot
+
+#### Public dev server header snapshot
+
+Observed on the local public Vite server during this pass:
+
+```text
+HTTP/1.1 200 OK
+Vary: Origin
+Content-Type: text/html
+Cache-Control: no-cache
+Etag: W/"d70-iFLpem2E2/C7jfG9/1RsVJtpKFc"
+Date: Sun, 05 Apr 2026 05:48:48 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+```
+
+#### Backend header snapshot
+
+Observed on `GET /health/live`:
+
+```text
+HTTP/1.1 200 OK
+date: Sun, 05 Apr 2026 05:49:07 GMT
+server: uvicorn
+content-length: 18
+content-type: application/json
+```
+
+#### Important nuance about health checks
+
+`/health/live` is currently a `GET` endpoint.
+
+That means:
+
+- `GET /health/live` returns `200`
+- `HEAD /health/live` returns `405 Method Not Allowed`
+
+So any future uptime checker or proxy health probe should use `GET`, not `HEAD`, unless the route behavior is changed.
+
+#### Security-header conclusion
+
+From the local responses captured above, these common security headers were not observed:
+
+- `Content-Security-Policy`
+- `Strict-Transport-Security`
+- `X-Frame-Options`
+- `X-Content-Type-Options`
+- `Referrer-Policy`
+- `Permissions-Policy`
+- `Cross-Origin-Opener-Policy`
+- `Cross-Origin-Resource-Policy`
+
+That does not automatically mean the future deployed site will lack them, because they may be added later at the reverse-proxy layer.
+
+But the honest codebase-level conclusion right now is:
+
+- they are not evidenced in the application responses captured during this pass
+- there is no checked-in `nginx` or reverse-proxy config showing them either
+
+### 25.5 Threat Model and the Meaning of "Cannot Be Reversed"
+
+No explicit threat-model document was found in this repo.
+
+So the best honest answer is an inferred one.
+
+#### What the current codebase appears to defend against
+
+The current application design clearly tries to address:
+
+- accidental admin mistakes
+- unauthorized admin actions
+- role overreach between staff users
+- opportunistic abuse of admin write endpoints
+- content mistakes before publication
+
+Evidence for that:
+
+- JWT-based admin authentication
+- backend-enforced RBAC permission checks
+- temporary `X-API-Key` protection on admin write routes
+- audit logging of important actions
+- draft, review, publish workflow for public content
+
+#### What the current codebase does not yet clearly evidence
+
+The repo does not currently demonstrate a posture built around:
+
+- nation-state adversaries
+- advanced persistent attackers
+- hardened reverse-proxy security policy
+- WAF rules
+- rate limiting
+- immutable external audit storage
+- cryptographic tamper-proof historical content records
+- anti-reversing or code-obfuscation controls
+
+So if someone asks for a realistic present-day threat model, the most honest answer is:
+
+- the current system looks designed more for authenticated staff governance and normal web risk reduction than for high-end adversarial environments
+
+#### What "cannot be reversed" could mean
+
+That phrase can mean two very different things, and they should not be confused.
+
+**Meaning 1: frontend code cannot be reverse-engineered**
+
+That is not what this repo currently implements.
+
+There is no evidence here of:
+
+- code obfuscation
+- anti-debugging measures
+- special frontend hardening meant to prevent reverse engineering
+
+The frontend is a normal Vite-built React application.
+
+**Meaning 2: historical content changes cannot be secretly tampered with**
+
+This repo partially addresses that, but not fully.
+
+What exists now:
+
+- audit log records
+- workflow status tracking
+- reviewer and publisher separation in the permission model
+
+What does not yet exist:
+
+- cryptographically signed history
+- WORM storage
+- external immutable log sink
+- database-level immutability guarantees beyond application behavior
+
+So the precise answer is:
+
+- if "cannot be reversed" means frontend obfuscation, then no, that is not present
+- if it means historical integrity and accountability, then the project has foundations for that, but not a fully tamper-proof design
+
+### 25.6 Frontend Package, Build, and Deploy Surface
+
+#### Package roles
+
+| Package | Role in the system | Notable scripts or behavior |
+| --- | --- | --- |
+| Root `package.json` | Workspace orchestrator for the monorepo | Runs the public app, new admin, typechecks, and deploy assembly with `build:deploy`. |
+| `apps/public/package.json` | Public marketing site | Vite dev on `5173`, client build, SSR build, and prerender step. |
+| `apps/admin-next/package.json` | Main admin interface | Vite dev on `3039`, TypeScript build, ESLint, Prettier, and MUI-heavy admin app dependencies. |
+| `packages/shared/package.json` | Shared low-level API helpers | Minimal shared dependency surface around `axios`. |
+| `packages/admin-core/package.json` | Shared admin logic | Auth context, admin API client, routes, services, and admin UI helpers. |
+
+#### Important repo-level observations
+
+- the root monorepo uses `npm` workspaces
+- `apps/admin-next` still declares `yarn@1.22.22` metadata in its own `package.json`
+- practical repo orchestration is currently done from the root with `npm`, not with a repo-wide Yarn setup
+
+#### Public build and prerender flow
+
+The public app build is more than a plain SPA build.
+
+It does all of the following:
+
+- TypeScript project build
+- client bundle build
+- SSR bundle build from `src/app/entry-server.tsx`
+- prerender pass through `apps/public/scripts/prerender.mjs`
+- sitemap and `robots.txt` generation
+
+#### Deploy assembly
+
+The root deploy builder now does the correct thing:
+
+- builds `@exxonim/public`
+- builds `@exxonim/admin-next`
+- copies public output into root `dist/`
+- copies admin-next output into `dist/admin/`
+
+That means the deploy artifact now aligns with the intended admin surface.
+
+#### Reverse-proxy config status
+
+No checked-in `nginx`, reverse-proxy, or systemd config was found in the repo.
+
+What exists instead:
+
+- deployment guidance
+- handoff expectations
+- build commands
+
+What does not exist yet:
+
+- a checked-in production proxy config
+- a checked-in TLS/header policy
+- a checked-in systemd service definition
+
+### 25.7 Public App Entry, Routing, Shell, and Loading/Error Structure
+
+#### Public entry and route structure
+
+The public app entry is local and custom rather than framework-heavy.
+
+Key points:
+
+- `src/app/main.tsx` bootstraps hydration and initial rendering
+- `src/app/App.tsx` is the main public shell and route switch
+- the public app does not use React Router for its main page routing
+- `src/app/usePublicRouter.ts` intercepts same-origin public links and keeps the shell mounted during internal navigation
+- `src/app/entry-server.tsx` handles server-side rendering for prerender
+
+#### Shell-critical components
+
+The main persistent shell is built around:
+
+- `Navigation`
+- `Footer`
+- `ShellStatusNotice`
+
+That means the app is now trying to preserve orientation even when dynamic content is degraded.
+
+#### Loading and error components
+
+The current loading and error surface is split across these responsibilities:
+
+- `PageLoader`
+  - initial boot overlay
+- `LoadBoundary`
+  - route or section skeleton/error boundary
+- `ErrorMessage`
+  - generic fallback error presentation
+- `ShellStatusNotice`
+  - degraded-mode messaging for shell-level fallback use
+
+This is important because the public-site loading model is no longer just "spinner everywhere."
+It now tries to distinguish:
+
+- shell availability
+- page-content loading
+- section-level degradation
+
+### 25.8 React Query, API Client, Base URL Logic, Caching, and Retry
+
+This is the area that needed the most precise wording.
+
+#### Shared base URL and HTTP client behavior
+
+The public and admin stacks both build on the shared API utilities.
+
+Current shared behavior:
+
+- base URL resolves from `VITE_API_URL`
+- fallback base URL is `http://localhost:8000/api/v1`
+- Axios client default timeout is `5000ms`
+
+#### React Query defaults in the public app
+
+The public query client currently sets:
+
+- `staleTime = 5 minutes`
+- `refetchOnWindowFocus = false`
+
+There is no global `retry: false` at the query-client level.
+
+That distinction matters.
+
+#### What normal page and content queries do
+
+Normal public queries such as:
+
+- `usePage`
+- `useBlogPosts`
+- `useNavigation`
+
+all do this pattern:
+
+- read cached `initialData`
+- then call service functions that use `fetchWithFallback`
+- keep React Query's normal retry behavior because they do not override `retry`
+
+That means:
+
+- if local cached content exists, these queries can render immediately from last-known-good data
+- if the network request fails, the service layer can still fall back to cached or default content
+- but the query itself still behaves like a normal React Query query from a retry perspective
+
+#### What shell-critical queries do differently
+
+`usePublicShell` handles:
+
+- navigation
+- brand
+- footer
+- company info
+
+Those queries explicitly set:
+
+- `retry: false`
+
+That means the shell-critical path is intentionally different from normal page queries.
+
+The current design choice is:
+
+- fail fast on shell fetches
+- degrade immediately to cached or built-in fallback shell content
+- avoid long retry-driven uncertainty for navigation and footer essentials
+
+#### Cache storage model
+
+The public cache helper stores content under the localStorage prefix:
+
+- `exxonim-public-content`
+
+The helper records:
+
+- a cache key
+- a cached timestamp
+- the cached value
+
+This is not a full stale-while-revalidate engine with cache expiry rules.
+It is better described as:
+
+- local last-known-good persistence with graceful fallback
+
+### 25.9 Backend Main, Middleware, CORS, JWT, and Route Guards
+
+#### FastAPI application surface
+
+The backend `main.py` currently does these core things:
+
+- creates the FastAPI app
+- applies `CORSMiddleware`
+- includes the main API router at `/api/v1`
+- includes the top-level health router
+- mounts `/uploads` as static files from the backend uploads directory
+
+#### CORS
+
+CORS is driven by an environment variable string and expanded into a list.
+
+Current behavior from code:
+
+- `allow_origins = settings.cors_origins`
+- `allow_credentials = True`
+- `allow_methods = ["*"]`
+- `allow_headers = ["*"]`
+
+This is flexible for local development, but it is not the same thing as a hardened production header policy.
+
+#### Auth model
+
+The current backend auth model is:
+
+- JWT bearer auth for admins
+- bcrypt password hashing through `passlib`
+- access token and refresh token generation with `python-jose`
+- stateless refresh tokens rather than a server-side session store
+
+Default auth timings from env examples:
+
+- access token expiry: `15` minutes
+- refresh token expiry: `7` days
+
+#### Guard chain for admin writes
+
+The admin write path is currently protected by two layers:
+
+1. authenticated admin identity
+2. temporary `X-API-Key` write protection
+
+Then the RBAC layer applies permission checks such as:
+
+- `require_permission("page.read")`
+- `require_permission("media.create")`
+- route-local permission assertions for workflow and ownership-specific behavior
+
+That means the backend is now the real authority for who may perform write actions.
+
+### 25.10 One Real CRUD Module End to End: Pages
+
+The pages module is a good end-to-end example because it connects:
+
+- public reads
+- admin writes
+- workflow rules
+- permission checks
+- audit logging
+
+#### Public read side
+
+The public page flow is:
+
+1. `usePage(slug)`
+2. `pageService.getPageBySlug(slug)`
+3. request to `GET /api/v1/pages/{slug}`
+4. backend `crud/page.py`
+5. database read from `pages`
+
+Important public rule:
+
+- public reads expose published content only
+- the CRUD layer still contains compatibility logic for legacy `is_published` data
+
+#### Admin write side
+
+The admin side for pages includes:
+
+- page listing
+- create
+- update
+- delete
+- submit for review
+- approve
+- reject
+- publish
+- archive
+
+#### Data model fields that matter
+
+The `Page` model now stores workflow-aware metadata including:
+
+- `status`
+- `created_by_id`
+- `updated_by_id`
+- `submitted_at`
+- `submitted_by_id`
+- `reviewed_at`
+- `reviewed_by_id`
+- `published_at`
+- `published_by_id`
+
+#### Permission model for pages
+
+The permission model distinguishes between:
+
+- read
+- create
+- edit own draft
+- edit any draft
+- submit for review
+- approve
+- reject
+- publish
+- archive
+- delete
+
+That separation is exactly why the permission matrix matters.
+
+#### Workflow logic
+
+The workflow layer enforces the legal state changes among:
+
+- `draft`
+- `pending_review`
+- `published`
+- `rejected`
+- `archived`
+
+So the system is no longer just "update a page row however you want."
+It is moving toward explicit editorial governance.
+
+### 25.11 Media Upload and Storage Path Logic
+
+The media module currently uses local filesystem storage.
+
+#### What happens on upload
+
+When an admin uploads media:
+
+- the request hits `POST /api/v1/admin/media/upload`
+- only `image/*` uploads are accepted
+- the file is stored under the backend `uploads/` directory
+- the stored filename is a generated UUID plus the original file suffix
+- a database record is created in the `media` table
+- the returned URL is built from `request.base_url` plus `/uploads/<filename>`
+
+#### Current storage shape
+
+That means today the media system is:
+
+- local filesystem-backed
+- exposed directly by FastAPI static serving
+- not using S3 or other object storage
+
+#### Important deployment implication
+
+Because media URLs are built from `request.base_url`, correct public media URLs in a reverse-proxy deployment will depend on proper forwarded host and scheme handling.
+
+That is worth noting because no checked-in proxy configuration is currently present to prove that behavior end to end.
+
+### 25.12 Environment Example Files
+
+Only example files were inspected here, not real secrets.
+
+#### Root `.env.example`
+
+The root example defines the cross-repo local development contract, including:
+
+- application environment mode
+- backend directory location
+- PostgreSQL host, port, users, password, and database name
+- public, admin, and backend dev ports
+- backend base URL, public site URL, and admin site URL
+- `DATABASE_URL`
+- JWT settings
+- cookie settings
+- CORS origins
+- media storage root
+- `VITE_API_URL`
+- `VITE_ADMIN_CSRF_COOKIE_NAME`
+
+#### `apps/admin-next/.env.example`
+
+The admin-next example is intentionally small:
+
+- `VITE_API_URL`
+- `VITE_ADMIN_CSRF_COOKIE_NAME`
+
+That fits the current architecture because the admin app mainly needs:
+
+- API base URL
+- CSRF cookie name for the cookie-based admin session model
+
+#### Backend `.env.example`
+
+The backend example defines:
+
+- `APP_ENV`
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `JWT_ALGORITHM`
+- access and refresh token lifetimes
+- cookie settings
+- `CORS_ORIGINS`
+- `PUBLIC_SITE_URL`
+- `ADMIN_SITE_URL`
+- `MEDIA_ROOT`
+
+### 25.13 Requested Artifacts Not Currently Present
+
+The following requested artifacts are not currently part of the checked-in project materials:
+
+- Lighthouse report
+- bundle analyzer output
+- full-page screenshots
+- screen recordings
+- checked-in production `nginx` config
+- checked-in proxy or CDN header policy
+- formal threat-model document
+- checked-in ERD file
+
+That does not mean the project cannot produce them later.
+It means they are not current source-of-truth artifacts in the repo today.
+
+### 25.14 Current Database Schema and Inferred ERD
+
+No standalone ERD file was found, but the backend models clearly imply this schema family:
+
+- `admin_users`
+- `roles`
+- `permissions`
+- `user_roles`
+- `role_permissions`
+- `audit_logs`
+- `pages`
+- `blog_posts`
+- `blog_categories`
+- `blog_authors`
+- `testimonials`
+- `navigation_items`
+- `site_settings`
+- `pricing_plans`
+- `career_jobs`
+- `consultations`
+- `consultation_status_history`
+- `media`
+
+#### Inferred ERD
+
+This diagram is inferred from the current SQLAlchemy models. It is useful for orientation, but it is not a separately maintained official ERD artifact.
+
+```mermaid
+erDiagram
+    ADMIN_USERS ||--o{ USER_ROLES : has
+    ROLES ||--o{ USER_ROLES : assigned_to
+    ROLES ||--o{ ROLE_PERMISSIONS : grants
+    PERMISSIONS ||--o{ ROLE_PERMISSIONS : maps
+    ADMIN_USERS ||--o{ AUDIT_LOGS : creates
+
+    ADMIN_USERS ||--o{ PAGES : creates_or_updates
+    ADMIN_USERS ||--o{ BLOG_POSTS : creates_or_updates
+    ADMIN_USERS ||--o{ TESTIMONIALS : creates_or_updates
+
+    BLOG_CATEGORIES ||--o{ BLOG_POSTS : classifies
+    BLOG_AUTHORS ||--o{ BLOG_POSTS : authors
+
+    ADMIN_USERS {
+        int id
+        string email
+        string hashed_password
+        bool is_active
+    }
+
+    ROLES {
+        int id
+        string code
+        string name
+    }
+
+    PERMISSIONS {
+        int id
+        string code
+        string module
+        string action
+    }
+
+    AUDIT_LOGS {
+        int id
+        int actor_id
+        string action
+        string target_type
+        string target_id
+        jsonb old_value
+        jsonb new_value
+    }
+
+    PAGES {
+        int id
+        string slug
+        string title
+        string status
+        jsonb content
+    }
+
+    BLOG_POSTS {
+        int id
+        string slug
+        string title
+        string status
+    }
+
+    TESTIMONIALS {
+        int id
+        string client_name
+        string status
+    }
+```
+
+### 25.15 Deep Technical Takeaway
+
+If these findings are summarized very plainly, the current technical position is:
+
+- the application architecture is real and substantial, not a mock frontend
+- the public site is API-backed but now has meaningful fallback foundations
+- the admin system has real RBAC and workflow foundations rather than only visual hiding
+- the deploy target is now aligned to `admin-next`
+- the codebase still lacks some of the external artifacts that a later deployer, auditor, or buyer would eventually want
+
+Those missing external artifacts are mostly in the category of:
+
+- production hardening evidence
+- deployment packaging evidence
+- observability evidence
+- formal documentation artifacts
+
+That is consistent with the current stage of the project:
+
+- locally verified
+- architecturally serious
+- not yet fully documented as a publicly operated hardened production platform

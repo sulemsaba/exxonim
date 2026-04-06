@@ -1,7 +1,15 @@
 import type { MouseEvent } from 'react';
 import type { IconButtonProps } from '@mui/material/IconButton';
+import type { ApiAdminNotification } from '@exxonim/admin-core/types/api';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router';
+import { useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  listAdminNotifications,
+  markAdminNotificationRead,
+  markAllAdminNotificationsRead,
+} from '@exxonim/admin-core/services/adminNotificationService';
 
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -12,6 +20,7 @@ import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
 import Popover from '@mui/material/Popover';
+import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import ListItemText from '@mui/material/ListItemText';
@@ -19,54 +28,61 @@ import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 
-import { RouterLink } from 'src/routes/components';
-
 import { fToNow } from 'src/utils/format-time';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
+import {
+  getAdminNotificationIcon,
+  getAdminNotificationSeverityColor,
+} from 'src/sections/admin/utils/admin-notification-metadata';
+
 // ----------------------------------------------------------------------
 
-type NotificationColor =
-  | 'default'
-  | 'primary'
-  | 'secondary'
-  | 'info'
-  | 'success'
-  | 'warning'
-  | 'error';
-
-export type NotificationItemProps = {
-  id: string;
-  title: string;
-  description: string;
-  isUnRead: boolean;
-  postedAt: string | number | null;
-  icon: string;
-  href?: string | null;
-  color?: NotificationColor;
-};
-
 export type NotificationsPopoverProps = IconButtonProps & {
-  data?: NotificationItemProps[];
   viewAllHref?: string;
 };
 
 export function NotificationsPopover({
-  data = [],
   sx,
   viewAllHref,
   ...other
 }: NotificationsPopoverProps) {
-  const [notifications, setNotifications] = useState(data);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
-  useEffect(() => {
-    setNotifications(data);
-  }, [data]);
+  const notificationsQuery = useQuery({
+    queryKey: ['admin-next', 'notifications', 'bell'],
+    queryFn: () =>
+      listAdminNotifications({
+        status: 'all',
+        page: 1,
+        limit: 7,
+      }),
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+  });
 
-  const totalUnRead = notifications.filter((item) => item.isUnRead).length;
+  const markReadMutation = useMutation({
+    mutationFn: (notificationId: string) => markAdminNotificationRead(notificationId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin-next', 'notifications'] });
+    },
+  });
+
+  const markAllMutation = useMutation({
+    mutationFn: () => markAllAdminNotificationsRead(),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin-next', 'notifications'] });
+    },
+  });
+
+  const totalUnRead = notificationsQuery.data?.unread_total ?? 0;
+  const notifications = notificationsQuery.data?.items ?? [];
   const freshItems = notifications.slice(0, 3);
   const earlierItems = notifications.slice(3);
 
@@ -79,13 +95,27 @@ export function NotificationsPopover({
   }, []);
 
   const handleMarkAllAsRead = useCallback(() => {
-    setNotifications((current) =>
-      current.map((notification) => ({
-        ...notification,
-        isUnRead: false,
-      }))
-    );
-  }, []);
+    void markAllMutation.mutateAsync();
+  }, [markAllMutation]);
+
+  const handleSelectNotification = useCallback(
+    async (notification: ApiAdminNotification) => {
+      if (!notification.is_read) {
+        try {
+          await markReadMutation.mutateAsync(notification.id);
+        } catch {
+          // Keep navigation responsive even if the read-state update fails.
+        }
+      }
+
+      handleClosePopover();
+
+      if (notification.href) {
+        navigate(notification.href);
+      }
+    },
+    [handleClosePopover, markReadMutation, navigate]
+  );
 
   return (
     <>
@@ -136,7 +166,7 @@ export function NotificationsPopover({
 
           {totalUnRead > 0 ? (
             <Tooltip title="Mark all as read">
-              <IconButton color="primary" onClick={handleMarkAllAsRead}>
+              <IconButton color="primary" onClick={handleMarkAllAsRead} disabled={markAllMutation.isPending}>
                 <Iconify icon="eva:done-all-fill" />
               </IconButton>
             </Tooltip>
@@ -146,7 +176,32 @@ export function NotificationsPopover({
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Scrollbar fillContent sx={{ minHeight: 200, maxHeight: 420 }}>
-          {notifications.length ? (
+          {notificationsQuery.isLoading ? (
+            <Box sx={{ px: 2.5, py: 2 }}>
+              {[0, 1, 2].map((item) => (
+                <Box key={item} sx={{ py: 1.5 }}>
+                  <Skeleton variant="rounded" height={56} />
+                </Box>
+              ))}
+            </Box>
+          ) : notificationsQuery.isError ? (
+            <Box
+              sx={{
+                px: 2.5,
+                py: 5,
+                textAlign: 'center',
+                color: 'text.secondary',
+              }}
+            >
+              <Iconify icon="solar:notification-unread-lines-bold-duotone" width={36} />
+              <Typography variant="subtitle2" sx={{ mt: 1.5 }}>
+                Notifications are temporarily unavailable
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 0.75 }}>
+                Your inbox will refresh automatically when the API responds again.
+              </Typography>
+            </Box>
+          ) : notifications.length ? (
             <>
               <List
                 disablePadding
@@ -160,7 +215,7 @@ export function NotificationsPopover({
                   <NotificationItem
                     key={notification.id}
                     notification={notification}
-                    onSelect={handleClosePopover}
+                    onSelect={handleSelectNotification}
                   />
                 ))}
               </List>
@@ -178,7 +233,7 @@ export function NotificationsPopover({
                     <NotificationItem
                       key={notification.id}
                       notification={notification}
-                      onSelect={handleClosePopover}
+                      onSelect={handleSelectNotification}
                     />
                   ))}
                 </List>
@@ -198,7 +253,7 @@ export function NotificationsPopover({
                 No notifications right now
               </Typography>
               <Typography variant="body2" sx={{ mt: 0.75 }}>
-                Exxonim alerts and activity will appear here.
+                Exxonim in-app alerts will appear here as real work arrives.
               </Typography>
             </Box>
           )}
@@ -212,11 +267,12 @@ export function NotificationsPopover({
               <Button
                 fullWidth
                 color="inherit"
-                component={RouterLink}
-                href={viewAllHref}
-                onClick={handleClosePopover}
+                onClick={() => {
+                  handleClosePopover();
+                  navigate(viewAllHref);
+                }}
               >
-                Open dashboard
+                Open notifications
               </Button>
             </Box>
           </>
@@ -232,84 +288,72 @@ function NotificationItem({
   notification,
   onSelect,
 }: {
-  notification: NotificationItemProps;
-  onSelect: () => void;
+  notification: ApiAdminNotification;
+  onSelect: (notification: ApiAdminNotification) => void | Promise<void>;
 }) {
-  const color = notification.color ?? 'default';
-  const clickableProps = notification.href
-    ? {
-        component: RouterLink,
-        href: notification.href,
-        onClick: onSelect,
-      }
-    : {
-        onClick: onSelect,
-      };
+  const color = getAdminNotificationSeverityColor(notification.severity);
 
   return (
     <ListItemButton
-      {...clickableProps}
+      onClick={() => {
+        void onSelect(notification);
+      }}
       sx={{
         py: 1.5,
         px: 2.5,
         mt: '1px',
         alignItems: 'flex-start',
-        ...(notification.isUnRead && {
-          bgcolor: 'action.selected',
-        }),
+        ...(notification.is_read
+          ? null
+          : {
+              bgcolor: 'action.selected',
+            }),
       }}
     >
       <ListItemAvatar>
         <Avatar
-          sx={(theme) => ({
-            bgcolor:
-              color === 'default'
-                ? theme.vars.palette.background.neutral
-                : theme.vars.palette[color].lighter,
-            color:
-              color === 'default'
-                ? theme.vars.palette.text.primary
-                : theme.vars.palette[color].dark,
-          })}
+          sx={{
+            width: 40,
+            height: 40,
+            bgcolor: `${color}.lighter`,
+            color: `${color}.main`,
+          }}
         >
-          <Iconify icon={notification.icon} width={18} />
+          <Iconify icon={getAdminNotificationIcon(notification)} width={18} />
         </Avatar>
       </ListItemAvatar>
 
       <ListItemText
         primary={
-          <Typography variant="subtitle2" sx={{ pr: 1 }}>
+          <Typography variant="subtitle2">
             {notification.title}
+            {notification.occurrence_count > 1 ? ` (${notification.occurrence_count})` : ''}
           </Typography>
         }
         secondary={
           <>
             <Typography
               variant="body2"
-              sx={{
-                mt: 0.5,
-                color: 'text.secondary',
-                display: '-webkit-box',
-                overflow: 'hidden',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-              }}
+              sx={{ mt: 0.5, color: 'text.secondary' }}
             >
-              {notification.description}
+              {notification.body || 'Open the related record for more detail.'}
             </Typography>
 
             <Typography
               variant="caption"
               sx={{
                 mt: 0.75,
-                gap: 0.5,
                 display: 'flex',
                 alignItems: 'center',
                 color: 'text.disabled',
               }}
             >
-              <Iconify width={14} icon="solar:clock-circle-outline" />
-              {fToNow(notification.postedAt)}
+              <Iconify
+                width={14}
+                icon="solar:clock-circle-bold"
+                sx={{ mr: 0.5, flexShrink: 0 }}
+              />
+              {fToNow(notification.last_occurred_at)}
             </Typography>
           </>
         }

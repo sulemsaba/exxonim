@@ -2,7 +2,10 @@ import { normalizePathname, routes } from "../routes";
 
 export type AdminSection =
   | "dashboard"
+  | "notifications"
+  | "reports"
   | "consultations"
+  | "review-queue"
   | "blog-posts"
   | "blog-analytics"
   | "blog-categories"
@@ -22,7 +25,8 @@ export type AdminSection =
   | "testimonials"
   | "footer-settings"
   | "seo-settings"
-  | "access-roles";
+  | "access-roles"
+  | "privacy-requests";
 
 export type AdminRouteMode = "index" | "new" | "edit" | "shortcut";
 
@@ -38,9 +42,10 @@ export interface AdminNavItem {
   description: string;
   icon:
     | "dashboard"
-      | "consultations"
-      | "posts"
+    | "notifications"
     | "analytics"
+    | "consultations"
+    | "posts"
     | "categories"
     | "authors"
     | "page"
@@ -58,7 +63,8 @@ export interface AdminNavItem {
     | "testimonials"
     | "footer"
     | "seo"
-    | "roles";
+    | "roles"
+    | "privacy";
 }
 
 export interface AdminNavGroup {
@@ -80,8 +86,11 @@ export interface AdminRouteMatch {
 
 export const adminRoutes = {
   dashboard: routes.admin,
+  notifications: "/admin/notifications/",
+  reports: "/admin/reports/",
   consultations: "/admin/consultations/",
   consultationDetail: (id: number) => `/admin/consultations/${id}/`,
+  reviewQueue: "/admin/review-queue/",
   blogPosts: "/admin/blog/posts/",
   blogPostsNew: "/admin/blog/posts/new/",
   blogPostEdit: (id: number) => `/admin/blog/posts/${id}/edit/`,
@@ -103,11 +112,13 @@ export const adminRoutes = {
   pricing: "/admin/pricing/",
   testimonials: "/admin/testimonials/",
   accessRoles: "/admin/access/roles/",
+  privacyRequests: "/admin/privacy-requests/",
   legacySiteSettings: "/admin/site-settings/",
   legacyMedia: "/admin/media/",
 } as const;
 
 export const editorRestrictedSections: AdminSection[] = [
+  "reports",
   "brand-settings",
   "contact-settings",
   "page-home",
@@ -125,6 +136,7 @@ export const editorRestrictedSections: AdminSection[] = [
   "footer-settings",
   "seo-settings",
   "access-roles",
+  "privacy-requests",
 ];
 
 export const authorRestrictedSections: AdminSection[] = [
@@ -153,7 +165,10 @@ export function isAdminSectionRestrictedForRole(
 
 const adminSectionPermissionMap: Record<AdminSection, string[]> = {
   dashboard: ["dashboard.read"],
+  notifications: ["notification.read"],
+  reports: ["report.read"],
   consultations: ["consultation.read"],
+  "review-queue": ["review_queue.read"],
   "blog-posts": ["blog_post.read"],
   "blog-analytics": ["blog_post.read"],
   "blog-categories": ["blog_category.read"],
@@ -174,6 +189,7 @@ const adminSectionPermissionMap: Record<AdminSection, string[]> = {
   "footer-settings": ["site_setting.read"],
   "seo-settings": ["site_setting.read"],
   "access-roles": ["user.manage"],
+  "privacy-requests": ["privacy_request.read"],
 };
 
 export function getAdminSectionPermissions(section: AdminSection) {
@@ -242,6 +258,20 @@ export const adminNavGroups: AdminNavGroup[] = [
         description: "Overview, alerts, and workspace pulse.",
         icon: "dashboard",
       },
+      {
+        section: "reports",
+        label: "Reports",
+        href: adminRoutes.reports,
+        description: "Operational reporting built from request history, workload, and audit activity.",
+        icon: "analytics",
+      },
+      {
+        section: "notifications",
+        label: "Notifications",
+        href: adminRoutes.notifications,
+        description: "Personal in-app alerts and notification preferences.",
+        icon: "notifications",
+      },
     ],
   },
   {
@@ -249,10 +279,17 @@ export const adminNavGroups: AdminNavGroup[] = [
     items: [
       {
         section: "consultations",
-        label: "Consultations",
+        label: "Service Requests",
         href: adminRoutes.consultations,
-        description: "Track client requests, assignments, and follow-up status.",
+        description: "Track service requests, assignments, and follow-up status.",
         icon: "consultations",
+      },
+      {
+        section: "review-queue",
+        label: "Review Queue",
+        href: adminRoutes.reviewQueue,
+        description: "Approve or reject content waiting in the publishing workflow.",
+        icon: "posts",
       },
       {
         section: "jobs",
@@ -392,6 +429,13 @@ export const adminNavGroups: AdminNavGroup[] = [
         description: "Manage admin users and editor permissions.",
         icon: "roles",
       },
+      {
+        section: "privacy-requests",
+        label: "Privacy Requests",
+        href: adminRoutes.privacyRequests,
+        description: "Track access, correction, and deletion requests with auditable internal handling.",
+        icon: "privacy",
+      },
     ],
   },
 ];
@@ -456,6 +500,26 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
       "Dashboard",
       "Admin overview for content, settings, and hiring.",
       [{ label: "Dashboard", href: adminRoutes.dashboard }]
+    );
+  }
+
+  if (segments[1] === "notifications") {
+    return directMatch(
+      normalizedPathname,
+      "notifications",
+      "Notifications",
+      "Review personal alerts, unread items, and in-app notification preferences.",
+      adminRoutes.notifications
+    );
+  }
+
+  if (segments[1] === "reports") {
+    return directMatch(
+      normalizedPathname,
+      "reports",
+      "Reports",
+      "Read-only operational reporting built from service-request history and audit activity.",
+      adminRoutes.reports
     );
   }
 
@@ -564,11 +628,11 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
         normalizedPathname,
         "consultations",
         "edit",
-        "Consultation Detail",
+        "Service Request Detail",
         "Review the request, update status, assign ownership, and track follow-up notes.",
         [
           { label: "Dashboard", href: adminRoutes.dashboard },
-          { label: "Consultations", href: adminRoutes.consultations },
+          { label: "Service Requests", href: adminRoutes.consultations },
           { label: `Request #${consultationId}` },
         ],
         { entityId: consultationId }
@@ -578,9 +642,19 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
     return directMatch(
       normalizedPathname,
       "consultations",
-      "Consultations",
-      "Track incoming consultation requests, assign owners, and move each request through follow-up.",
+      "Service Requests",
+      "Track incoming service requests, assign owners, and move each request through follow-up.",
       adminRoutes.consultations
+    );
+  }
+
+  if (segments[1] === "review-queue") {
+    return directMatch(
+      normalizedPathname,
+      "review-queue",
+      "Review Queue",
+      "Review and approve content waiting in the publishing workflow.",
+      adminRoutes.reviewQueue
     );
   }
 
@@ -762,6 +836,16 @@ export function matchAdminRoute(pathname: string | undefined): AdminRouteMatch |
       "Access Roles",
       "Manage admin users, editor permissions, and activation status.",
       adminRoutes.accessRoles
+    );
+  }
+
+  if (segments[1] === "privacy-requests") {
+    return directMatch(
+      normalizedPathname,
+      "privacy-requests",
+      "Privacy Requests",
+      "Log and manage access, correction, and deletion requests with an audit trail.",
+      adminRoutes.privacyRequests
     );
   }
 

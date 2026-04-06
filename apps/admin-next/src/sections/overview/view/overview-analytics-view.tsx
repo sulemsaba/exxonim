@@ -5,10 +5,18 @@ import { useQuery } from '@tanstack/react-query';
 import { getAdminErrorMessage } from '@exxonim/admin-core/utils/admin';
 import { getAdminDashboardSummary } from '@exxonim/admin-core/services/adminDashboardService';
 import { listAdminConsultations } from '@exxonim/admin-core/services/adminConsultationService';
+import { getAdminDashboardWorklists } from '@exxonim/admin-core/services/adminServiceRequestService';
 
 import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
 import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+
+import { RouterLink } from 'src/routes/components';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -162,6 +170,21 @@ function consultationText(item: ApiConsultation) {
 }
 
 function inferService(item: ApiConsultation): ServiceLabel {
+  switch (item.service_type?.code) {
+    case 'registration':
+      return 'Registration';
+    case 'licensing':
+      return 'Licensing';
+    case 'tax_returns':
+      return 'Tax & Returns';
+    case 'compliance':
+      return 'Compliance';
+    case 'general_consultation':
+      return 'Compliance';
+    default:
+      break;
+  }
+
   const text = consultationText(item);
 
   if (
@@ -270,9 +293,13 @@ export function OverviewAnalyticsView() {
     queryKey: ['admin-next', 'dashboard', 'overview-consultations'],
     queryFn: () => listAdminConsultations({ page: 1, limit: 100 }),
   });
+  const worklistsQuery = useQuery({
+    queryKey: ['admin-next', 'dashboard', 'worklists'],
+    queryFn: getAdminDashboardWorklists,
+  });
 
   const dashboard = useMemo(() => {
-    if (!summaryQuery.data || !consultationsQuery.data) {
+    if (!summaryQuery.data || !consultationsQuery.data || !worklistsQuery.data) {
       return null;
     }
 
@@ -402,7 +429,7 @@ export function OverviewAnalyticsView() {
     const taskItems = [
       {
         id: 'task-review-requests',
-        name: `Review new consultation requests (${newRequestsThisWeek})`,
+        name: `Review new service requests (${newRequestsThisWeek})`,
       },
       {
         id: 'task-assign-cases',
@@ -414,7 +441,7 @@ export function OverviewAnalyticsView() {
       },
       {
         id: 'task-overdue-cases',
-        name: `Check overdue consultations (${overdueCases})`,
+        name: `Check overdue service requests (${overdueCases})`,
       },
       {
         id: 'task-send-updates',
@@ -437,7 +464,7 @@ export function OverviewAnalyticsView() {
           chart: newRequestSeries,
         },
         {
-          title: 'Active Consultations',
+          title: 'Active Service Requests',
           total: activeConsultations.length,
           percent: seriesDelta(activeCaseSeries),
           subtitle: `${activeConsultations.length} open cases`,
@@ -512,10 +539,11 @@ export function OverviewAnalyticsView() {
       consultationTimeline,
       requestChannels,
       taskItems,
+      worklists: worklistsQuery.data,
     };
-  }, [consultationsQuery.data, summaryQuery.data]);
+  }, [consultationsQuery.data, summaryQuery.data, worklistsQuery.data]);
 
-  if (summaryQuery.isLoading || consultationsQuery.isLoading) {
+  if (summaryQuery.isLoading || consultationsQuery.isLoading || worklistsQuery.isLoading) {
     return (
       <DashboardContent maxWidth="xl">
         <Alert severity="info">Loading Exxonim consultation operations...</Alert>
@@ -523,12 +551,12 @@ export function OverviewAnalyticsView() {
     );
   }
 
-  if (summaryQuery.isError || consultationsQuery.isError) {
+  if (summaryQuery.isError || consultationsQuery.isError || worklistsQuery.isError) {
     return (
       <DashboardContent maxWidth="xl">
         <Alert severity="error">
           {getAdminErrorMessage(
-            summaryQuery.error || consultationsQuery.error,
+            summaryQuery.error || consultationsQuery.error || worklistsQuery.error,
             'Unable to load the consultation dashboard.'
           )}
         </Alert>
@@ -572,6 +600,39 @@ export function OverviewAnalyticsView() {
             />
           </Grid>
         ))}
+
+        <Grid size={{ xs: 12 }}>
+          <Card>
+            <CardHeader
+              title="Quick Worklists"
+              subheader="Jump straight into the queues that need attention first."
+            />
+            <CardContent>
+              <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} useFlexGap flexWrap="wrap">
+                {dashboard.worklists.map((item) => (
+                  <Button
+                    key={item.key}
+                    component={item.href ? RouterLink : 'button'}
+                    href={item.href || undefined}
+                    variant={item.count ? 'contained' : 'outlined'}
+                    color={
+                      item.tone === 'error'
+                        ? 'error'
+                        : item.tone === 'warning'
+                          ? 'warning'
+                          : item.tone === 'info'
+                            ? 'info'
+                            : 'inherit'
+                    }
+                    sx={{ justifyContent: 'space-between', minWidth: { md: 220 } }}
+                  >
+                    {item.label} ({item.count})
+                  </Button>
+                ))}
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <AnalyticsCurrentVisits

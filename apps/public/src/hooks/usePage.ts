@@ -6,5 +6,6 @@ export function usePage<TContent = Record<string, unknown>>(slug: string) {
     queryKey: ["pages", slug],
     queryFn: () => getPageBySlug<TContent>(slug),
     initialData: () => getCachedPageBySlug<TContent>(slug),
+    staleTime: 1000 * 60 * 60,
   });
 }

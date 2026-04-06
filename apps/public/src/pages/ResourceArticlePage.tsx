@@ -4,7 +4,7 @@ import { useBlogPost } from "../hooks/useBlogPost";
 import { useBlogPosts } from "../hooks/useBlogPosts";
 import { usePage } from "../hooks/usePage";
 import { useResolvedBlogSeo } from "../hooks/useResolvedSeo";
-import { resourcePost, routes } from "../routes";
+import { resourceArticlePath, routes } from "../routes";
 import type { BlogPost, ResourcesPageContent } from "../types";
 import {
   getBlogArticleIntro,
@@ -499,7 +499,7 @@ export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
                           <a
                             key={relatedPost.slug}
                             className="resource-article-related-card"
-                            href={resourcePost(relatedPost.slug)}
+                            href={resourceArticlePath(relatedPost.slug)}
                           >
                             {relatedPost.category?.label ? (
                               <span className="page-card__eyebrow">

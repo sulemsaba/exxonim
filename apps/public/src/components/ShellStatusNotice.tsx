@@ -1,11 +1,33 @@
 interface ShellStatusNoticeProps {
   isVisible: boolean;
+  missingModules?: string[];
 }
 
-export function ShellStatusNotice({ isVisible }: ShellStatusNoticeProps) {
+function formatModules(modules: string[]) {
+  if (modules.length === 0) {
+    return "";
+  }
+
+  if (modules.length === 1) {
+    return modules[0];
+  }
+
+  if (modules.length === 2) {
+    return `${modules[0]} and ${modules[1]}`;
+  }
+
+  return `${modules.slice(0, -1).join(", ")}, and ${modules[modules.length - 1]}`;
+}
+
+export function ShellStatusNotice({
+  isVisible,
+  missingModules = [],
+}: ShellStatusNoticeProps) {
   if (!isVisible) {
     return null;
   }
+
+  const moduleCopy = formatModules(missingModules);
 
   return (
     <>
@@ -46,8 +68,9 @@ export function ShellStatusNotice({ isVisible }: ShellStatusNoticeProps) {
       `}</style>
       <div className="shell-status-notice" role="status" aria-live="polite">
         <p>
-          Live site data is temporarily unavailable. Exxonim is showing a stable
-          fallback shell while sections reconnect in the background.
+          Exxonim is using a stable fallback view right now so the site stays
+          usable while live content reconnects.
+          {moduleCopy ? ` Some live ${moduleCopy} details are still refreshing.` : ""}
         </p>
       </div>
     </>

@@ -1,7 +1,7 @@
 import {
   getResourcePostSlug,
   normalizePathname,
-  resourcePost,
+  resourceArticlePath,
   routes,
 } from "./routes";
 import type { BlogPost, PageRecord } from "./types";
@@ -137,7 +137,7 @@ export function createBlogPostSeo(
   return {
     title: post.metaTitle ?? post.title,
     description: post.metaDescription ?? post.excerpt ?? options.defaultDescription ?? post.title,
-    canonicalPath: resourcePost(post.slug),
+    canonicalPath: resourceArticlePath(post.slug),
     image:
       post.coverImageSrc ??
       options.defaultImage ??

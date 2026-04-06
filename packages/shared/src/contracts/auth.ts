@@ -20,16 +20,19 @@ export interface ApiAdminUser {
   updated_at: string;
 }
 
-export interface ApiAdminTokenResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
+export interface ApiAdminSessionResponse {
+  token_type: "cookie";
   admin: ApiAdminUser;
 }
 
-export interface ApiAdminAccessTokenResponse {
-  access_token: string;
-  token_type: string;
+export interface ApiAdminRefreshResponse {
+  token_type: "cookie";
+  authenticated: boolean;
+}
+
+export interface ApiAdminLogoutResponse {
+  token_type: "cookie";
+  authenticated: boolean;
 }
 
 export interface ApiAdminMeResponse {

@@ -13,17 +13,6 @@ import {
   formatWorkflowStatusLabel,
 } from '@exxonim/admin-core/utils/admin';
 import {
-  getAdminPages,
-  approveAdminPage,
-  archiveAdminPage,
-  createAdminPage,
-  publishAdminPage,
-  rejectAdminPage,
-  submitAdminPageForReview,
-  updateAdminPage,
-  type AdminPagePayload,
-} from '@exxonim/admin-core/services/adminPageService';
-import {
   getAdminJob,
   getAdminJobs,
   createAdminJob,
@@ -31,6 +20,17 @@ import {
   deleteAdminJob,
   type AdminJobPayload,
 } from '@exxonim/admin-core/services/adminJobsService';
+import {
+  getAdminPages,
+  createAdminPage,
+  rejectAdminPage,
+  updateAdminPage,
+  approveAdminPage,
+  archiveAdminPage,
+  publishAdminPage,
+  type AdminPagePayload,
+  submitAdminPageForReview,
+} from '@exxonim/admin-core/services/adminPageService';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';

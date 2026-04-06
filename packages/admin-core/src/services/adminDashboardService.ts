@@ -180,7 +180,7 @@ export async function getAdminDashboardSummary(): Promise<ApiAdminDashboardSumma
         },
         {
           key: "pending_consultations",
-          label: "Pending Consultations",
+          label: "Pending Service Requests",
           value: pendingConsultations.length,
           helper: `${consultations.length - pendingConsultations.length} already reviewed`,
           href: adminRoutes.consultations,
@@ -210,8 +210,8 @@ export async function getAdminDashboardSummary(): Promise<ApiAdminDashboardSumma
               {
                 id: "consultations-pending",
                 severity: "warning" as const,
-                title: "Consultations waiting for follow-up",
-                message: `${pendingConsultations.length} consultation requests are still pending review.`,
+                title: "Service requests waiting for follow-up",
+                message: `${pendingConsultations.length} service requests are still pending review.`,
                 href: adminRoutes.consultations,
               },
             ]

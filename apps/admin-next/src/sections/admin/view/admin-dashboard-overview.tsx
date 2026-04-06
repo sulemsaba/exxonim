@@ -620,8 +620,8 @@ function ConsultationInboxCard({ summary }: { summary: ApiAdminDashboardSummary 
   return (
     <Card>
       <CardHeader
-        title="Consultation inbox"
-        subheader="New and in-progress Exxonim consultation requests."
+        title="Service request inbox"
+        subheader="New and in-progress Exxonim service requests."
       />
       <Divider />
       <Box sx={{ p: 1.5 }}>
@@ -666,7 +666,7 @@ function ConsultationInboxCard({ summary }: { summary: ApiAdminDashboardSummary 
           ))
         ) : (
           <Box sx={{ p: 2 }}>
-            <Alert severity="info">No consultation requests are visible in the current summary.</Alert>
+            <Alert severity="info">No service requests are visible in the current summary.</Alert>
           </Box>
         )}
       </Box>
@@ -690,7 +690,7 @@ export function AdminDashboardOverview() {
     const draftPosts = getMetric(summary, 'draft_posts', 'Draft Posts');
     const publishedPages = getMetric(summary, 'published_pages', 'Published Pages');
     const publishedPosts = getMetric(summary, 'published_posts', 'Published Posts');
-    const pendingConsultations = getMetric(summary, 'pending_consultations', 'Pending Consultations');
+    const pendingConsultations = getMetric(summary, 'pending_consultations', 'Pending Service Requests');
 
     return {
       summary,
@@ -709,7 +709,7 @@ export function AdminDashboardOverview() {
           { label: 'Published posts', value: publishedPosts.value },
           { label: 'Draft posts', value: draftPosts.value },
           { label: 'Live pages', value: publishedPages.value },
-          { label: 'Pending consultations', value: pendingConsultations.value },
+          { label: 'Pending service requests', value: pendingConsultations.value },
         ],
       },
       readinessChart: {

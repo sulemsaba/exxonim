@@ -2,12 +2,10 @@ import type { Breakpoint } from '@mui/material/styles';
 
 import { merge } from 'es-toolkit';
 import { useLocation } from 'react-router';
-import { useQuery } from '@tanstack/react-query';
 import { useBoolean } from 'minimal-shared/hooks';
 import { routes } from '@exxonim/admin-core/routes';
 import { useMemo, useState, useEffect } from 'react';
 import { useAuth } from '@exxonim/admin-core/contexts/AuthContext';
-import { getAdminDashboardSummary } from '@exxonim/admin-core/services/adminDashboardService';
 
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
@@ -26,7 +24,6 @@ import { HeaderSection } from '../core/header-section';
 import { LayoutSection } from '../core/layout-section';
 import { ThemeToggleButton } from '../components/theme-toggle-button';
 import { NotificationsPopover } from '../components/notifications-popover';
-import { mapDashboardNotifications } from '../components/map-dashboard-notifications';
 
 import type { MainSectionProps } from '../core/main-section';
 import type { HeaderSectionProps } from '../core/header-section';
@@ -74,15 +71,6 @@ export function DashboardLayout({
     () => isBlogEditorFocusMode(location.pathname, location.search),
     [location.pathname, location.search]
   );
-  const dashboardQuery = useQuery({
-    queryKey: ['admin-next', 'dashboard'],
-    queryFn: getAdminDashboardSummary,
-    staleTime: 30000,
-  });
-  const notifications = useMemo(
-    () => mapDashboardNotifications(dashboardQuery.data),
-    [dashboardQuery.data]
-  );
   const effectiveNavCollapsed = isFocusMode || navCollapsed;
 
   useEffect(() => {
@@ -116,13 +104,14 @@ export function DashboardLayout({
       rightArea: (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 0.75 } }}>
           {!isFocusMode ? <Searchbar /> : null}
-          {!isFocusMode ? <NotificationsPopover data={notifications} viewAllHref={routes.admin} /> : null}
+          {!isFocusMode ? <NotificationsPopover viewAllHref="/admin/notifications/" /> : null}
           <ThemeToggleButton />
           <IconButton
             aria-label="Sign out"
             onClick={() => {
-              logout();
-              window.location.assign(routes.adminLogin);
+              void logout().finally(() => {
+                window.location.assign(routes.adminLogin);
+              });
             }}
           >
             <Iconify icon="solar:logout-3-bold" />

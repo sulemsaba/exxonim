@@ -162,8 +162,12 @@ export function LoadBoundary({
   loadingLabel = "Loading content...",
   variant = "page",
 }: LoadBoundaryProps) {
-  if (isPending) {
+  if (isPending && !isReady) {
     return <ContentSkeleton label={loadingLabel} variant={variant} />;
+  }
+
+  if (isReady) {
+    return <>{typeof children === "function" ? children() : children}</>;
   }
 
   if (error || !isReady) {
@@ -176,5 +180,5 @@ export function LoadBoundary({
     );
   }
 
-  return <>{typeof children === "function" ? children() : children}</>;
+  return null;
 }

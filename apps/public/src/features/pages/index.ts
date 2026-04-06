@@ -4,6 +4,8 @@ export { ContactPage } from "../../pages/ContactPage";
 export { FaqPage } from "../../pages/FaqPage";
 export { NotFoundPage } from "../../pages/NotFoundPage";
 export {
+  CookiePage,
+  DataRightsPage,
   PrivacyPage,
   SupportPage,
   TermsPage,

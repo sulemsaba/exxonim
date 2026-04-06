@@ -19,6 +19,29 @@ import {
 
 const BLOG_POSTS_CACHE_KEY = "blog:posts";
 const BLOG_CATEGORIES_CACHE_KEY = "blog:categories";
+const BLOG_POSTS_TTL_MS = 1000 * 60 * 30;
+const BLOG_CATEGORIES_TTL_MS = 1000 * 60 * 60 * 24;
+const BLOG_POST_TTL_MS = 1000 * 60 * 60 * 6;
+
+function blogPostCacheKey(slug: string) {
+  return `blog:post:${slug}`;
+}
+
+function isBlogPostCollection(value: BlogPost[]) {
+  return Array.isArray(value) && value.length > 0;
+}
+
+function isBlogCategoryCollection(value: BlogCategory[]) {
+  return Array.isArray(value) && value.length > 0;
+}
+
+function isBlogPostRecord(value: BlogPost | undefined): value is BlogPost {
+  return Boolean(value && typeof value.slug === "string");
+}
+
+function findFallbackBlogPost(slug: string) {
+  return fallbackBlogPosts.find((post) => post.slug === slug);
+}
 
 function mapPostsResponse(responseData: ApiPublicBlogPostListResponse | ApiBlogPost[]) {
   if (Array.isArray(responseData)) {
@@ -57,6 +80,8 @@ export async function listPublicBlogPosts() {
     cacheKey: BLOG_POSTS_CACHE_KEY,
     fallbackValue: fallbackBlogPosts,
     fetcher: fetchFreshPublicBlogPosts,
+    ttlMs: BLOG_POSTS_TTL_MS,
+    validate: isBlogPostCollection,
     warningLabel: "Using cached or default blog posts.",
   });
 }
@@ -67,8 +92,37 @@ export async function listFeaturedPublicBlogPosts(limit: number = 3) {
 }
 
 export async function getPublicBlogPostBySlug(slug: string) {
-  const response = await api.get<ApiBlogPost>(apiRoutes.public.blog.posts.bySlug(slug));
-  return mapBlogPost(response.data);
+  return fetchWithFallback<BlogPost>({
+    cacheKey: blogPostCacheKey(slug),
+    fallbackValue: findFallbackBlogPost(slug),
+    fetcher: async () => {
+      const response = await api.get<ApiBlogPost>(apiRoutes.public.blog.posts.bySlug(slug));
+      return mapBlogPost(response.data);
+    },
+    ttlMs: BLOG_POST_TTL_MS,
+    validate: isBlogPostRecord,
+    warningLabel: `Using cached or default blog article content for "${slug}".`,
+  });
+}
+
+export function getCachedPublicBlogPostBySlug(slug: string) {
+  const cachedPost = getCachedPublicContent<BlogPost | undefined>(
+    blogPostCacheKey(slug)
+  );
+  if (cachedPost) {
+    return cachedPost;
+  }
+
+  const cachedPosts = getCachedPublicContent<BlogPost[]>(
+    BLOG_POSTS_CACHE_KEY,
+    fallbackBlogPosts
+  );
+  const cachedCollectionMatch = cachedPosts?.find((post) => post.slug === slug);
+
+  return getCachedPublicContent<BlogPost | undefined>(
+    blogPostCacheKey(slug),
+    cachedCollectionMatch ?? findFallbackBlogPost(slug)
+  );
 }
 
 async function fetchFreshPublicBlogCategories() {
@@ -90,6 +144,8 @@ export async function listPublicBlogCategories() {
     cacheKey: BLOG_CATEGORIES_CACHE_KEY,
     fallbackValue: fallbackBlogCategories,
     fetcher: fetchFreshPublicBlogCategories,
+    ttlMs: BLOG_CATEGORIES_TTL_MS,
+    validate: isBlogCategoryCollection,
     warningLabel: "Using cached or default blog categories.",
   });
 }
