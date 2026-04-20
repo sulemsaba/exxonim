@@ -9,6 +9,8 @@ export function useBlogCategories() {
     queryKey: ["blog", "categories"],
     queryFn: listPublicBlogCategories,
     initialData: getCachedPublicBlogCategories,
+    refetchOnMount: "always",
+    refetchOnReconnect: "always",
     staleTime: 1000 * 60 * 60,
   });
 }

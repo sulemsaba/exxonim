@@ -6,6 +6,8 @@ export function useSiteSetting<TValue = unknown>(key: string) {
     queryKey: ["site-settings", key],
     queryFn: () => getSiteSetting<TValue>(key),
     initialData: () => getCachedSiteSetting<TValue>(key),
+    refetchOnMount: "always",
+    refetchOnReconnect: "always",
     retry: (failureCount, error) => {
       const status = (error as { response?: { status?: number } } | null)?.response?.status;
       if (status === 404) {

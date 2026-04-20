@@ -7,7 +7,6 @@ import { useAuth } from '@exxonim/admin-core/contexts/AuthContext';
 import { getAdminErrorMessage } from '@exxonim/admin-core/utils/admin';
 
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -116,11 +115,7 @@ export function SignInView() {
         </Button>
       </Stack>
 
-      <Box sx={{ mt: 3, textAlign: 'center' }}>
-        <Link href={adminRoutes.dashboard} underline="hover" color="inherit">
-          Go to admin home
-        </Link>
-      </Box>
+      {/* Removed "Go to admin home" link as it's misleading for non-authenticated users */}
     </Box>
   );
 }

@@ -39,6 +39,8 @@ export function usePublicShell(): PublicShellData {
     queryKey: ["public-shell", "navigation"],
     queryFn: getNavigationResource,
     initialData: getCachedNavigationResource,
+    refetchOnMount: "always",
+    refetchOnReconnect: "always",
     retry: false,
     staleTime: 1000 * 60 * 60,
   });
@@ -46,6 +48,8 @@ export function usePublicShell(): PublicShellData {
     queryKey: ["public-shell", "site-settings", "brand"],
     queryFn: () => getSiteSettingResource<BrandAssets>("brand"),
     initialData: () => getCachedSiteSettingResource<BrandAssets>("brand"),
+    refetchOnMount: "always",
+    refetchOnReconnect: "always",
     retry: false,
     staleTime: 1000 * 60 * 60,
   });
@@ -53,6 +57,8 @@ export function usePublicShell(): PublicShellData {
     queryKey: ["public-shell", "site-settings", "footer"],
     queryFn: () => getSiteSettingResource<SiteSettingFooterValue>("footer"),
     initialData: () => getCachedSiteSettingResource<SiteSettingFooterValue>("footer"),
+    refetchOnMount: "always",
+    refetchOnReconnect: "always",
     retry: false,
     staleTime: 1000 * 60 * 60,
   });
@@ -60,6 +66,8 @@ export function usePublicShell(): PublicShellData {
     queryKey: ["public-shell", "site-settings", "company_info"],
     queryFn: () => getSiteSettingResource<CompanyInfo>("company_info"),
     initialData: () => getCachedSiteSettingResource<CompanyInfo>("company_info"),
+    refetchOnMount: "always",
+    refetchOnReconnect: "always",
     retry: false,
     staleTime: 1000 * 60 * 60,
   });

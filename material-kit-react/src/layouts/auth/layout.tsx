@@ -57,10 +57,10 @@ export function AuthLayout({
       ),
       rightArea: (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
-          {/** @slot Help link */}
-          <Link href="#" component={RouterLink} color="inherit" sx={{ typography: 'subtitle2' }}>
+          {/** @slot Help link - Temporarily removed until proper help page is implemented */}
+          {/* <Link href="#" component={RouterLink} color="inherit" sx={{ typography: 'subtitle2' }}>
             Need help?
-          </Link>
+          </Link> */}
         </Box>
       ),
     };
@@ -146,3 +146,4 @@ const backgroundStyles = (): CSSObject => ({
   backgroundPosition: 'center center',
   backgroundImage: 'url(/assets/background/overlay.jpg)',
 });
+

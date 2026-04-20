@@ -9,6 +9,8 @@ export function useTestimonials() {
     queryKey: ["testimonials"],
     queryFn: getTestimonials,
     initialData: getCachedTestimonials,
+    refetchOnMount: "always",
+    refetchOnReconnect: "always",
     staleTime: 1000 * 60 * 60,
   });
 }

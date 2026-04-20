@@ -1,6 +1,6 @@
 import { CONFIG } from 'src/config-global';
 
-import { SignInView } from 'src/sections/auth';
+import { SignInSimpleView } from 'src/sections/auth/sign-in-simple-view';
 
 // ----------------------------------------------------------------------
 
@@ -10,10 +10,10 @@ export default function Page() {
       <title>{`Sign in - ${CONFIG.appName}`}</title>
       <meta
         name="description"
-        content="Sign in to the Exxonim Material Kit admin study workspace."
+        content="Sign in to the Exxonim admin dashboard to manage content, clients, and site settings."
       />
 
-      <SignInView />
+      <SignInSimpleView />
     </>
   );
 }

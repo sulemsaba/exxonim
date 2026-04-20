@@ -9,7 +9,6 @@ import { useAuth } from '@exxonim/admin-core/contexts/AuthContext';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
 
 // ----------------------------------------------------------------------
@@ -55,11 +54,9 @@ export const routesSection: RouteObject[] = [
   {
     path: '/admin/login',
     element: (
-      <AuthLayout>
-        <Suspense fallback={fallback}>
-          <SignInPage />
-        </Suspense>
-      </AuthLayout>
+      <Suspense fallback={fallback}>
+        <SignInPage />
+      </Suspense>
     ),
   },
   {

@@ -10,6 +10,8 @@ export function useBlogPost(slug: string | null) {
     queryFn: () => getPublicBlogPostBySlug(slug as string),
     enabled: Boolean(slug),
     initialData: slug ? () => getCachedPublicBlogPostBySlug(slug) : undefined,
+    refetchOnMount: "always",
+    refetchOnReconnect: "always",
     staleTime: 1000 * 60 * 30,
     retry: (failureCount, error) => {
       const status = (error as { response?: { status?: number } } | null)?.response?.status;

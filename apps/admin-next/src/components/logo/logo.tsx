@@ -4,7 +4,7 @@ import { mergeClasses } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
-import { styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 
 import { RouterLink } from 'src/routes/components';
 
@@ -31,6 +31,12 @@ export function Logo({
   inverted = false,
   ...other
 }: LogoProps) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
+  
+  // Automatically invert logo in dark mode unless explicitly overridden
+  const shouldInvert = inverted !== undefined ? inverted : isDarkMode;
+
   return (
     <LogoRoot
       component={RouterLink}
@@ -58,7 +64,7 @@ export function Logo({
       <Box
         component="img"
         alt="Exxonim"
-        src={isSingle ? (inverted ? BRAND_MARK_INVERTED_SRC : BRAND_MARK_SRC) : BRAND_WORDMARK_SRC}
+        src={isSingle ? (shouldInvert ? BRAND_MARK_INVERTED_SRC : BRAND_MARK_SRC) : BRAND_WORDMARK_SRC}
         sx={{
           width: '100%',
           height: '100%',

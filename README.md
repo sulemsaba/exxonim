@@ -37,7 +37,7 @@ Windows and macOS are out of scope for this README.
 The scripts in this repo expect this sibling layout:
 
 ```text
-~/projects/
+~/nim/
 ├── exxonim/
 └── exxonim_backend/
 ```
@@ -49,8 +49,8 @@ If your folders are not laid out like this, some scripts will fail.
 If you do not already have both repos, run:
 
 ```bash
-mkdir -p ~/projects
-cd ~/projects
+mkdir -p ~/nim
+cd ~/nim
 
 git clone https://github.com/sulemsaba/exxonim.git exxonim
 git clone https://github.com/sulemsaba/exxonim_backend.git exxonim_backend
@@ -61,7 +61,7 @@ cd exxonim
 If you already have both folders and they already live side by side, go into the frontend repo:
 
 ```bash
-cd ~/projects/exxonim
+cd ~/nim/exxonim
 ```
 
 ## Step 1: Check Required Tools
@@ -175,10 +175,10 @@ These are the default local values used by the root scripts unless you override 
 
 ## Fastest Linux Path From Zero
 
-If you want the shortest copy-paste path from a fresh Linux setup, run these commands from `~/projects/exxonim`:
+If you want the shortest copy-paste path from a fresh Linux setup, run these commands from `~/nim/exxonim`:
 
 ```bash
-cd ~/projects/exxonim
+cd ~/nim/exxonim
 cp .env.example .env
 cp ../exxonim_backend/.env.example ../exxonim_backend/.env
 chmod +x scripts/*.sh
@@ -222,7 +222,7 @@ Do not use them in staging or production.
 
 | Field | Value |
 | --- | --- |
-| Email | `demo.admin@exxonim.local` |
+| Email | `demo.admin@exxonim.dev` |
 | Password | `Admin123!` |
 | Full name | `Local Demo Admin` |
 | Role | `administrator` |
@@ -236,7 +236,7 @@ If you want a custom full-access account instead, use:
 If you want to reuse the demo admin for local smoke checks:
 
 ```bash
-export SMOKE_ADMIN_EMAIL="demo.admin@exxonim.local"
+export SMOKE_ADMIN_EMAIL="demo.admin@exxonim.dev"
 export SMOKE_ADMIN_PASSWORD="Admin123!"
 ```
 
@@ -548,7 +548,7 @@ python -m app.cli.predeploy_check --strict
 alembic upgrade head
 python scripts/seed_roles_permissions.py
 python scripts/seed_local_defaults.py
-python scripts/create_admin.py --email demo.admin@exxonim.local --password Admin123! --full-name "Local Demo Admin" --role administrator --upsert
+python scripts/create_admin.py --email demo.admin@exxonim.dev --password Admin123! --full-name "Local Demo Admin" --role administrator --upsert
 python -m app.cli.superuser --email you@example.com
 ```
 

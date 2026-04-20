@@ -20,6 +20,8 @@ export function CareerPage() {
     queryKey: ["career-jobs"],
     queryFn: getPublishedJobs,
     initialData: getCachedPublishedJobs,
+    refetchOnMount: "always",
+    refetchOnReconnect: "always",
     staleTime: 1000 * 60 * 30,
   });
   useResolvedPageSeo(page, routes.career);

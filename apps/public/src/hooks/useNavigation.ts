@@ -6,5 +6,7 @@ export function useNavigation() {
     queryKey: ["navigation"],
     queryFn: getNavigation,
     initialData: getCachedNavigation,
+    refetchOnMount: "always",
+    refetchOnReconnect: "always",
   });
 }
