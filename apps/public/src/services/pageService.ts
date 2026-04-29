@@ -7,7 +7,13 @@ import {
 import { mapPage } from "../utils/contentMappers";
 import type { PageRecord } from "../types";
 import type { ApiPage } from "../types/api";
+import {
+  preloadStaticFallback,
+  getStaticFallback,
+} from "./staticFallbackService";
 import { getFallbackPage } from "../content/fallbackPublicContent";
+
+preloadStaticFallback<Record<string, unknown>[]>("pages");
 
 const PAGE_TTL_MS = 1000 * 60 * 60 * 6;
 
@@ -29,14 +35,17 @@ async function fetchFreshPageBySlug<TContent = Record<string, unknown>>(slug: st
 export function getCachedPageBySlug<TContent = Record<string, unknown>>(slug: string) {
   return getCachedPublicContent<PageRecord<TContent> | undefined>(
     pageCacheKey(slug),
-    getFallbackPage(slug) as PageRecord<TContent> | undefined
+    getStaticFallback<PageRecord<TContent>>("pages") ??
+      (getFallbackPage(slug) as PageRecord<TContent> | undefined)
   );
 }
 
 export async function getPageBySlug<TContent = Record<string, unknown>>(slug: string) {
   return fetchWithFallback<PageRecord<TContent>>({
     cacheKey: pageCacheKey(slug),
-    fallbackValue: getFallbackPage(slug) as PageRecord<TContent> | undefined,
+    fallbackValue:
+      getStaticFallback<PageRecord<TContent>>("pages") ??
+      (getFallbackPage(slug) as PageRecord<TContent> | undefined),
     fetcher: () => fetchFreshPageBySlug<TContent>(slug),
     ttlMs: PAGE_TTL_MS,
     validate: isPageRecord,

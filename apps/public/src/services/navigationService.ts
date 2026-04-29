@@ -9,7 +9,13 @@ import {
 import { mapNavigationItem } from "../utils/contentMappers";
 import type { NavigationItem } from "../types";
 import type { ApiNavigationItem } from "../types/api";
+import {
+  preloadStaticFallback,
+  getStaticFallback,
+} from "./staticFallbackService";
 import { fallbackNavigationItems } from "../content/fallbackPublicContent";
+
+preloadStaticFallback<NavigationItem[]>("navigation");
 
 const NAVIGATION_CACHE_KEY = "navigation";
 const NAVIGATION_TTL_MS = 1000 * 60 * 60 * 24;
@@ -26,12 +32,12 @@ async function fetchFreshNavigation() {
 }
 
 export function getCachedNavigation() {
-  return getCachedPublicContent<NavigationItem[]>(NAVIGATION_CACHE_KEY, fallbackNavigationItems);
+  return getCachedPublicContent<NavigationItem[]>(NAVIGATION_CACHE_KEY, getStaticFallback<NavigationItem[]>("navigation") ?? fallbackNavigationItems);
 }
 
 export function getCachedNavigationResource() {
   return getCachedPublicContentState<NavigationItem[]>(NAVIGATION_CACHE_KEY, {
-    fallbackValue: fallbackNavigationItems,
+    fallbackValue: getStaticFallback<NavigationItem[]>("navigation") ?? fallbackNavigationItems,
     ttlMs: NAVIGATION_TTL_MS,
   });
 }
@@ -39,7 +45,7 @@ export function getCachedNavigationResource() {
 export async function getNavigation() {
   return fetchWithFallback<NavigationItem[]>({
     cacheKey: NAVIGATION_CACHE_KEY,
-    fallbackValue: fallbackNavigationItems,
+    fallbackValue: getStaticFallback<NavigationItem[]>("navigation") ?? fallbackNavigationItems,
     fetcher: fetchFreshNavigation,
     ttlMs: NAVIGATION_TTL_MS,
     validate: isNavigationCollection,
@@ -50,7 +56,7 @@ export async function getNavigation() {
 export async function getNavigationResource() {
   return fetchWithFallbackResource<NavigationItem[]>({
     cacheKey: NAVIGATION_CACHE_KEY,
-    fallbackValue: fallbackNavigationItems,
+    fallbackValue: getStaticFallback<NavigationItem[]>("navigation") ?? fallbackNavigationItems,
     fetcher: fetchFreshNavigation,
     ttlMs: NAVIGATION_TTL_MS,
     validate: isNavigationCollection,

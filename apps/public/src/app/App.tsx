@@ -185,10 +185,7 @@ export default function App({ initialPathname }: AppProps) {
         theme={theme}
       />
 
-      <ShellStatusNotice
-        isVisible={shell.isDegraded}
-        missingModules={shell.missingModules}
-      />
+      <ShellStatusNotice />
 
       <main id="top" className="site-main">
         {page}

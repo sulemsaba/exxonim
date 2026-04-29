@@ -5,7 +5,13 @@ import {
   getCachedPublicContent,
 } from "@exxonim/shared/publicContentCache";
 import type { ApiCareerJob } from "../types/api";
+import {
+  preloadStaticFallback,
+  getStaticFallback,
+} from "./staticFallbackService";
 import { fallbackJobs } from "../content/fallbackPublicContent";
+
+preloadStaticFallback<ApiCareerJob[]>("jobs");
 
 const JOBS_CACHE_KEY = "jobs:published";
 const JOBS_TTL_MS = 1000 * 60 * 30;
@@ -20,13 +26,13 @@ async function fetchFreshPublishedJobs() {
 }
 
 export function getCachedPublishedJobs() {
-  return getCachedPublicContent<ApiCareerJob[]>(JOBS_CACHE_KEY, fallbackJobs);
+  return getCachedPublicContent<ApiCareerJob[]>(JOBS_CACHE_KEY, getStaticFallback<ApiCareerJob[]>("jobs") ?? fallbackJobs);
 }
 
 export async function getPublishedJobs() {
   return fetchWithFallback<ApiCareerJob[]>({
     cacheKey: JOBS_CACHE_KEY,
-    fallbackValue: fallbackJobs,
+    fallbackValue: getStaticFallback<ApiCareerJob[]>("jobs") ?? fallbackJobs,
     fetcher: fetchFreshPublishedJobs,
     ttlMs: JOBS_TTL_MS,
     validate: isJobCollection,

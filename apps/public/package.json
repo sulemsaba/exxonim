@@ -1,13 +1,15 @@
 {
+  
   "name": "@exxonim/public",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite --port 5173",
-    "build": "tsc -b && npm run build:client && npm run build:server && npm run prerender",
+    "build": "npm run fetch-fallback && tsc -b && npm run build:client && npm run build:server && npm run prerender",
     "build:client": "vite build",
     "build:server": "vite build --ssr src/app/entry-server.tsx --outDir dist/server",
+    "fetch-fallback": "node scripts/fetchFallbackAssets.mjs",
     "prerender": "node scripts/prerender.mjs",
     "preview": "vite preview --port 4173",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
@@ -20,10 +22,14 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^22.10.1",
     "@types/react": "^18.3.7",
     "@types/react-dom": "^18.3.3",
     "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^4.0.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.10"
   }

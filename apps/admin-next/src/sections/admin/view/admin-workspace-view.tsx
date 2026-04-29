@@ -90,7 +90,7 @@ import { RouterLink } from 'src/routes/components';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { NotFoundView } from 'src/sections/error';
-import { OverviewAnalyticsView } from 'src/sections/overview/view';
+import { DashboardView } from "../../dashboard";
 import { BlogPostsRoutePanel } from 'src/sections/admin/view/admin-blog-panels';
 import { ReportsRoutePanel } from 'src/sections/admin/view/admin-reports-panel';
 import { CareersRoutePanel } from 'src/sections/admin/view/admin-careers-panels';
@@ -908,7 +908,7 @@ export function AdminWorkspaceView() {
   }
 
   if (match.section === 'dashboard') {
-    return <OverviewAnalyticsView />;
+    return <DashboardView />;
   }
 
   let content: ReactNode = <NotFoundPanel />;

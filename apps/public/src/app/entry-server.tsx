@@ -1,6 +1,7 @@
 import { renderToString } from "react-dom/server";
 import App from "./App";
 import { AppProviders } from "./providers/AppProviders";
+import { queryClient } from "./queryClient";
 import { routes } from "./routes";
 import { siteOrigin } from "./seo";
 import { getBlogPrerenderRoutes, resolveServerSeo } from "./serverSeo";
@@ -14,10 +15,14 @@ export function render(url = "/") {
 }
 
 export async function renderPage(url = "/") {
-  return {
-    appHtml: render(url),
-    seo: await resolveServerSeo(url),
-  };
+  try {
+    return {
+      appHtml: render(url),
+      seo: await resolveServerSeo(url),
+    };
+  } finally {
+    queryClient.clear();
+  }
 }
 
 export async function getPrerenderRoutes() {

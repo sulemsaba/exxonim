@@ -10,7 +10,6 @@ import { usePricingPlans } from "../hooks/usePricingPlans";
 import { useTestimonials } from "../hooks/useTestimonials";
 import { routes } from "../routes";
 import type { PricingPlan, Testimonial } from "../types";
-import "./ServicePackagesSection.css";
 
 type ServicePackagesSectionProps = {
   variant?: "home" | "page";

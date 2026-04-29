@@ -145,6 +145,5 @@ export const fallbackFooter: SiteSettingFooterValue = {
     href: routes.contact,
   },
   social_links: [],
-  copyright:
-    "Exxonim. Core site navigation and contact fallback are available while live content reconnects.",
+  copyright: "Exxonim. All rights reserved.",
 };

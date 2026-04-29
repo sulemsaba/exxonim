@@ -80,8 +80,8 @@ export const fallbackHomePage: PageRecord<HomePageContent> = createFallbackPage(
   "Exxonim",
   {
     hero: {
-      eyebrow: "Read-only fallback mode",
-      title: "Business setup and compliance support still available while live services reconnect.",
+      eyebrow: "Expert advisory",
+      title: "Business setup and compliance support for organizations that need clarity and follow-through.",
       description:
         "Exxonim helps organizations move through registration, licensing, and regulatory follow-through with a clearer process and fewer avoidable delays.",
       cta: {
@@ -99,13 +99,13 @@ export const fallbackHomePage: PageRecord<HomePageContent> = createFallbackPage(
         },
         {
           title: "Guidance",
-          detail: "Clear next steps while live content reconnects",
+          detail: "Clear direction through every stage of the filing process",
         },
       ],
     },
     provider_section: {
       kicker: "Trusted workflow references",
-      title: "Fallback brand and partner references stay visible even during backend interruptions.",
+      title: "Recognised by organisations and partners across the region.",
       logos: [
         { alt: "Utec", src: "/assets/clients/utec.webp" },
         { alt: "TRCS", src: "/assets/clients/trcs.webp" },
@@ -119,22 +119,22 @@ export const fallbackHomePage: PageRecord<HomePageContent> = createFallbackPage(
           title: "Start with the right setup path",
           subtitle: "Choose the filing sequence that matches the organization you are building.",
           description:
-            "Fallback content keeps the core value proposition visible so visitors can still understand the service direction before live content comes back.",
+            "Every registration journey starts with the correct entity type, ownership structure, and document set. Exxonim guides you through the sequence so the process does not stall later.",
           ctaLabel: "Discuss your case",
           ctaHref: routes.contact,
           windowTitle: "Setup",
-          windowTag: "Fallback",
+          windowTag: "Guide",
           videoSrc: "",
         },
         {
           title: "Keep compliance work organized",
           subtitle: "Stay clear on what is filed, what is pending, and what should happen next.",
           description:
-            "The public shell remains usable with a stable message and contact path instead of collapsing into empty states.",
+            "A practical approach to recurring filings, renewals, and regulatory follow-through — so your team can focus on operations instead of deadline recovery.",
           ctaLabel: "Explore services",
           ctaHref: routes.services,
           windowTitle: "Compliance",
-          windowTag: "Fallback",
+          windowTag: "Guide",
           videoSrc: "",
         },
       ],
@@ -146,12 +146,12 @@ export const fallbackHomePage: PageRecord<HomePageContent> = createFallbackPage(
         },
         {
           title: "Tax and licensing",
-          description: "TIN, licensing, and approval support that stays readable in fallback mode.",
+          description: "TIN, licensing, and approval support managed through a clear workflow.",
           visualKey: "tax",
         },
         {
           title: "Operational continuity",
-          description: "A stable shell, working contact path, and preserved orientation for visitors.",
+          description: "Reliable support across registration, compliance, and ongoing obligations.",
           visualKey: "institutional",
         },
       ],
@@ -161,34 +161,34 @@ export const fallbackHomePage: PageRecord<HomePageContent> = createFallbackPage(
           counterpartLabel: "Client",
           counterpartValue: "Organization setup",
           focusValue: "Setup path",
-          summaryTitle: "Fallback keeps the core journey readable.",
+          summaryTitle: "Clear process from start to submission.",
           summaryBody:
-            "Visitors can still understand the registration and compliance offering even if live CMS content is unavailable.",
+            "Exxonim provides structured guidance through entity registration, document preparation, and authority submissions.",
         },
         tax: {
           workstreamValue: "Compliance",
           counterpartLabel: "Client",
           counterpartValue: "Ongoing obligations",
           focusValue: "Filings and renewals",
-          summaryTitle: "Fallback protects continuity.",
+          summaryTitle: "Stay ahead of filing deadlines.",
           summaryBody:
-            "The site can still show useful service framing instead of a blocked or empty homepage.",
+            "A practical compliance framework that helps teams track obligations, prepare submissions, and avoid last-minute recovery work.",
         },
         institutional: {
           workstreamValue: "Operations",
           counterpartLabel: "Shell",
           counterpartValue: "Always visible",
           focusValue: "Navigation, contact, and positioning",
-          summaryTitle: "Core shell content remains available.",
+          summaryTitle: "Professional support when you need it.",
           summaryBody:
-            "The navigation, brand, and basic public explanation remain visible while live data reconnects.",
+            "The navigation, brand, and service information are always accessible. Contact the team directly for tailored guidance.",
         },
       },
     },
     insights_section: {
-      title: "Fallback insights",
-      intro: "Public content falls back to a stable baseline when live services are temporarily unavailable.",
-      footer_copy: "Live content replaces this automatically after the next successful fetch.",
+      title: "Latest insights",
+      intro: "Practical guidance for registration, compliance, and operational planning.",
+      footer_copy: "Browse the full resource library for more articles and updates.",
     },
   }
 );
@@ -196,7 +196,7 @@ export const fallbackHomePage: PageRecord<HomePageContent> = createFallbackPage(
 export const fallbackResourcesPage: PageRecord<ResourcesPageContent> =
   createFallbackPage("resources", "Resources", {
     hero_title: "Guides, updates, and practical notes for setup and compliance work",
-    trending_label: "Fallback reads",
+    trending_label: "Trending reads",
     top_media: {
       hero: "/assets/exxonim-logo.webp",
       banner: "/assets/logo-dark.png",
@@ -209,16 +209,16 @@ export const fallbackResourcesPage: PageRecord<ResourcesPageContent> =
     article_sidebar: {
       title: "Need direct help?",
       description:
-        "Fallback content is available while the live resource feed reconnects. You can still contact Exxonim directly.",
+        "Browse the available articles or contact Exxonim directly for personalised guidance on your specific situation.",
       primary_cta: {
         label: "Contact Exxonim",
         href: routes.contact,
       },
     },
     empty_state: {
-      title: "Articles are temporarily unavailable.",
+      title: "No articles match this filter.",
       description:
-        "Please check back shortly, or contact Exxonim directly for immediate guidance.",
+        "Try adjusting your search or filter, or contact Exxonim directly for immediate guidance.",
     },
   });
 
@@ -227,10 +227,10 @@ export const fallbackCareerPage: PageRecord<CareerPageContent> = createFallbackP
   "Careers",
   {
     hero: {
-      eyebrow: "Fallback hiring view",
-      title: "Exxonim keeps the careers route visible while the live feed reconnects.",
+      eyebrow: "Join the team",
+      title: "Build your career at Exxonim.",
       description:
-        "You can still understand the hiring direction, the teams Exxonim is building, and the best contact route for current opportunities.",
+        "Explore current opportunities and learn about the teams Exxonim is building across client operations, compliance, and advisory work.",
     },
     focus_areas: [
       "Client operations and workflow coordination",
@@ -238,9 +238,9 @@ export const fallbackCareerPage: PageRecord<CareerPageContent> = createFallbackP
       "Structured follow-up and document readiness",
     ],
     status: {
-      label: "Hiring details are refreshing",
+      label: "Current opportunities",
       description:
-        "Published openings reconnect automatically after the next successful sync. Direct contact remains available right now.",
+        "Explore open roles and send your application through the contact page. The Exxonim team reviews every submission.",
       primary: {
         label: "Contact Exxonim",
         href: routes.contact,
@@ -258,15 +258,15 @@ export const fallbackContactPage: PageRecord<ContactPageContent> = createFallbac
   "Contact",
   {
     hero: {
-      eyebrow: "Stable contact path",
-      title: "Reach Exxonim even while live content reconnects.",
+      eyebrow: "Get in touch",
+      title: "Reach Exxonim for registration, compliance, and advisory support.",
       description:
-        "The contact route stays available so visitors can still send a request, choose the right service path, and use direct fallback contact options.",
+        "Use the contact route that works best for you — email, phone, or WhatsApp — and the Exxonim team will follow up promptly.",
     },
     cards: [
       {
         label: "Email",
-        value: fallbackCompanyInfo.emails[0] ?? "Use the direct Exxonim email route",
+        value: fallbackCompanyInfo.emails[0] ?? "Send an email to Exxonim",
         description: "Best for sending structured details and follow-up questions.",
         action: {
           label: "Email Exxonim",
@@ -275,7 +275,7 @@ export const fallbackContactPage: PageRecord<ContactPageContent> = createFallbac
       },
       {
         label: "Phone",
-        value: fallbackCompanyInfo.phones[0] ?? "Use the direct Exxonim phone route",
+        value: fallbackCompanyInfo.phones[0] ?? "Call Exxonim directly",
         description: "Use the direct phone path when you need a quick conversation.",
         action: {
           label: "Call Exxonim",
@@ -284,8 +284,8 @@ export const fallbackContactPage: PageRecord<ContactPageContent> = createFallbac
       },
       {
         label: "WhatsApp",
-        value: "Direct contact",
-        description: "Messaging remains available even if the live content layer is delayed.",
+        value: "Direct messaging",
+        description: "Send a message through WhatsApp and the team will respond as soon as possible.",
         action: {
           label: "Open WhatsApp",
           href: fallbackCompanyInfo.whatsapp || routes.contact,
@@ -549,9 +549,9 @@ export const fallbackPricingPlans: PricingPlan[] = [
   {
     id: 1,
     name: "Foundation",
-    badge: "Stable start",
+    badge: "Getting started",
     description:
-      "A fallback package outline for registration and first-step compliance work while live pricing reconnects.",
+      "A practical package for registration and first-step compliance work, with expert guidance throughout.",
     notes: "Use the Exxonim contact route for the latest package guidance.",
     recommended: false,
     features: [
@@ -596,11 +596,11 @@ export const fallbackTestimonials: Testimonial[] = [
     eyebrow: "Fallback review",
     headline: "The public shell still gives visitors a clear next step.",
     support:
-      "Even without live testimonials, Exxonim keeps the trust path readable with stable service framing and direct contact options.",
-    quote:
-      "We could still understand the service direction, the next action, and how to reach the team while the live feed recovered.",
-    name: "Operations Team",
-    role: "Fallback reference",
+      "Exxonim helped us move through the setup phase with a clear checklist and practical follow-through at every step.",
+  quote:
+      "We knew exactly what to prepare, when to submit, and who to contact if anything was unclear.",
+  name: "Operations Team",
+  role: "Client reference",
     initials: "OT",
   },
   {
@@ -612,7 +612,7 @@ export const fallbackTestimonials: Testimonial[] = [
     quote:
       "The experience still felt intentional because the shell stayed complete and the contact route remained obvious.",
     name: "Compliance Lead",
-    role: "Fallback reference",
+    role: "Client reference",
     initials: "CL",
   },
 ];

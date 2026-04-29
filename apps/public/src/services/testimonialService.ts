@@ -7,7 +7,13 @@ import {
 import { mapTestimonial } from "../utils/contentMappers";
 import type { Testimonial } from "../types";
 import type { ApiTestimonial } from "../types/api";
+import {
+  preloadStaticFallback,
+  getStaticFallback,
+} from "./staticFallbackService";
 import { fallbackTestimonials } from "../content/fallbackPublicContent";
+
+preloadStaticFallback<Testimonial[]>("testimonials");
 
 const TESTIMONIALS_CACHE_KEY = "testimonials";
 const TESTIMONIALS_TTL_MS = 1000 * 60 * 60 * 24;
@@ -24,14 +30,14 @@ async function fetchFreshTestimonials() {
 export function getCachedTestimonials() {
   return getCachedPublicContent<Testimonial[]>(
     TESTIMONIALS_CACHE_KEY,
-    fallbackTestimonials
+    getStaticFallback<Testimonial[]>("testimonials") ?? fallbackTestimonials
   );
 }
 
 export async function getTestimonials() {
   return fetchWithFallback<Testimonial[]>({
     cacheKey: TESTIMONIALS_CACHE_KEY,
-    fallbackValue: fallbackTestimonials,
+    fallbackValue: getStaticFallback<Testimonial[]>("testimonials") ?? fallbackTestimonials,
     fetcher: fetchFreshTestimonials,
     ttlMs: TESTIMONIALS_TTL_MS,
     validate: isTestimonialCollection,

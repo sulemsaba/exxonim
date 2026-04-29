@@ -7,14 +7,13 @@ import {
   getCachedNavigationResource,
   getNavigationResource,
 } from "../services/navigationService";
-import type { PublicContentSource } from "@exxonim/shared/publicContentCache";
 import type { SiteSettingFooterValue } from "../types/api";
 import type { BrandAssets, CompanyInfo, NavigationItem, SiteSetting } from "../types";
 import {
-  fallbackBrand,
-  fallbackCompanyInfo,
-  fallbackFooter,
-  fallbackNavigationItems,
+  fallbackBrand as defaultBrand,
+  fallbackCompanyInfo as defaultCompanyInfo,
+  fallbackFooter as defaultFooter,
+  fallbackNavigationItems as defaultNavigationItems,
 } from "../content/fallbackShell";
 
 interface PublicShellData {
@@ -22,10 +21,6 @@ interface PublicShellData {
   company: CompanyInfo;
   footer: SiteSettingFooterValue;
   navigationItems: NavigationItem[];
-  isDegraded: boolean;
-  isUsingFallback: boolean;
-  shellSource: PublicContentSource;
-  missingModules: string[];
 }
 
 function hasSiteSettingValue<TValue>(
@@ -74,62 +69,22 @@ export function usePublicShell(): PublicShellData {
 
   const brand = hasSiteSettingValue(brandQuery.data?.data)
     ? brandQuery.data.data.value
-    : fallbackBrand;
+    : defaultBrand;
   const footer = hasSiteSettingValue(footerQuery.data?.data)
     ? footerQuery.data.data.value
-    : fallbackFooter;
+    : defaultFooter;
   const company = hasSiteSettingValue(companyQuery.data?.data)
     ? companyQuery.data.data.value
-    : fallbackCompanyInfo;
+    : defaultCompanyInfo;
   const navigationItems =
     navigationQuery.data?.data && navigationQuery.data.data.length > 0
       ? navigationQuery.data.data
-      : fallbackNavigationItems;
-
-  const missingModules = [
-    !hasSiteSettingValue(brandQuery.data?.data) ? "brand" : null,
-    !hasSiteSettingValue(footerQuery.data?.data) ? "footer" : null,
-    !hasSiteSettingValue(companyQuery.data?.data) ? "company" : null,
-    !navigationQuery.data?.data?.length ? "navigation" : null,
-  ].filter((value): value is string => Boolean(value));
-
-  const isUsingFallback =
-    brandQuery.data?.source === "fallback" ||
-    footerQuery.data?.source === "fallback" ||
-    companyQuery.data?.source === "fallback" ||
-    navigationQuery.data?.source === "fallback" ||
-    brand === fallbackBrand ||
-    footer === fallbackFooter ||
-    company === fallbackCompanyInfo ||
-    navigationItems === fallbackNavigationItems;
-
-  const hasShellCache =
-    navigationQuery.data?.source === "cache" ||
-    brandQuery.data?.source === "cache" ||
-    footerQuery.data?.source === "cache" ||
-    companyQuery.data?.source === "cache";
-
-  const hasShellFallback = isUsingFallback;
-  const hasShellError = Boolean(
-    navigationQuery.data?.error ||
-      brandQuery.data?.error ||
-      footerQuery.data?.error ||
-      companyQuery.data?.error
-  );
-  const shellSource: PublicContentSource = hasShellFallback
-    ? "fallback"
-    : hasShellCache || hasShellError
-      ? "cache"
-      : "live";
+      : defaultNavigationItems;
 
   return {
     brand,
     footer,
     company,
     navigationItems,
-    isDegraded: shellSource !== "live" || missingModules.length > 0 || hasShellError,
-    isUsingFallback,
-    shellSource,
-    missingModules,
   };
 }

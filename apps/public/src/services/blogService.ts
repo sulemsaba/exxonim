@@ -13,9 +13,16 @@ import type {
   ApiPublicBlogPostListResponse,
 } from "../types/api";
 import {
+  preloadStaticFallback,
+  getStaticFallback,
+} from "./staticFallbackService";
+import {
   fallbackBlogCategories,
   fallbackBlogPosts,
 } from "../content/fallbackPublicContent";
+
+preloadStaticFallback<BlogPost[]>("blog-posts");
+preloadStaticFallback<BlogCategory[]>("blog-categories");
 
 const BLOG_POSTS_CACHE_KEY = "blog:posts";
 const BLOG_CATEGORIES_CACHE_KEY = "blog:categories";
@@ -72,13 +79,13 @@ export async function fetchFreshPublicBlogPosts() {
 }
 
 export function getCachedPublicBlogPosts() {
-  return getCachedPublicContent<BlogPost[]>(BLOG_POSTS_CACHE_KEY, fallbackBlogPosts);
+  return getCachedPublicContent<BlogPost[]>(BLOG_POSTS_CACHE_KEY, getStaticFallback<BlogPost[]>("blog-posts") ?? fallbackBlogPosts);
 }
 
 export async function listPublicBlogPosts() {
   return fetchWithFallback<BlogPost[]>({
     cacheKey: BLOG_POSTS_CACHE_KEY,
-    fallbackValue: fallbackBlogPosts,
+    fallbackValue: getStaticFallback<BlogPost[]>("blog-posts") ?? fallbackBlogPosts,
     fetcher: fetchFreshPublicBlogPosts,
     ttlMs: BLOG_POSTS_TTL_MS,
     validate: isBlogPostCollection,
@@ -115,7 +122,7 @@ export function getCachedPublicBlogPostBySlug(slug: string) {
 
   const cachedPosts = getCachedPublicContent<BlogPost[]>(
     BLOG_POSTS_CACHE_KEY,
-    fallbackBlogPosts
+    getStaticFallback<BlogPost[]>("blog-posts") ?? fallbackBlogPosts
   );
   const cachedCollectionMatch = cachedPosts?.find((post) => post.slug === slug);
 
@@ -135,14 +142,14 @@ async function fetchFreshPublicBlogCategories() {
 export function getCachedPublicBlogCategories() {
   return getCachedPublicContent<BlogCategory[]>(
     BLOG_CATEGORIES_CACHE_KEY,
-    fallbackBlogCategories
+    getStaticFallback<BlogCategory[]>("blog-categories") ?? fallbackBlogCategories
   );
 }
 
 export async function listPublicBlogCategories() {
   return fetchWithFallback<BlogCategory[]>({
     cacheKey: BLOG_CATEGORIES_CACHE_KEY,
-    fallbackValue: fallbackBlogCategories,
+    fallbackValue: getStaticFallback<BlogCategory[]>("blog-categories") ?? fallbackBlogCategories,
     fetcher: fetchFreshPublicBlogCategories,
     ttlMs: BLOG_CATEGORIES_TTL_MS,
     validate: isBlogCategoryCollection,

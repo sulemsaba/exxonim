@@ -1,7 +1,7 @@
 import { createRoot, hydrateRoot } from "react-dom/client";
 import App from "./App";
 import { AppProviders } from "./providers/AppProviders";
-import "../styles.css";
+import "../tailwind.css";
 
 function bootstrapDocumentShell(pathname: string) {
   try {
