@@ -40,33 +40,32 @@ function responsiveFontSizes(obj: ResponsiveFontSizesInput): ResponsiveFontSizes
 
 // ----------------------------------------------------------------------
 
-const primaryFont = setFont(themeConfig.fontFamily.primary);
-const secondaryFont = setFont(themeConfig.fontFamily.secondary);
+const systemFont = setFont(themeConfig.fontFamily.primary);
 
 export const typography: TypographyVariantsOptions = {
-  fontFamily: primaryFont,
-  fontSecondaryFamily: secondaryFont,
+  fontFamily: systemFont,
+  fontSecondaryFamily: systemFont,
   fontWeightLight: '300',
   fontWeightRegular: '400',
   fontWeightMedium: '500',
   fontWeightSemiBold: '600',
   fontWeightBold: '700',
   h1: {
-    fontFamily: secondaryFont,
+    fontFamily: systemFont,
     fontWeight: 800,
     lineHeight: 80 / 64,
     fontSize: pxToRem(40),
     ...responsiveFontSizes({ sm: 52, md: 58, lg: 64 }),
   },
   h2: {
-    fontFamily: secondaryFont,
+    fontFamily: systemFont,
     fontWeight: 800,
     lineHeight: 64 / 48,
     fontSize: pxToRem(32),
     ...responsiveFontSizes({ sm: 40, md: 44, lg: 48 }),
   },
   h3: {
-    fontFamily: secondaryFont,
+    fontFamily: systemFont,
     fontWeight: 700,
     lineHeight: 1.5,
     fontSize: pxToRem(24),

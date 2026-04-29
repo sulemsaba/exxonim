@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
@@ -8,7 +7,6 @@
    ========================================================= */
 
 :root {
-  --font-display: "EB Garamond", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Garamond, "Times New Roman", serif;
   --color-page: #eef0ec;
   --color-page-strong: #e2e6e1;
   --color-surface: #f7f7f4;
@@ -23,6 +21,7 @@
   --color-accent-soft: rgba(15, 92, 99, 0.12);
   --color-accent-soft-strong: rgba(15, 92, 99, 0.22);
   --color-accent-contrast: #f7fbfb;
+  --font-display: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --color-border-soft: rgba(15, 92, 99, 0.12);
   --color-border-strong: rgba(15, 92, 99, 0.22);
   --color-overlay: rgba(8, 24, 27, 0.54);
