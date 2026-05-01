@@ -93,8 +93,6 @@ export default {
           "bg-end": "var(--cinematic-bg-end)",
           "orb-one": "var(--cinematic-orb-one)",
           "orb-two": "var(--cinematic-orb-two)",
-          "glow-bright": "var(--cinematic-glow-bright)",
-          "glow-deep": "var(--cinematic-glow-deep)",
           "card-bg": "var(--cinematic-card-bg)",
           "card-border": "var(--cinematic-card-border)",
           "card-shadow": "var(--cinematic-card-shadow)",

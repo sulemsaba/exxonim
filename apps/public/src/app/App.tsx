@@ -43,96 +43,6 @@ export default function App({ initialPathname }: AppProps) {
     document.documentElement.classList.add("js");
   }, []);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    let targetX = window.innerWidth / 2;
-    let targetY = window.innerHeight / 2;
-    let currentX = targetX;
-    let currentY = targetY;
-    let rafPending = false;
-    let frameId = 0;
-    const lerpFactor = 0.08;
-    const reducedMotionQuery = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    );
-
-    const writeGlowPosition = (x: number, y: number) => {
-      root.style.setProperty("--mouse-x", `${x}px`);
-      root.style.setProperty("--mouse-y", `${y}px`);
-    };
-
-    const stopGlowAnimation = () => {
-      if (frameId) {
-        window.cancelAnimationFrame(frameId);
-        frameId = 0;
-      }
-      rafPending = false;
-    };
-
-    const handlePointerMove = (event: MouseEvent) => {
-      targetX = event.clientX;
-      targetY = event.clientY;
-      queueGlowUpdate();
-    };
-
-    const updateScroll = () => {
-      root.style.setProperty("--scroll-y", `${window.scrollY}px`);
-    };
-
-    const animateGlow = () => {
-      rafPending = false;
-      currentX += (targetX - currentX) * lerpFactor;
-      currentY += (targetY - currentY) * lerpFactor;
-      writeGlowPosition(currentX, currentY);
-
-      const delta =
-        Math.abs(targetX - currentX) + Math.abs(targetY - currentY);
-
-      if (!reducedMotionQuery.matches && delta > 0.5) {
-        queueGlowUpdate();
-      }
-    };
-
-    const queueGlowUpdate = () => {
-      if (reducedMotionQuery.matches || rafPending) {
-        return;
-      }
-
-      rafPending = true;
-      frameId = window.requestAnimationFrame(animateGlow);
-    };
-
-    const handleReducedMotionChange = () => {
-      stopGlowAnimation();
-
-      if (reducedMotionQuery.matches) {
-        currentX = window.innerWidth / 2;
-        currentY = window.innerHeight / 2;
-        targetX = currentX;
-        targetY = currentY;
-        writeGlowPosition(currentX, currentY);
-        return;
-      }
-
-      queueGlowUpdate();
-    };
-
-    writeGlowPosition(currentX, currentY);
-    updateScroll();
-    queueGlowUpdate();
-
-    window.addEventListener("mousemove", handlePointerMove, { passive: true });
-    window.addEventListener("scroll", updateScroll, { passive: true });
-    reducedMotionQuery.addEventListener("change", handleReducedMotionChange);
-
-    return () => {
-      window.removeEventListener("mousemove", handlePointerMove);
-      window.removeEventListener("scroll", updateScroll);
-      reducedMotionQuery.removeEventListener("change", handleReducedMotionChange);
-      stopGlowAnimation();
-    };
-  }, []);
-
   const articleSlug = getResourcePostSlug(pathname);
   const whatsappUrl = shell.company.whatsapp;
 
@@ -173,7 +83,6 @@ export default function App({ initialPathname }: AppProps) {
       <div className="cinematic-bg" aria-hidden="true">
         <div className="cinematic-bg__orb cinematic-bg__orb--one"></div>
         <div className="cinematic-bg__orb cinematic-bg__orb--two"></div>
-        <div className="cinematic-bg__glow"></div>
       </div>
 
       <Navigation
