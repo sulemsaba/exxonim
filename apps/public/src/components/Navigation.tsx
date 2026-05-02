@@ -1,18 +1,14 @@
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type FocusEvent,
-} from "react";
-import { normalizePathname, routes } from "../routes";
-import type { BrandAssets, CompanyInfo, NavigationItem, Theme } from "../types";
+import { useEffect, useId, useRef, useState, type FocusEvent } from 'react'
+import { Sun, Moon, ChevronDown, Phone, Menu, X } from 'lucide-react'
+import { cn } from '../utils/cn'
+import { normalizePathname, routes } from '../routes'
+import type { BrandAssets, CompanyInfo, NavigationItem, Theme } from '../types'
 import {
   findNavigationLinksByTitle,
   getNavigationColumns,
   getNavigationRoot,
   getPrimaryLinks,
-} from "../utils/navigation";
+} from '../utils/navigation'
 
 interface NavigationProps {
   brand: BrandAssets;
@@ -45,51 +41,65 @@ function getFocusableElements(node: HTMLElement) {
 }
 
 
-function renderThemeToggle(className: string, theme: Theme, onToggleTheme: () => void) {
+function ThemeToggle({ className, theme, onToggleTheme }: { className?: string; theme: Theme; onToggleTheme: () => void }) {
   return (
     <button
-      className={className}
+      className={cn(
+        'relative inline-flex items-center justify-center w-12 h-7 rounded-full border border-border-soft bg-surface-soft transition-all',
+        'hover:border-accent/50 dark:border-border-dark-soft dark:bg-surface-dark-soft',
+        className
+      )}
       type="button"
       data-theme={theme}
-      aria-pressed={theme === "dark"}
+      aria-pressed={theme === 'dark'}
       onClick={onToggleTheme}
       aria-label={`Toggle theme. Current theme is ${theme}.`}
     >
-      <span className="tutorial-toggle__orb" aria-hidden="true">
-        <svg className="tutorial-toggle__icon tutorial-toggle__icon--sun" viewBox="0 0 20 20" fill="currentColor">
-          <path
-            fillRule="evenodd"
-            d="M10 2a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm4.22 3.22a1 1 0 0 1 1.415 0l.707.707a1 1 0 0 1-1.414 1.414l-.707-.707a1 1 0 0 1 0-1.414ZM18 10a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm-3.78 5.364a1 1 0 0 1 0 1.414l-.707.707a1 1 0 0 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0ZM10 18a1 1 0 0 1-1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1Zm-4.22-3.22a1 1 0 0 1-1.415 0l-.707-.707a1 1 0 0 1 1.414-1.414l.707.707a1 1 0 0 1 0 1.414ZM2 10a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Zm1.78-4.586a1 1 0 0 1 0-1.414l.707-.707A1 1 0 0 1 5.903 4.72l-.707.707a1 1 0 0 1-1.414 0ZM10 14a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"
-            clipRule="evenodd"
-          />
-        </svg>
-        <svg className="tutorial-toggle__icon tutorial-toggle__icon--moon" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M17.293 13.293A8 8 0 0 1 6.707 2.707a8 8 0 1 0 10.586 10.586Z" />
-        </svg>
+      <span
+        className={cn(
+          'absolute top-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 flex items-center justify-center',
+          theme === 'dark' ? 'translate-x-2.5' : '-translate-x-2.5'
+        )}
+        aria-hidden="true"
+      >
+        <Sun className={cn('w-3 h-3 text-amber-500 transition-opacity', theme === 'dark' ? 'opacity-0' : 'opacity-100')} />
+        <Moon className={cn('absolute w-3 h-3 text-indigo-400 transition-opacity', theme === 'dark' ? 'opacity-100' : 'opacity-0')} />
       </span>
     </button>
-  );
+  )
 }
 
-function renderMenuColumns(columns: MenuColumn[], onNavigate: () => void) {
-  return columns.map((column) => (
-    <div
-      key={column.title}
-      className="nav-shell__menu-column"
-      data-border={column.borderLeft ? "true" : undefined}
-    >
-      <h3 className="nav-shell__menu-title">{column.title}</h3>
-      <ul className="nav-shell__menu-list">
-        {column.items.map((item) => (
-          <li key={item.href}>
-            <a className="nav-shell__menu-link" href={item.href} onClick={onNavigate}>
-              {item.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  ));
+function MenuColumns({ columns, onNavigate }: { columns: MenuColumn[]; onNavigate: () => void }) {
+  return (
+    <>
+      {columns.map((column, index) => (
+        <div
+          key={column.title}
+          className={cn(
+            'flex-1 min-w-[140px]',
+            column.borderLeft && index > 0 && 'pl-6 border-l border-border-soft dark:border-border-dark-soft'
+          )}
+        >
+          <h3 className="text-xs font-extrabold tracking-[0.14em] uppercase text-accent mb-3 dark:text-accent-dark">
+            {column.title}
+          </h3>
+          <ul className="grid gap-1.5">
+            {column.items.map((item) => (
+              <li key={item.href}>
+                <a
+                  className="text-sm text-text-muted hover:text-accent transition-colors dark:text-text-dark-muted dark:hover:text-accent-dark"
+                  href={item.href}
+                  onClick={onNavigate}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </>
+  )
 }
 
 function getHrefPath(href: string) {
@@ -284,77 +294,85 @@ export function Navigation({
     setDesktopMenu(null);
   };
 
+  const navLinkBase = 'relative inline-flex items-center justify-center h-10 px-4 text-sm font-medium text-text rounded-full transition-all hover:bg-accent-soft dark:text-text-dark dark:hover:bg-accent-dark-soft'
+  const navLinkActive = 'bg-accent-soft text-accent dark:bg-accent-dark-soft dark:text-accent-dark'
+
   return (
     <>
-<header ref={headerRef} className="nav-shell" data-theme={theme}>
-        <div className="nav-shell__bar">
-          <a className="nav-shell__brand" href={routes.home} onClick={closeAllMenus}>
+      <header
+        ref={headerRef}
+        data-theme={theme}
+        className="fixed top-0 inset-x-0 z-50 h-[70px] bg-surface/86 backdrop-blur-xl border-b border-border-soft transition-all dark:bg-surface-dark/78 dark:border-border-dark-soft"
+        style={{ '--header-height': '70px' } as React.CSSProperties}
+      >
+        <div className="container h-full mx-auto px-[clamp(16px,4vw,48px)] flex items-center justify-between gap-4">
+          {/* Brand */}
+          <a href={routes.home} onClick={closeAllMenus} className="flex items-center">
             <img
-              className="nav-shell__logo nav-shell__logo--light"
               src={brand.lightLogoSrc}
               alt={brand.name}
+              className="block h-8 w-auto dark:hidden"
             />
             <img
-              className="nav-shell__logo nav-shell__logo--dark"
               src={brand.darkLogoSrc}
               alt=""
               aria-hidden="true"
+              className="hidden h-8 w-auto dark:block"
             />
           </a>
 
-          <div className="nav-shell__desktop">
-            <nav className="nav-shell__pill" aria-label="Primary navigation">
+          {/* Desktop Navigation */}
+          <div className="hidden xl:flex items-center">
+            <nav className="inline-flex items-center gap-1 p-1.5 rounded-full bg-surface-soft border border-border-soft dark:bg-surface-dark-soft dark:border-border-dark-soft" aria-label="Primary navigation">
               {desktopLinks.slice(0, 2).map((link) => (
                 <a
                   key={link.href}
-                  className="nav-shell__tab nav-shell__link"
                   href={link.href}
-                  data-active={isActive(link.href)}
-                  aria-current={isActive(link.href) ? "page" : undefined}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                   onClick={closeAllMenus}
+                  className={cn(navLinkBase, isActive(link.href) && navLinkActive)}
                 >
                   {link.label}
                 </a>
               ))}
 
+              {/* Services Dropdown */}
               <div
-                className="nav-shell__dropdown"
-                onMouseEnter={() => setDesktopMenu("services")}
+                className="relative"
+                onMouseEnter={() => setDesktopMenu('services')}
                 onMouseLeave={() => setDesktopMenu(null)}
-                onFocusCapture={() => setDesktopMenu("services")}
+                onFocusCapture={() => setDesktopMenu('services')}
                 onBlur={handleDropdownBlur}
               >
                 <a
-                  className="nav-shell__tab nav-shell__trigger"
                   href={routes.services}
-                  data-active={servicesActive}
-                  data-open={desktopMenu === "services" ? "true" : undefined}
-                  aria-expanded={desktopMenu === "services"}
+                  aria-expanded={desktopMenu === 'services'}
                   aria-controls={servicesMenuId}
-                  aria-current={servicesActive ? "page" : undefined}
+                  aria-current={servicesActive ? 'page' : undefined}
                   onClick={closeAllMenus}
+                  className={cn(navLinkBase, servicesActive && navLinkActive, 'group')}
                 >
                   Services
-                  <svg className="nav-shell__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <ChevronDown className={cn('ml-1 w-4 h-4 transition-transform', desktopMenu === 'services' && 'rotate-180')} aria-hidden="true" />
                 </a>
 
                 <div
                   id={servicesMenuId}
-                  className="nav-shell__menu nav-shell__menu--services"
-                  data-open={desktopMenu === "services"}
-                  aria-hidden={desktopMenu !== "services"}
+                  aria-hidden={desktopMenu !== 'services'}
+                  className={cn(
+                    'absolute top-full left-1/2 -translate-x-1/2 pt-2 transition-all',
+                    desktopMenu === 'services' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2 pointer-events-none'
+                  )}
                 >
-                  <div className="nav-shell__menu-card">
-                    <div className="nav-shell__menu-grid nav-shell__menu-grid--services">
-                      {renderMenuColumns(servicesColumns, closeAllMenus)}
+                  <div className="p-4 rounded-2xl bg-surface border border-border-soft shadow-popover min-w-[360px] dark:bg-surface-dark dark:border-border-dark-soft dark:shadow-popover-dark">
+                    <div className="flex gap-6">
+                      <MenuColumns columns={servicesColumns} onNavigate={closeAllMenus} />
                     </div>
-                    <div className="nav-shell__menu-footer">
-                      <a className="nav-shell__cta-primary" href={routes.services} onClick={closeAllMenus}>
+                    <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border-soft dark:border-border-dark-soft">
+                      <a href={routes.services} onClick={closeAllMenus} className="inline-flex items-center justify-center h-10 px-5 rounded-full bg-accent text-white text-sm font-extrabold hover:bg-accent-hover transition-all">
                         See More Services
                       </a>
-                      <a className="nav-shell__cta-secondary" href={routes.contact} onClick={closeAllMenus}>
+                      <a href={routes.contact} onClick={closeAllMenus} className="text-sm font-medium text-accent hover:underline dark:text-accent-dark">
                         Contact Exxonim
                       </a>
                     </div>
@@ -362,44 +380,43 @@ export function Navigation({
                 </div>
               </div>
 
+              {/* Resources Dropdown */}
               <div
-                className="nav-shell__dropdown"
-                onMouseEnter={() => setDesktopMenu("resources")}
+                className="relative"
+                onMouseEnter={() => setDesktopMenu('resources')}
                 onMouseLeave={() => setDesktopMenu(null)}
-                onFocusCapture={() => setDesktopMenu("resources")}
+                onFocusCapture={() => setDesktopMenu('resources')}
                 onBlur={handleDropdownBlur}
               >
                 <a
-                  className="nav-shell__tab nav-shell__trigger"
                   href={routes.resources}
-                  data-active={resourcesActive}
-                  data-open={desktopMenu === "resources" ? "true" : undefined}
-                  aria-expanded={desktopMenu === "resources"}
+                  aria-expanded={desktopMenu === 'resources'}
                   aria-controls={resourcesMenuId}
-                  aria-current={resourcesActive ? "page" : undefined}
+                  aria-current={resourcesActive ? 'page' : undefined}
                   onClick={closeAllMenus}
+                  className={cn(navLinkBase, resourcesActive && navLinkActive, 'group')}
                 >
                   Resources
-                  <svg className="nav-shell__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <ChevronDown className={cn('ml-1 w-4 h-4 transition-transform', desktopMenu === 'resources' && 'rotate-180')} aria-hidden="true" />
                 </a>
 
                 <div
                   id={resourcesMenuId}
-                  className="nav-shell__menu"
-                  data-open={desktopMenu === "resources"}
-                  aria-hidden={desktopMenu !== "resources"}
+                  aria-hidden={desktopMenu !== 'resources'}
+                  className={cn(
+                    'absolute top-full left-1/2 -translate-x-1/2 pt-2 transition-all',
+                    desktopMenu === 'resources' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2 pointer-events-none'
+                  )}
                 >
-                  <div className="nav-shell__menu-card">
-                    <div className="nav-shell__menu-grid nav-shell__menu-grid--resources">
-                      {renderMenuColumns(resourcesColumns, closeAllMenus)}
+                  <div className="p-4 rounded-2xl bg-surface border border-border-soft shadow-popover min-w-[280px] dark:bg-surface-dark dark:border-border-dark-soft dark:shadow-popover-dark">
+                    <div className="flex gap-6">
+                      <MenuColumns columns={resourcesColumns} onNavigate={closeAllMenus} />
                     </div>
-                    <div className="nav-shell__menu-footer">
-                      <a className="nav-shell__cta-primary" href={routes.resources} onClick={closeAllMenus}>
+                    <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border-soft dark:border-border-dark-soft">
+                      <a href={routes.resources} onClick={closeAllMenus} className="inline-flex items-center justify-center h-10 px-5 rounded-full bg-accent text-white text-sm font-extrabold hover:bg-accent-hover transition-all">
                         See More
                       </a>
-                      <a className="nav-shell__cta-secondary" href={routes.contact} onClick={closeAllMenus}>
+                      <a href={routes.contact} onClick={closeAllMenus} className="text-sm font-medium text-accent hover:underline dark:text-accent-dark">
                         Ask a Question
                       </a>
                     </div>
@@ -410,11 +427,10 @@ export function Navigation({
               {desktopLinks.slice(2).map((link) => (
                 <a
                   key={link.href}
-                  className="nav-shell__tab nav-shell__link"
                   href={link.href}
-                  data-active={isActive(link.href)}
-                  aria-current={isActive(link.href) ? "page" : undefined}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                   onClick={closeAllMenus}
+                  className={cn(navLinkBase, isActive(link.href) && navLinkActive)}
                 >
                   {link.label}
                 </a>
@@ -422,148 +438,149 @@ export function Navigation({
             </nav>
           </div>
 
-          <div className="nav-shell__actions">
-            {renderThemeToggle("tutorial-toggle nav-shell__theme-desktop", theme, onToggleTheme)}
-            {renderThemeToggle("tutorial-toggle tutorial-toggle--mobile nav-shell__theme-mobile", theme, onToggleTheme)}
+          {/* Actions */}
+          <div className="flex items-center gap-2 md:gap-3">
+            <ThemeToggle className="hidden xl:inline-flex" theme={theme} onToggleTheme={onToggleTheme} />
+            <ThemeToggle className="xl:hidden" theme={theme} onToggleTheme={onToggleTheme} />
 
-            <a className="nav-shell__call-button" href={callHref}>
-              <div className="nav-shell__call-icon">
-                <svg className="animate-ring" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 5a2 2 0 0 1 2-2h3.28a1 1 0 0 1 .948.684l1.498 4.493a1 1 0 0 1-.502 1.21l-2.257 1.13a11.042 11.042 0 0 0 5.516 5.516l1.13-2.257a1 1 0 0 1 1.21-.502l4.493 1.498a1 1 0 0 1 .684.949V19a2 2 0 0 1-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                  />
-                </svg>
+            {/* Call Button */}
+            <a href={callHref} className="hidden md:inline-flex items-center gap-3 h-12 pl-3 pr-5 rounded-full bg-accent-soft hover:bg-accent-soft-hover transition-all dark:bg-accent-dark-soft dark:hover:bg-accent-dark-soft-hover">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-accent text-white animate-phone-ring">
+                <Phone className="w-4 h-4" aria-hidden="true" />
               </div>
-              <div className="nav-shell__call-copy">
-                <span className="nav-shell__call-label">
-                  {primaryPhone ? "Call Now" : "Contact Exxonim"}
+              <div className="flex flex-col">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-accent dark:text-accent-dark">
+                  {primaryPhone ? 'Call Now' : 'Contact Exxonim'}
                 </span>
-                <span className="nav-shell__call-number">
-                  {primaryPhone || "Open the contact page"}
+                <span className="text-sm font-medium text-text dark:text-text-dark">
+                  {primaryPhone || 'Open the contact page'}
                 </span>
               </div>
             </a>
 
+            {/* Mobile Menu Toggle */}
             <button
               ref={mobileToggleRef}
-              className={`nav-shell__toggle${mobileMenuOpen ? " is-open" : ""}`}
               type="button"
               aria-expanded={mobileMenuOpen}
               aria-controls={mobileMenuId}
-              aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
+              aria-label={mobileMenuOpen ? 'Close navigation' : 'Open navigation'}
               onClick={() => {
-                setDesktopMenu(null);
-                setMobileMenuOpen((open) => !open);
+                setDesktopMenu(null)
+                setMobileMenuOpen((open) => !open)
               }}
+              className={cn(
+                'inline-flex xl:hidden items-center justify-center w-11 h-11 rounded-full border transition-all',
+                mobileMenuOpen
+                  ? 'bg-accent text-white border-accent'
+                  : 'bg-surface text-text border-border-soft hover:border-accent dark:bg-surface-dark dark:text-text-dark dark:border-border-dark-soft'
+              )}
             >
-              <span className="nav-shell__sr-only">Toggle navigation</span>
-
-              <svg
-                className="nav-shell__toggle-icon--menu"
-                viewBox="0 0 32 32"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.25"
-                aria-hidden="true"
-              >
-                <path strokeLinecap="round" d="M 7 10 h 18 M 7 16 h 18 M 7 22 h 18" />
-              </svg>
-
-              <svg
-                className="nav-shell__toggle-icon--close"
-                viewBox="0 0 32 32"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.25"
-                aria-hidden="true"
-              >
-                <path strokeLinecap="round" d="M 10 10 L 22 22 M 22 10 L 10 22" />
-              </svg>
+              <span className="sr-only">Toggle navigation</span>
+              <Menu className={cn('w-6 h-6', mobileMenuOpen && 'hidden')} aria-hidden="true" />
+              <X className={cn('w-6 h-6', !mobileMenuOpen && 'hidden')} aria-hidden="true" />
             </button>
           </div>
         </div>
       </header>
 
+      {/* Mobile Menu */}
       <div
-        className="nav-shell__mobile"
-        data-theme={theme}
-        data-open={mobileMenuOpen}
         id={mobileMenuId}
         aria-hidden={!mobileMenuOpen}
+        className={cn(
+          'fixed inset-0 z-40 xl:hidden transition-opacity',
+          mobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+        )}
       >
+        {/* Backdrop */}
         <button
-          className="nav-shell__mobile-backdrop"
           type="button"
           aria-label="Close navigation"
           onClick={() => setMobileMenuOpen(false)}
+          className="absolute inset-0 bg-surface-strong/60 backdrop-blur-sm dark:bg-surface-dark-strong/60"
         />
-        <div className="nav-shell__mobile-wrap">
+
+        {/* Panel */}
+        <div className="absolute top-[70px] right-4 left-4 max-w-md ml-auto">
           <div
             ref={mobilePanelRef}
-            className="nav-shell__mobile-panel"
             role="dialog"
             aria-modal="true"
             aria-label="Site navigation"
             tabIndex={-1}
+            className={cn(
+              'max-h-[calc(100vh-100px)] overflow-y-auto rounded-2xl border bg-surface p-4 shadow-popover transition-all dark:bg-surface-dark dark:border-border-dark-soft dark:shadow-popover-dark',
+              mobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
+            )}
           >
-            <div className="nav-shell__mobile-grid">
-              <div className="nav-shell__mobile-quick-links">
+            <div className="grid gap-4">
+              {/* Quick Links */}
+              <div className="flex flex-wrap gap-2">
                 {desktopLinks.map((link) => (
                   <a
                     key={link.href}
-                    className="nav-shell__mobile-quick-link"
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'inline-flex items-center h-10 px-4 rounded-full text-sm font-medium transition-colors',
+                      isActive(link.href)
+                        ? 'bg-accent text-white'
+                        : 'bg-surface-soft text-text hover:bg-accent-soft dark:bg-surface-dark-soft dark:text-text-dark dark:hover:bg-accent-dark-soft'
+                    )}
                   >
                     {link.label}
                   </a>
                 ))}
               </div>
 
-              <div className="nav-shell__mobile-card">
-                <p className="nav-shell__mobile-card-title">Services</p>
-                <div className="nav-shell__mobile-card-links">
+              {/* Services Card */}
+              <div className="p-4 rounded-xl border border-border-soft bg-surface-elevated dark:bg-surface-dark-elevated dark:border-border-dark-soft">
+                <p className="text-xs font-extrabold tracking-[0.14em] uppercase text-accent mb-3 dark:text-accent-dark">
+                  Services
+                </p>
+                <div className="flex flex-wrap gap-2 mb-4">
                   {mobileServices.map((item) => (
                     <a
                       key={item.href}
-                      className="nav-shell__mobile-card-link"
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
+                      className="text-sm text-text-muted hover:text-accent transition-colors dark:text-text-dark-muted dark:hover:text-accent-dark"
                     >
                       {item.label}
                     </a>
                   ))}
                 </div>
-                <div className="nav-shell__mobile-card-actions">
+                <div className="flex items-center gap-3 pt-3 border-t border-border-soft dark:border-border-dark-soft">
                   <a
-                    className="nav-shell__mobile-card-primary"
                     href={routes.services}
                     onClick={() => setMobileMenuOpen(false)}
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-accent text-white text-sm font-extrabold hover:bg-accent-hover transition-all"
                   >
                     See More Services
                   </a>
                   <a
-                    className="nav-shell__mobile-card-secondary"
                     href={routes.contact}
                     onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-medium text-accent hover:underline dark:text-accent-dark"
                   >
                     Contact Exxonim
                   </a>
                 </div>
               </div>
 
-              <div className="nav-shell__mobile-card">
-                <p className="nav-shell__mobile-card-title">Resources</p>
-                <div className="nav-shell__mobile-card-links">
+              {/* Resources Card */}
+              <div className="p-4 rounded-xl border border-border-soft bg-surface-elevated dark:bg-surface-dark-elevated dark:border-border-dark-soft">
+                <p className="text-xs font-extrabold tracking-[0.14em] uppercase text-accent mb-3 dark:text-accent-dark">
+                  Resources
+                </p>
+                <div className="flex flex-wrap gap-3">
                   {mobileResources.map((item) => (
                     <a
                       key={item.href}
-                      className="nav-shell__mobile-card-link"
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
+                      className="text-sm text-text-muted hover:text-accent transition-colors dark:text-text-dark-muted dark:hover:text-accent-dark"
                     >
                       {item.label}
                     </a>
@@ -571,24 +588,22 @@ export function Navigation({
                 </div>
               </div>
 
-              <div className="nav-shell__mobile-bottom">
-                <a
-                  className="nav-shell__mobile-bottom-link"
-                  href={callHref}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="nav-shell__mobile-bottom-label">
-                    {primaryPhone ? "Call Now" : "Contact Exxonim"}
-                  </span>
-                  <span className="nav-shell__mobile-bottom-number">
-                    {primaryPhone || "Open the contact page"}
-                  </span>
-                </a>
-              </div>
+              {/* Bottom CTA */}
+              <a
+                href={callHref}
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-3 h-14 rounded-full bg-accent text-white hover:bg-accent-hover transition-all"
+              >
+                <Phone className="w-5 h-5 animate-phone-ring" aria-hidden="true" />
+                <span className="font-extrabold">
+                  {primaryPhone ? 'Call Now' : 'Contact Exxonim'}
+                </span>
+                {primaryPhone && <span className="text-white/80">{primaryPhone}</span>}
+              </a>
             </div>
           </div>
         </div>
       </div>
     </>
-  );
+  )
 }

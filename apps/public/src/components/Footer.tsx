@@ -1,6 +1,8 @@
-import { routes } from "../routes";
-import type { BrandAssets, CompanyInfo, Theme } from "../types";
-import type { SiteSettingFooterValue, SiteSettingSocialLinkValue } from "../types/api";
+import { MapPin, Mail, Phone } from 'lucide-react'
+import { Container } from './primitives/Container'
+import { routes } from '../routes'
+import type { BrandAssets, CompanyInfo } from '../types'
+import type { SiteSettingFooterValue, SiteSettingSocialLinkValue } from '../types/api'
 
 function socialLabel(link: SiteSettingSocialLinkValue) {
   return link.label?.trim() || link.platform.charAt(0).toUpperCase() + link.platform.slice(1);
@@ -59,10 +61,9 @@ interface FooterProps {
   brand: BrandAssets;
   company: CompanyInfo;
   footer: SiteSettingFooterValue;
-  theme: Theme;
 }
 
-export function Footer({ brand, company, footer, theme }: FooterProps) {
+export function Footer({ brand, company, footer }: FooterProps) {
   const socialLinks = footerSocialPlatforms
     .map((platform) =>
       (footer.social_links ?? []).find(
@@ -73,185 +74,184 @@ export function Footer({ brand, company, footer, theme }: FooterProps) {
 
   return (
     <footer
-        className="footer-shell"
-        data-theme={theme}
-        id="site-footer"
-      >
-        <div className="footer-shell__content">
-          <div className="footer-shell__grid">
-            <section className="footer-shell__brand-panel">
-              <a
-                className="footer-shell__brand-link"
-                href={routes.home}
-                aria-label={`${brand.name} home`}
-              >
-                <img
-                  className="footer-shell__brand-logo"
-                  src={theme === "dark" ? brand.darkLogoSrc : brand.lightLogoSrc}
-                  alt={brand.name}
-                  loading="lazy"
-                />
-              </a>
+      id="site-footer"
+      className="relative mt-auto border-t border-border-soft bg-page dark:bg-page-dark dark:border-border-dark-soft"
+    >
+      <Container className="py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6 mb-8 pb-8 border-b border-border-soft dark:border-border-dark-soft">
+          {/* Brand Panel */}
+          <section className="grid gap-4 content-start">
+            <a
+              href={routes.home}
+              aria-label={`${brand.name} home`}
+              className="inline-flex items-center"
+            >
+              <img
+                src={brand.lightLogoSrc}
+                alt={brand.name}
+                loading="lazy"
+                className="block max-w-[9.25rem] h-auto dark:hidden"
+              />
+              <img
+                src={brand.darkLogoSrc}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                className="hidden max-w-[9.25rem] h-auto dark:block"
+              />
+            </a>
 
-              <p className="footer-shell__tagline">
-                {footer.tagline}
-              </p>
+            <p className="text-text-muted text-sm leading-relaxed max-w-[26ch] dark:text-text-dark-muted">
+              {footer.tagline}
+            </p>
 
-              <a className="footer-shell__cta" href={footer.primary_cta.href}>
-                {footer.primary_cta.label}
-              </a>
+            <a
+              href={footer.primary_cta.href}
+              className="inline-flex items-center justify-center w-fit min-h-[2.75rem] px-5 py-2.5 rounded-full bg-accent text-white font-extrabold text-sm shadow-button hover:bg-accent-hover transition-all hover:-translate-y-0.5"
+            >
+              {footer.primary_cta.label}
+            </a>
+          </section>
 
-            </section>
-
-            <section className="footer-shell__column">
-              <h4 className="footer-shell__eyebrow">Quick Links</h4>
-              <nav aria-label="Footer navigation">
-                <ul className="footer-shell__list">
-                  {footer.quick_links.map((link) => (
-                    <li key={`${link.label}-${link.href}`}>
-                      <a href={link.href}>{link.label}</a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            </section>
-
-            <section className="footer-shell__column">
-              <h4 className="footer-shell__eyebrow">Other Resources</h4>
-              <ul className="footer-shell__list">
-                {footer.other_resources.map((link) => (
+          {/* Quick Links */}
+          <section>
+            <h4 className="text-xs font-extrabold tracking-[0.14em] uppercase text-accent mb-4 dark:text-accent-dark">
+              Quick Links
+            </h4>
+            <nav aria-label="Footer navigation">
+              <ul className="grid gap-2">
+                {footer.quick_links.map((link) => (
                   <li key={`${link.label}-${link.href}`}>
-                    <a href={link.href}>{link.label}</a>
+                    <a
+                      href={link.href}
+                      className="text-text-muted text-sm hover:text-accent transition-colors dark:text-text-dark-muted dark:hover:text-accent-dark"
+                    >
+                      {link.label}
+                    </a>
                   </li>
                 ))}
               </ul>
-            </section>
+            </nav>
+          </section>
 
-            <section className="footer-shell__column">
-              <h4 className="footer-shell__eyebrow">Contact Us</h4>
-              <ul className="footer-shell__list footer-shell__list--contact">
-                <li className="footer-shell__contact-item">
-                  <svg
-                    className="footer-shell__contact-icon"
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+          {/* Other Resources */}
+          <section>
+            <h4 className="text-xs font-extrabold tracking-[0.14em] uppercase text-accent mb-4 dark:text-accent-dark">
+              Other Resources
+            </h4>
+            <ul className="grid gap-2">
+              {footer.other_resources.map((link) => (
+                <li key={`${link.label}-${link.href}`}>
+                  <a
+                    href={link.href}
+                    className="text-text-muted text-sm hover:text-accent transition-colors dark:text-text-dark-muted dark:hover:text-accent-dark"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M17.657 16.657 13.414 20.9a1.998 1.998 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0Z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                    />
-                  </svg>
-
-                  <span>{company.address || "Use the contact page for location details."}</span>
+                    {link.label}
+                  </a>
                 </li>
+              ))}
+            </ul>
+          </section>
 
-                <li className="footer-shell__contact-item">
-                  <svg
-                    className="footer-shell__contact-icon"
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="m3 8 7.89 5.26a2 2 0 0 0 2.22 0L21 8"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2Z"
-                    />
-                  </svg>
+          {/* Contact Us */}
+          <section>
+            <h4 className="text-xs font-extrabold tracking-[0.14em] uppercase text-accent mb-4 dark:text-accent-dark">
+              Contact Us
+            </h4>
+            <ul className="grid gap-3">
+              <li className="flex items-start gap-3">
+                <MapPin className="w-5 h-5 text-accent flex-shrink-0 mt-0.5 dark:text-accent-dark" aria-hidden="true" />
+                <span className="text-text-muted text-sm dark:text-text-dark-muted">
+                  {company.address || 'Use the contact page for location details.'}
+                </span>
+              </li>
 
-                  <div className="footer-shell__contact-copy--stacked">
-                    {company.emails.length ? (
-                      company.emails.map((email) => (
-                        <a key={email} href={`mailto:${email}`}>
-                          {email}
-                        </a>
-                      ))
-                    ) : (
-                      <a href={routes.contact}>Use the Exxonim contact page</a>
-                    )}
-                  </div>
-                </li>
-
-                <li className="footer-shell__contact-item">
-                  <svg
-                    className="footer-shell__contact-icon"
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 5a2 2 0 0 1 2-2h3.28a1 1 0 0 1 .948.684l1.498 4.493a1 1 0 0 1-.502 1.21l-2.257 1.13a11.042 11.042 0 0 0 5.516 5.516l1.13-2.257a1 1 0 0 1 1.21-.502l4.493 1.498a1 1 0 0 1 .684.949V19a2 2 0 0 1-2 2h-1C9.716 21 3 14.284 3 6V5Z"
-                    />
-                  </svg>
-
-                  <div className="footer-shell__contact-copy--stacked">
-                    {company.phones.length ? (
-                      company.phones.map((phone) => (
-                        <a key={phone} href={`tel:${phone.replace(/\s+/g, "")}`}>
-                          {phone}
-                        </a>
-                      ))
-                    ) : (
-                      <a href={routes.contact}>Use the Exxonim contact page</a>
-                    )}
-                  </div>
-                </li>
-              </ul>
-            </section>
-          </div>
-
-          <div className="footer-shell__bottom">
-            <p>{footer.copyright}</p>
-            <div className="footer-shell__bottom-tools">
-              {socialLinks.length ? (
-                <div className="footer-shell__bottom-social" aria-label="Social media links">
-                  {socialLinks.map((link, index) => (
+              <li className="flex items-start gap-3">
+                <Mail className="w-5 h-5 text-accent flex-shrink-0 mt-0.5 dark:text-accent-dark" aria-hidden="true" />
+                <div className="grid gap-1">
+                  {company.emails.length ? (
+                    company.emails.map((email) => (
+                      <a
+                        key={email}
+                        href={`mailto:${email}`}
+                        className="text-text-muted text-sm hover:text-accent transition-colors dark:text-text-dark-muted dark:hover:text-accent-dark"
+                      >
+                        {email}
+                      </a>
+                    ))
+                  ) : (
                     <a
-                      key={`${link.platform}-${link.url}-${index}`}
-                      className="footer-shell__social-link"
-                      href={link.url}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      aria-label={socialLabel(link)}
-                      title={socialLabel(link)}
+                      href={routes.contact}
+                      className="text-text-muted text-sm hover:text-accent transition-colors dark:text-text-dark-muted dark:hover:text-accent-dark"
                     >
-                      {renderSocialIcon(link.platform)}
+                      Use the Exxonim contact page
                     </a>
-                  ))}
+                  )}
                 </div>
-              ) : null}
-              <button
-                className="footer-shell__top-button"
-                type="button"
-                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                aria-label="Back to top"
-                title="Back to top"
-              >
-                Top
-              </button>
-            </div>
+              </li>
+
+              <li className="flex items-start gap-3">
+                <Phone className="w-5 h-5 text-accent flex-shrink-0 mt-0.5 dark:text-accent-dark" aria-hidden="true" />
+                <div className="grid gap-1">
+                  {company.phones.length ? (
+                    company.phones.map((phone) => (
+                      <a
+                        key={phone}
+                        href={`tel:${phone.replace(/\s+/g, '')}`}
+                        className="text-text-muted text-sm hover:text-accent transition-colors dark:text-text-dark-muted dark:hover:text-accent-dark"
+                      >
+                        {phone}
+                      </a>
+                    ))
+                  ) : (
+                    <a
+                      href={routes.contact}
+                      className="text-text-muted text-sm hover:text-accent transition-colors dark:text-text-dark-muted dark:hover:text-accent-dark"
+                    >
+                      Use the Exxonim contact page
+                    </a>
+                  )}
+                </div>
+              </li>
+            </ul>
+          </section>
+        </div>
+
+        {/* Bottom */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-text-soft text-sm dark:text-text-dark-soft">
+            {footer.copyright}
+          </p>
+          <div className="flex items-center gap-3">
+            {socialLinks.length ? (
+              <div className="flex items-center gap-2" aria-label="Social media links">
+                {socialLinks.map((link, index) => (
+                  <a
+                    key={`${link.platform}-${link.url}-${index}`}
+                    href={link.url}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    aria-label={socialLabel(link)}
+                    title={socialLabel(link)}
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-surface-soft text-text-muted hover:text-accent hover:bg-accent-soft transition-all dark:bg-surface-dark-soft dark:text-text-dark-muted dark:hover:text-accent-dark dark:hover:bg-accent-dark-soft"
+                  >
+                    <span className="w-5 h-5 flex items-center justify-center">{renderSocialIcon(link.platform)}</span>
+                  </a>
+                ))}
+              </div>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              aria-label="Back to top"
+              title="Back to top"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-surface-soft text-text-muted text-sm font-medium hover:bg-accent-soft hover:text-accent transition-all dark:bg-surface-dark-soft dark:text-text-dark-muted dark:hover:bg-accent-dark-soft dark:hover:text-accent-dark"
+            >
+              Top
+            </button>
           </div>
         </div>
+      </Container>
     </footer>
-  );
+  )
 }

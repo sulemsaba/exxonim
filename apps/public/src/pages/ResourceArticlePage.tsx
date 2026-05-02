@@ -70,7 +70,7 @@ export function ResourceArticlePage({ slug }: ResourceArticlePageProps) {
 
             return (
             <>
-<section className="resource-article-page light-section">
+<section className="relative bg-[linear-gradient(180deg,rgba(248,242,232,0.72)_0%,rgba(235,226,211,0.6)_100%)] backdrop-blur-[8px] dark:bg-[#071b1d]">
                 <div className="container resource-article-shell">
                   <a className="resource-article-back" href={routes.resources}>
                     <span aria-hidden="true">&larr;</span>

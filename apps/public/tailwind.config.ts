@@ -127,8 +127,6 @@ export default {
       // ANIMATIONS
       // ========================================
       animation: {
-        "organic-drift-1": "organic-drift-1 25s ease-in-out infinite",
-        "organic-drift-2": "organic-drift-2 30s ease-in-out infinite",
         "provider-marquee": "provider-marquee 34s linear infinite",
         "code-pan": "code-pan 12s linear infinite alternate",
         "whatsapp-pulse": "whatsapp-pulse 2s ease-out infinite",
@@ -144,18 +142,6 @@ export default {
       },
 
       keyframes: {
-        "organic-drift-1": {
-          "0%": { transform: "translate(0, 0) scale(1)" },
-          "33%": { transform: "translate(-80px, 60px) scale(1.1)" },
-          "66%": { transform: "translate(40px, -40px) scale(0.9)" },
-          "100%": { transform: "translate(0, 0) scale(1)" },
-        },
-        "organic-drift-2": {
-          "0%": { transform: "translate(0, 0) scale(1)" },
-          "33%": { transform: "translate(60px, -80px) scale(0.95)" },
-          "66%": { transform: "translate(-50px, 50px) scale(1.05)" },
-          "100%": { transform: "translate(0, 0) scale(1)" },
-        },
         "provider-marquee": {
           from: { transform: "translateX(0)" },
           to: { transform: "translateX(-50%)" },

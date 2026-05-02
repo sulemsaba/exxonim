@@ -22,7 +22,7 @@ function ContentPage({
 }: ContentPageProps) {
   return (
     <>
-<section className="info-page light-section">
+<section className="relative bg-[linear-gradient(180deg,rgba(248,242,232,0.72)_0%,rgba(235,226,211,0.6)_100%)] backdrop-blur-[8px] dark:bg-[#071b1d]">
         <div className="container">
           <header className="info-page__header">
             <p className="section-pill section-pill--light">

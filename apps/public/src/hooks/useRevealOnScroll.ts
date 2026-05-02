@@ -1,25 +1,30 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
+/**
+ * Applies scroll-reveal animation directly via inline styles.
+ * No CSS classes required — pure Tailwind compatible.
+ */
 export function useRevealOnScroll() {
   useEffect(() => {
-    const observedNodes = new WeakSet<Element>();
-
-    const markVisible = (node: Element) => {
-      node.classList.add("is-visible");
+    const applyInvisible = (el: Element) => {
+      if (el instanceof HTMLElement) {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(16px)";
+        el.style.transition = "opacity 620ms ease, transform 620ms ease";
+      }
     };
 
-    const isAlreadyVisible = (node: Element) => {
-      const rect = node.getBoundingClientRect();
-      const viewportHeight =
-        window.innerHeight || document.documentElement.clientHeight;
-
-      return rect.top < viewportHeight * 0.92 && rect.bottom > 0;
+    const applyVisible = (el: Element) => {
+      if (el instanceof HTMLElement) {
+        el.style.opacity = "1";
+        el.style.transform = "translateY(0)";
+      }
     };
 
     if (!("IntersectionObserver" in window)) {
-      document
-        .querySelectorAll<HTMLElement>("[data-reveal]")
-        .forEach((node) => markVisible(node));
+      document.querySelectorAll<HTMLElement>("[data-reveal]").forEach((el) => {
+        applyVisible(el);
+      });
       return;
     }
 
@@ -27,7 +32,7 @@ export function useRevealOnScroll() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            markVisible(entry.target);
+            applyVisible(entry.target);
             observer.unobserve(entry.target);
           }
         });
@@ -36,28 +41,26 @@ export function useRevealOnScroll() {
     );
 
     const observeNode = (node: Element) => {
-      if (observedNodes.has(node)) {
-        return;
+      if (node instanceof HTMLElement) {
+        applyInvisible(node);
+        observer.observe(node);
       }
-
-      observedNodes.add(node);
-
-      if (isAlreadyVisible(node)) {
-        markVisible(node);
-        return;
-      }
-
-      observer.observe(node);
     };
 
     const scanNodes = (root: ParentNode = document) => {
       if (root instanceof Element && root.matches("[data-reveal]")) {
         observeNode(root);
       }
-
       root
         .querySelectorAll?.<HTMLElement>("[data-reveal]")
         .forEach((node) => observeNode(node));
+    };
+
+    // Check if already visible
+    const isAlreadyVisible = (node: Element) => {
+      const rect = node.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      return rect.top < viewportHeight * 0.92 && rect.bottom > 0;
     };
 
     scanNodes();

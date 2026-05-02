@@ -21,6 +21,8 @@
     "preview:admin-legacy": "npm run preview --workspace @exxonim/admin",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build:deploy": "node scripts/build-deploy.mjs",
-    "preview:deploy": "npm run build:deploy && node scripts/preview-deploy.mjs"
+    "preview:deploy": "npm run build:deploy && node scripts/preview-deploy.mjs",
+    "test:admin": "npm run test --workspace @exxonim/admin-next",
+    "test:admin:watch": "npm run test:watch --workspace @exxonim/admin-next"
   }
 }

@@ -1,4 +1,5 @@
 import 'src/global.css';
+import 'src/app/tailwind.css';
 
 import type { ReactNode } from 'react';
 

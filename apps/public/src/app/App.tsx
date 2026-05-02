@@ -104,22 +104,24 @@ export default function App({ initialPathname }: AppProps) {
         brand={shell.brand}
         company={shell.company}
         footer={shell.footer}
-        theme={theme}
       />
 
       <PrivacyConsentBanner pathname={pathname} />
 
       {!whatsappUrl ? null : (
         <a
-          className="whatsapp-float"
+          className="fixed right-6 bottom-6 z-[30] inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#25d366] text-white shadow-[0_18px_40px_rgba(37,211,102,0.28)] transition-transform duration-150 ease-out hover:scale-110"
           href={whatsappUrl}
           target="_blank"
           rel="noreferrer"
           aria-label="Chat on WhatsApp"
         >
-          <span className="whatsapp-float__pulse" aria-hidden="true"></span>
+          <span
+            className="absolute inset-0 rounded-full bg-[#25d366]/50 animate-whatsapp-pulse"
+            aria-hidden="true"
+          />
           <svg
-            className="whatsapp-float__icon"
+            className="relative z-10 w-[1.9rem] h-[1.9rem]"
             viewBox="0 0 24 24"
             fill="currentColor"
             aria-hidden="true"

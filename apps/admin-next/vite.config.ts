@@ -2,6 +2,7 @@ import path from 'path';
 import checker from 'vite-plugin-checker';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
+import tailwindcss from '@tailwindcss/vite';
 
 // ----------------------------------------------------------------------
 
@@ -13,6 +14,7 @@ export default defineConfig(({ command }) => ({
   // write access inside this workspace-local node_modules directory.
   cacheDir: path.resolve(process.cwd(), '../../node_modules/.vite/admin-next'),
   plugins: [
+    tailwindcss(),
     react(),
     checker({
       typescript: true,

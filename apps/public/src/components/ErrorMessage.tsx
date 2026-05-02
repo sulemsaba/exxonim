@@ -11,11 +11,11 @@ export function ErrorMessage({
 }: ErrorMessageProps) {
   return (
     <div
-      className={`error-message${compact ? " error-message--compact" : ""}`}
+      className={compact ? "rounded-xl border border-border-soft bg-page p-4" : "rounded-2xl border border-border-soft bg-page p-8 text-center"}
       role="alert"
     >
-      <p className="error-message__title">{title}</p>
-      <p className="error-message__detail">{detail}</p>
+      <p className="text-sm font-semibold text-text">{title}</p>
+      <p className="mt-1 text-sm text-text-muted">{detail}</p>
     </div>
   );
 }

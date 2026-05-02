@@ -20,7 +20,7 @@ export function FaqPage() {
       loadingLabel="Loading FAQ..."
     >
       {() => (
-        <section className="page-shell light-section">
+        <section className="py-7 pb-[5.5rem] relative bg-[linear-gradient(180deg,rgba(248,242,232,0.72)_0%,rgba(235,226,211,0.6)_100%)] backdrop-blur-[8px] dark:bg-[#071b1d]">
           <div className="container page-hero" id="faq" data-reveal>
             <div className="faq-shell">
               <div className="faq-shell__header">
