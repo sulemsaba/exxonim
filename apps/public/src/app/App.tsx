@@ -1,19 +1,4 @@
-import { useEffect, useState } from "react";
-import { HomePage } from "../features/home";
-import {
-  AboutPage,
-  CareerPage,
-  CookiePage,
-  ContactPage,
-  DataRightsPage,
-  FaqPage,
-  NotFoundPage,
-  PrivacyPage,
-  SupportPage,
-  TermsPage,
-} from "../features/pages";
-import { ResourceArticlePage, ResourcesPage } from "../features/resources";
-import { ServicesPage } from "../features/services";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Footer, Navigation } from "../features/site-shell";
 import { PageLoader } from "../components/PageLoader";
 import { PrivacyConsentBanner } from "../components/PrivacyConsentBanner";
@@ -23,7 +8,179 @@ import { usePublicShell } from "../hooks/usePublicShell";
 import { useRevealOnScroll } from "../hooks/useRevealOnScroll";
 import { useStackCardDepth } from "../hooks/useStackCardDepth";
 import { useTheme } from "../hooks/useTheme";
-import { getResourcePostSlug, routes } from "./routes";
+import { getResourcePostSlug } from "./routes";
+
+/* ═══════════════════════════════════════════════════════════
+ * LAZY-LOADED PAGE COMPONENTS
+ * ═══════════════════════════════════════════════════════════
+ *
+ * WHY LAZY LOADING?
+ * -----------------
+ * Previously ALL page components were eagerly imported at the
+ * top of this file. Vite bundled EVERY page into the initial
+ * chunk, even though only ONE page is visible at a time.
+ * This caused:
+ *
+ *   1. LARGE INITIAL BUNDLE -> slow first paint and laggy
+ *      scrolling on the home page (unused page CSS/JS bloated
+ *      the render tree and style calculations)
+ *
+ *   2. SLOW FILE-TO-FILE NAVIGATION -> every route change
+ *      forced React to reconcile ALL component trees, even
+ *      those not visible, because they were in the same module
+ *      graph
+ *
+ *   3. NO CODE SPLITTING -> no parallel chunk loading, no
+ *      caching of individual pages across navigations
+ *
+ * SOLUTION
+ * --------
+ * Each page is wrapped in React.lazy() which tells Vite to
+ * code-split them into separate chunks. A page chunk is only
+ * fetched when the user navigates to that route.
+ *
+ * To hide the chunk-load delay, we also preload pages during
+ * browser idle time (see requestIdleCallback below).
+ *
+ * RULE FOR FUTURE DEVELOPERS:
+ *   NEVER revert to static imports for page components.
+ *   If you add a new page, add its lazy() import here.
+ */
+
+// ── Lazy loader functions ──────────────────────────────
+// Defined as standalone functions (not inline arrows) so we
+// can reuse them for BOTH lazy() creation AND idle-time
+// preloading without duplicating import path strings.
+const loadHomePage = () =>
+  import("../features/home").then((m) => ({ default: m.HomePage }));
+const loadAboutPage = () =>
+  import("../features/pages").then((m) => ({ default: m.AboutPage }));
+const loadCareerPage = () =>
+  import("../features/pages").then((m) => ({ default: m.CareerPage }));
+const loadContactPage = () =>
+  import("../features/pages").then((m) => ({ default: m.ContactPage }));
+const loadFaqPage = () =>
+  import("../features/pages").then((m) => ({ default: m.FaqPage }));
+const loadNotFoundPage = () =>
+  import("../features/pages").then((m) => ({ default: m.NotFoundPage }));
+const loadResourceArticlePage = () =>
+  import("../features/resources").then((m) => ({
+    default: m.ResourceArticlePage,
+  }));
+const loadResourcesPage = () =>
+  import("../features/resources").then((m) => ({ default: m.ResourcesPage }));
+const loadServicesPage = () =>
+  import("../features/services").then((m) => ({ default: m.ServicesPage }));
+const loadSupportPage = () =>
+  import("../features/pages").then((m) => ({ default: m.SupportPage }));
+const loadTermsPage = () =>
+  import("../features/pages").then((m) => ({ default: m.TermsPage }));
+const loadPrivacyPage = () =>
+  import("../features/pages").then((m) => ({ default: m.PrivacyPage }));
+const loadCookiePage = () =>
+  import("../features/pages").then((m) => ({ default: m.CookiePage }));
+const loadDataRightsPage = () =>
+  import("../features/pages").then((m) => ({ default: m.DataRightsPage }));
+
+// ── Lazy components ────────────────────────────────────
+const HomePage = lazy(loadHomePage);
+const AboutPage = lazy(loadAboutPage);
+const CareerPage = lazy(loadCareerPage);
+const ContactPage = lazy(loadContactPage);
+const FaqPage = lazy(loadFaqPage);
+const NotFoundPage = lazy(loadNotFoundPage);
+const ResourceArticlePage = lazy(loadResourceArticlePage);
+const ResourcesPage = lazy(loadResourcesPage);
+const ServicesPage = lazy(loadServicesPage);
+const SupportPage = lazy(loadSupportPage);
+const TermsPage = lazy(loadTermsPage);
+const PrivacyPage = lazy(loadPrivacyPage);
+const CookiePage = lazy(loadCookiePage);
+const DataRightsPage = lazy(loadDataRightsPage);
+
+// ── Preloader registry ─────────────────────────────────
+// All lazy-loader functions collected for idle-time preload.
+// WHEN ADDING A NEW PAGE: add its loader here too.
+const publicPagePreloaders = [
+  loadHomePage,
+  loadAboutPage,
+  loadCareerPage,
+  loadContactPage,
+  loadFaqPage,
+  loadNotFoundPage,
+  loadResourceArticlePage,
+  loadResourcesPage,
+  loadServicesPage,
+  loadSupportPage,
+  loadTermsPage,
+  loadPrivacyPage,
+  loadCookiePage,
+  loadDataRightsPage,
+];
+
+// ── Type helper for requestIdleCallback ────────────────
+type IdleWindow = typeof window & {
+  requestIdleCallback?: (
+    callback: IdleRequestCallback,
+    options?: IdleRequestOptions
+  ) => number;
+  cancelIdleCallback?: (handle: number) => void;
+};
+
+/* ── Page-level Suspense fallback ───────────────────────
+ * Rendered inside <main> so the shell (nav + footer) stays
+ * visible while a lazy page chunk loads.
+ *
+ * NOTE: We do NOT reuse <PageLoader /> here because that
+ * component is a full-screen overlay (position: fixed). During
+ * lazy navigation we want the nav+footer to REMAIN VISIBLE so
+ * the user doesn't think the app crashed. This inline fallback
+ * just fills the content area with a matching spinner style.
+ */
+function PageSuspenseFallback() {
+  return (
+    <div
+      className="flex items-center justify-center py-24"
+      aria-label="Loading page"
+    >
+      <div className="page-loader__content">
+        <div className="page-loader__spinner">
+          <div className="page-loader__ring" />
+          <div className="page-loader__ring" />
+          <div className="page-loader__ring" />
+        </div>
+        <p className="page-loader__text">Loading</p>
+      </div>
+    </div>
+  );
+}
+
+/* ── ScrollToTop on route change ────────────────────────
+ * The custom SPA router (usePublicRouter) updates pathname
+ * via pushState but does NOT scroll to top. Without this,
+ * navigating from a long page leaves you scrolled halfway
+ * down on the new page — which feels broken.
+ */
+function ScrollToTop({ pathname }: { pathname: string }) {
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [pathname]);
+  return null;
+}
+
+/* ── COLD START NOTE ────────────────────────────────────
+ * On a fresh Vite dev server start (or after clearing cache),
+ * the FIRST navigation to ANY lazy page shows the Suspense
+ * fallback briefly while Vite compiles that chunk.
+ *
+ * This is EXPECTED and ONLY happens once per page per session.
+ * Subsequent navigations are instant (Vite caches in memory).
+ * In production (vite build), all chunks are pre-compiled so
+ * the fallback is never seen.
+ *
+ * Do NOT remove lazy loading thinking it's "slower" during
+ * dev. The alternative (eager loading) makes EVERY page slow.
+ */
 
 interface AppProps {
   initialPathname?: string;
@@ -38,14 +195,43 @@ export default function App({ initialPathname }: AppProps) {
   useRevealOnScroll();
   useStackCardDepth(pathname);
 
+  /* ── Initial load & idle preloading ────────────────────
+   *
+   * WHY requestIdleCallback?
+   * We preload ALL page chunks after first render, but only
+   * during browser idle periods. This means:
+   *   - First page is FAST (only one chunk loaded)
+   *   - Subsequent pages are INSTANT (chunk already cached)
+   *   - No network waterfalls during navigation
+   *   - No competition with initial paint or user interactions
+   *
+   * Fallback to setTimeout(1200ms) for older browsers.
+   */
   useEffect(() => {
     setIsPageLoading(false);
     document.documentElement.classList.add("js");
+
+    const preloadPages = () => {
+      void Promise.allSettled(
+        publicPagePreloaders.map((preloadPage) => preloadPage())
+      );
+    };
+
+    const idleWindow = window as IdleWindow;
+    if (idleWindow.requestIdleCallback) {
+      const handle = idleWindow.requestIdleCallback(preloadPages, {
+        timeout: 2500,
+      });
+      return () => idleWindow.cancelIdleCallback?.(handle);
+    }
+    const handle = window.setTimeout(preloadPages, 1200);
+    return () => window.clearTimeout(handle);
   }, []);
 
   const articleSlug = getResourcePostSlug(pathname);
   const whatsappUrl = shell.company.whatsapp;
 
+  // Route matching: map pathname -> lazy component
   const page = pathname === "/" ? (
     <HomePage />
   ) : pathname === "/about" ? (
@@ -78,11 +264,15 @@ export default function App({ initialPathname }: AppProps) {
 
   return (
     <div className="site-shell">
+      {/* Full-screen loader on very first load only */}
       <PageLoader isLoading={isPageLoading} delay={300} />
 
+      {/* Scroll to top on every route change */}
+      <ScrollToTop pathname={pathname} />
+
       <div className="cinematic-bg" aria-hidden="true">
-        <div className="cinematic-bg__orb cinematic-bg__orb--one"></div>
-        <div className="cinematic-bg__orb cinematic-bg__orb--two"></div>
+        <div className="cinematic-bg__orb cinematic-bg__orb--one" />
+        <div className="cinematic-bg__orb cinematic-bg__orb--two" />
       </div>
 
       <Navigation
@@ -96,8 +286,14 @@ export default function App({ initialPathname }: AppProps) {
 
       <ShellStatusNotice />
 
+      {/*
+        Page content wrapped in Suspense so shell stays
+        mounted during lazy chunk loading.
+      */}
       <main id="top" className="site-main">
-        {page}
+        <Suspense fallback={<PageSuspenseFallback />}>
+          {page}
+        </Suspense>
       </main>
 
       <Footer
